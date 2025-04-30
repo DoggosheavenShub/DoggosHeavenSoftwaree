@@ -1,0 +1,1140 @@
+const express = require("express");
+const mongoose = require("mongoose");
+const Pet = require("../models/pet");
+const Visit = require("../models/Visit");
+const Inventory = require("../models/inventory");
+const Attendance = require("../models/attendance");
+const Boarding = require("../models/boarding");
+const Subscription = require("../models/subscription");
+const Price = require("../models/price");
+const scheduledVisit = require("../models/scheduledVisit");
+const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
+const VisitType = require("../models/visitTypes");
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+exports.addVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { petId, visitForm, totalPrice } = req.body;
+    const {
+      purpose,
+      itemDetails,
+      nextFollowUp,
+      followUpTime,
+      followUpPurpose,
+      customerType,
+    } = visitForm;
+
+    if (!mongoose.Types.ObjectId.isValid(petId)) {
+      throw new Error("Invalid pet ID");
+    }
+
+    // Validate each item in itemDetails
+    for (const itemDetail of itemDetails) {
+      const { item, dose, volumeML } = itemDetail;
+
+      const inventoryItem = await Inventory.findById(item);
+      if (!inventoryItem) {
+        throw new Error(`Inventory item with ID ${item} not found`);
+      }
+
+      if (inventoryItem.totalVolume < volumeML) {
+        throw new Error(
+          `Insufficient volume for item ${inventoryItem.itemName}`
+        );
+      }
+
+      // Update inventory
+      const stockused = volumeML / inventoryItem.volumeML;
+
+      inventoryItem.stockUnit -= stockused;
+
+      if (inventoryItem.totalVolume) {
+        inventoryItem.totalVolume -= volumeML;
+      }
+
+      await inventoryItem.save({ session });
+
+      const petobtain = await Pet.findById(petId).session(session);
+      if (!petobtain) throw new Error("Pet not found");
+
+      const it = {};
+
+      it["name"] = inventoryItem.itemName;
+      it["numberOfDose"] = dose;
+
+      const existingVaccination = petobtain.vaccinations.find(
+        (vac) => vac.name === inventoryItem.itemName
+      );
+
+      if (existingVaccination) {
+        existingVaccination.numberOfDose = dose;
+      } else {
+        petobtain.vaccinations.push(it);
+      }
+
+      await petobtain.save({ session });
+    }
+    // Create a new visit record
+    const visit = new Visit({
+      pet: petId,
+      purpose,
+      itemDetails,
+      nextFollowUp: new Date(`${nextFollowUp}T${followUpTime}`),
+      followUpPurpose,
+      customerType,
+      price: totalPrice,
+    });
+
+    await visit.save({ session });
+
+    const date = new Date(nextFollowUp);
+
+    const attendance = await Attendance.findOne({
+      date,
+    });
+
+    if (attendance) {
+      attendance.List.push({ petId, purpose: followUpPurpose });
+      await attendance.save();
+    } else {
+      const attendance = new Attendance({
+        date,
+      });
+      await attendance.save();
+      attendance.List.push({ petId, purpose: followUpPurpose });
+      await attendance.save();
+    }
+
+    await session.commitTransaction();
+
+    res.json({
+      success: true,
+      message: "Visit saved successfully",
+    });
+  } catch (error) {
+    console.log("error in addvisit controllere", error);
+    await session.abortTransaction();
+    console.log("Error in addvisit controller ", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.getVisit = async (req, res) => {
+  try {
+    const { type } = req.query;
+    const today = new Date();
+
+    let nextDate = new Date();
+
+    if (type === "today") {
+      nextDate = new Date(today);
+      nextDate.setDate(today.getDate() + 2);
+    } else {
+      nextDate = new Date(today);
+      nextDate.setDate(today.getDate() + 7);
+    }
+
+    nextDate.setHours(0, 0, 0, 0);
+    const endOfNextDate = new Date(nextDate);
+    endOfNextDate.setHours(23, 59, 59, 999);
+
+    const List = await Visit.find({
+      nextFollowUp: {
+        $gte: nextDate,
+        $lt: endOfNextDate,
+      },
+    }).populate({
+      path: "pet",
+      populate: {
+        path: "owner",
+      },
+    });
+
+    if (List) {
+      return res.status(200).json({
+        success: true,
+        message: "List fetched successfully",
+        List,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "Invalid data",
+      });
+    }
+  } catch (error) {
+    console.log("Error in getVisitController", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+exports.addInquiryVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const {
+      petId,
+      visitType,
+      note,
+      followUpPurpose,
+      nextFollowUp,
+      followUpTime,
+    } = req.body;
+
+    if (!petId) {
+      return res.json({
+        success: false,
+        message: "A pet must be selected to save a visit",
+      });
+    }
+
+    if (!visitType) {
+      return res.json({
+        success: false,
+        message: "A visittype must be selected to save visit",
+      });
+    }
+
+    if (!note) {
+      return res.json({
+        success: false,
+        message: "Enter notes to save an inquiry  visit",
+      });
+    }
+
+    if (nextFollowUp && followUpPurpose && followUpTime) {
+      const newscheduledVisit = new scheduledVisit({
+        date: new Date(nextFollowUp),
+        petId,
+        purpose: followUpPurpose,
+      });
+
+      await newscheduledVisit.save({ session });
+    }
+    // ... your code here ...}
+    else if (!nextFollowUp && !followUpPurpose && !followUpTime) {
+      // All three variables have falsy values.
+      // ... your code here ...
+    } else {
+      return res.json({
+        succes: false,
+        message: "Please fill all followup details",
+      });
+    }
+
+    // Create a new visit record
+    const details = {};
+    details.note = note;
+    details.price = 0;
+    const visit = new Visit({
+      pet: petId,
+      visitType,
+      details,
+      nextFollowUp:
+        nextFollowUp && followUpTime
+          ? new Date(`${nextFollowUp}T${followUpTime}`)
+          : null,
+    });
+
+    await visit.save({ session });
+
+    await session.commitTransaction();
+
+    return res.json({
+      success: true,
+      message: "Inquiry visit saved successfully",
+    });
+  } catch (error) {
+    console.log("error in addInquiryVisit controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.addDogParkVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { petId, discount = 0, visitType } = req.body;
+
+    let price = 0;
+
+    if (!petId) {
+      return res.json({
+        success: false,
+        message: "A pet must be selected to save a visit",
+      });
+    }
+
+    if (!visitType) {
+      return res.json({
+        success: false,
+        message: "A visittype must be selected to save visit",
+      });
+    }
+
+    const visitDetails = await VisitType.findOne({ _id: visitType });
+
+    if (discount < 0)
+      return res.json({
+        success: false,
+        message: "Discount cannot be negative",
+      });
+
+    if (discount >= visitDetails?.price) {
+      return res.json({
+        success: false,
+        message: "Discount must be less than original price",
+      });
+    }
+
+    // Create a new visit record
+    const details = {};
+    details.price = visitDetails.price - discount;
+
+    const visit = new Visit({
+      pet: petId,
+      visitType,
+      details,
+    });
+
+    await visit.save({ session });
+
+    const boardingDetails = await Boarding.findOne({
+      petId,
+      isBoarded: true,
+    }).populate({ path: "boardingType", select: "purpose" });
+
+    if (boardingDetails) {
+      return res.json({
+        success: false,
+        message: `Pet has already been boarded in ${boardingDetails?.boardingType?.purpose}`,
+      });
+    }
+
+    const boarding = new Boarding({
+      boardingType: visitType,
+      visitId: visit?._id,
+      petId,
+      entryTime: new Date(),
+    });
+
+    await boarding.save({ session });
+
+    await session.commitTransaction();
+
+    return res.json({
+      success: true,
+      message: `Pet has been boarded in ${visitDetails?.purpose} successfully`,
+    });
+  } catch (error) {
+    console.log("error in addDogParkVisit controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.addVeterinaryVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const {
+      petId,
+      visitType,
+      medicines,
+      vaccines,
+      followUpPurpose,
+      nextFollowUp,
+      followUpTime,
+      customerType,
+    } = req.body;
+
+    if (medicines.length === 0 && vaccines.length === 0) {
+      return res.json({
+        success: false,
+        message: "select medicines or vaccines to save the visit",
+      });
+    }
+
+    if (nextFollowUp && followUpPurpose && followUpTime) {
+      const newscheduledVisit = new scheduledVisit({
+        date: new Date(nextFollowUp),
+        petId,
+        purpose: followUpPurpose,
+      });
+
+      await newscheduledVisit.save({ session });
+    } else if (!nextFollowUp && !followUpPurpose && !followUpTime) {
+    } else {
+      return res.json({
+        succes: false,
+        message: "Please fill all followup details",
+      });
+    }
+
+    const calculateTotalPriceAndUpdateStock = async () => {
+      // Extract all unique IDs from medicines and vaccines
+      const medicineIds = medicines.map((med) => med.id);
+      const vaccineIds = vaccines.map((vac) => vac.id);
+      const allIds = [...new Set([...medicineIds, ...vaccineIds])]; // Remove duplicates
+
+      // Fetch all inventory items in one query using $in
+      const inventoryItems = await Inventory.find({ _id: { $in: allIds } })
+        .session(session)
+        .lean();
+
+      // Create a map for quick lookup by ID
+      const inventoryMap = inventoryItems.reduce((map, item) => {
+        map[item._id.toString()] = item;
+        return map;
+      }, {});
+
+      // Validate and calculate medicine total
+      let medicineTotal = 0;
+      for (const med of medicines) {
+        const medicine = inventoryMap[med.id];
+        if (!medicine) {
+          throw new Error(`Inventory item with ID ${med.id} not found`);
+        }
+        if (!med.id || !med.quantity || med.quantity <= 0) {
+          throw new Error(
+            "Each medicine must have a valid ID and positive quantity"
+          );
+        }
+        if (medicine.stockUnit < med.quantity) {
+          throw new Error(`Insufficient stock for ${medicine.name}`);
+        }
+        const price =
+          customerType === "NGO"
+            ? medicine.unitMinRetailPriceNGO
+            : medicine.unitMaxRetailPriceCustomer;
+        medicineTotal += price * med.quantity;
+      }
+
+      // Validate and calculate vaccine total
+      let vaccineTotal = 0;
+      for (const vac of vaccines) {
+        const vaccine = inventoryMap[vac.id];
+        if (!vaccine) {
+          throw new Error(`Inventory item with ID ${vac.id} not found`);
+        }
+        if (!vac.id || !vac.volume || vac.volume <= 0) {
+          throw new Error(
+            "Each vaccine must have a valid ID and positive volume"
+          );
+        }
+        const requiredStock = vac.volume / vaccine.volumeML;
+        if (vaccine.stockUnit < requiredStock) {
+          throw new Error(`Insufficient stock for ${vaccine.name}`);
+        }
+        if (vaccine.totalVolume < vac.volume) {
+          throw new Error(`Insufficient volume for vaccine: ${vaccine.name}`);
+        }
+        const price =
+          customerType === "NGO"
+            ? vaccine.unitMinRetailPriceNGO
+            : vaccine.unitMaxRetailPriceCustomer;
+        vaccineTotal += price * vac.volume;
+      }
+
+      // Prepare bulk updates
+      const bulkOps = [];
+
+      // Update medicine stock
+      for (const med of medicines) {
+        const medicine = inventoryMap[med.id];
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: medicine._id },
+            update: { $inc: { stockUnit: -med.quantity } },
+          },
+        });
+      }
+
+      // Update vaccine stock and volume
+      for (const vac of vaccines) {
+        const vaccine = inventoryMap[vac.id];
+        const requiredStock = vac.volume / vaccine.volumeML;
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: vaccine._id },
+            update: {
+              $inc: {
+                stockUnit: -requiredStock,
+                totalVolume: -vac.volume,
+              },
+              $set: {
+                stockUnit:
+                  vaccine.totalVolume - vac.volume <= 0 ? 0 : undefined,
+              },
+            },
+          },
+        });
+      }
+
+      // Execute bulk updates
+      if (bulkOps.length > 0) {
+        await Inventory.bulkWrite(bulkOps, { session });
+      }
+
+      // Return total price
+      return medicineTotal + vaccineTotal;
+    };
+
+    const totalPrice = await calculateTotalPriceAndUpdateStock();
+
+    // Create a new visit record
+    const details = {};
+    details.medicines = medicines.length ? medicines : null;
+    details.vaccines = vaccines.length ? vaccines : null;
+    details.nextFollowUp =
+      nextFollowUp && followUpTime
+        ? new Date(`${nextFollowUp}T${followUpTime}`)
+        : null;
+    details.followUpPurpose = followUpPurpose ? followUpPurpose : "";
+    details.customerType = customerType;
+    details.price = totalPrice;
+
+    const visit = new Visit({
+      pet: petId,
+      visitType,
+      details,
+    });
+
+    await visit.save({ session });
+
+    if (nextFollowUp) {
+      const newscheduledVisit = new scheduledVisit({
+        date: new Date(nextFollowUp),
+        petId,
+        purpose: followUpPurpose,
+      });
+
+      await newscheduledVisit.save({ session });
+    }
+
+    await session.commitTransaction();
+
+    return res.json({
+      success: true,
+      message: "Veterinary visit saved successfully",
+    });
+  } catch (error) {
+    console.log("error in addVeterinaryVisit controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.addHostelVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const {
+      petId,
+      discount,
+      numberOfDays,
+      isSubscriptionAvailed,
+      planId,
+      visitType,
+    } = req.body;
+
+    let price = 0;
+
+    if (!petId) {
+      return res.json({
+        success: false,
+        message: "A pet must be selected to save a visit",
+      });
+    }
+
+    if (!visitType) {
+      return res.json({
+        success: false,
+        message: "A visittype must be selected to save visit",
+      });
+    }
+
+    if (isSubscriptionAvailed) {
+      const subscription = Subscription.find({ planId, petId });
+      if (!subscription) {
+        return res.json({
+          success: false,
+          message: "The pet has no subscription for given plan",
+        });
+      }
+      price = 0;
+    } else if (discount) {
+      const Hostel = await VisitType.findOne({ _id: visitType });
+
+      if (discount >= Hostel?.price) {
+        return res.json({
+          success: false,
+          message: "Discount must be less than original price",
+        });
+      }
+
+      price = (Hostel?.price - discount) * numberOfDays;
+    } else {
+      return res.json({
+        success: false,
+        message: "Either avail subscription or buy for some days",
+      });
+    }
+
+    const details = {};
+
+    details["isSubscriptionAvailed"] = isSubscriptionAvailed;
+    details["price"] = price;
+    details["numberOfDays"] = numberOfDays;
+    details["discount"] = discount;
+
+    const visit = new Visit({
+      pet: petId,
+      visitType,
+      details,
+    });
+
+    await visit.save({ session });
+
+    const boarding = new Boarding({
+      boardingType: visitType,
+      visitId: visit._id,
+      isSubscriptionAvailed: isSubscriptionAvailed,
+      planId: isSubscriptionAvailed ? planId : null,
+      petId,
+      entryTime: new Date(),
+      numberOfDays,
+    });
+
+    await boarding.save({ session });
+    await session.commitTransaction();
+
+    const timeRightNow = dayjs(boarding.entryTime)
+      .tz("Asia/Kolkata")
+      .format("DD MM YYYY HH:mm:ss");
+    return res.json({
+      success: true,
+      timeRightNow,
+      message: "Hostel visit saved successfully",
+    });
+  } catch (error) {
+    console.log("error in HostelVisit controller", error);
+    await session.abortTransaction();
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.addDayCareVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { petId, discount = 0, visitType } = req.body;
+
+    if (!petId) {
+      return res.json({
+        success: false,
+        message: "A pet must be selected to save a visit",
+      });
+    }
+
+    if (!visitType) {
+      return res.json({
+        success: false,
+        message: "A visittype must be selected to save visit",
+      });
+    }
+
+    const visitDetails = await VisitType.findOne({ _id: visitType });
+
+    if (discount < 0)
+      return res.json({
+        success: false,
+        message: "Discount cannot be negative",
+      });
+
+    if (discount >= visitDetails?.price) {
+      return res.json({
+        success: false,
+        message: "Discount must be less than original price",
+      });
+    }
+
+    // Create a new visit record
+
+    details = {};
+    details.price = visitDetails?.price - discount;
+
+    const visit = new Visit({
+      pet: petId,
+      visitType,
+      details,
+    });
+
+    await visit.save({ session });
+
+    const boarding = new Boarding({
+      boardingType: visitType,
+      visitId: visit?._id,
+      petId,
+      entryTime: new Date(),
+    });
+
+    await boarding.save({ session });
+
+    await session.commitTransaction();
+
+    return res.json({
+      success: true,
+      message: "Day Care visit saved successfully",
+    });
+  } catch (error) {
+    console.log("error in addDayCareVisit controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.addDaySchoolVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const {
+      petId,
+      discount = 0,
+      isSubscriptionAvailed,
+      planId,
+      visitType,
+    } = req.body;
+
+    let price = 0;
+
+    if (!petId) {
+      return res.json({
+        success: false,
+        message: "A pet must be selected to save a visit",
+      });
+    }
+
+    if (!visitType) {
+      return res.json({
+        success: false,
+        message: "A visittype must be selected to save visit",
+      });
+    }
+
+    const visitDetails = await VisitType.findOne({ _id: visitType });
+
+    if (isSubscriptionAvailed) {
+      const subscription = Subscription.findOne({ planId, petId });
+      if (!subscription) {
+        return res.json({
+          success: false,
+          message: "No subscription exist for given pet",
+        });
+      }
+      price = 0;
+    } else {
+      if (discount >= visitDetails?.price) {
+        return res.json({
+          success: false,
+          message: "Discount must be less than original price",
+        });
+      }
+      price = visitDetails?.price - discount;
+    }
+
+    details = {};
+    details.price = price;
+
+    const visit = new Visit({
+      pet: petId,
+      visitType,
+      details,
+    });
+
+    await visit.save({ session });
+
+    const boarding = new Boarding({
+      boardingType: visitType,
+      visitId: visit._id,
+      isSubscriptionAvailed: isSubscriptionAvailed,
+      petId,
+      entryTime: new Date(),
+    });
+
+    await boarding.save({ session });
+    await session.commitTransaction();
+
+    return res.json({
+      success: true,
+      message: "Day School visit saved successfully",
+    });
+  } catch (error) {
+    console.log("error in Day School visit controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.addPlaySchoolVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const {
+      petId,
+      discount = 0,
+      isSubscriptionAvailed,
+      planId,
+      visitType,
+    } = req.body;
+
+    let price = 0;
+
+    if (!petId) {
+      return res.json({
+        success: false,
+        message: "A pet must be selected to save a visit",
+      });
+    }
+
+    if (!visitType) {
+      return res.json({
+        success: false,
+        message: "A visittype must be selected to save visit",
+      });
+    }
+
+    const visitDetails = await VisitType.findOne({ _id: visitType });
+
+    if (isSubscriptionAvailed) {
+      const subscription = Subscription.findOne({ planId, petId });
+      if (!subscription) {
+        return res.json({
+          success: false,
+          message: "No subscription exist for given pet",
+        });
+      }
+      price = 0;
+    } else {
+      if (discount >= visitDetails?.price) {
+        return res.json({
+          success: false,
+          message: "Discount must be less than original price",
+        });
+      }
+      price = visitDetails?.price - discount;
+    }
+
+    details = {};
+    details.price = price;
+
+    const visit = new Visit({
+      pet: petId,
+      visitType,
+      details,
+    });
+
+    await visit.save({ session });
+
+    const boarding = new Boarding({
+      boardingType: visitType,
+      visitId: visit._id,
+      isSubscriptionAvailed: isSubscriptionAvailed,
+      petId,
+      entryTime: new Date(),
+    });
+
+    await boarding.save({ session });
+    await session.commitTransaction();
+
+    return res.json({
+      success: true,
+      message: "Day School visit saved successfully",
+    });
+  } catch (error) {
+    console.log("error in Day School visit controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.getAllVisitPrices = async (req, res) => {
+  try {
+    const prices = await Price.find({});
+
+    return res.status(200).json({
+      success: true,
+      message: "Prices fetched successfully",
+      prices,
+    });
+  } catch (error) {
+    console.log("Error in get all prices controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+exports.getVisitList = async (req, res) => {
+  try {
+    const { date } = req.body;
+
+    if (!date) {
+      return res.json({
+        success: false,
+        message: "Please provide a date to see corresponding visit",
+      });
+    }
+
+    const targetDate = new Date(date);
+
+    const nextDate = new Date(targetDate);
+    nextDate.setDate(targetDate.getDate() + 1);
+
+    const List = await Visit.find({
+      createdAt: {
+        $gte: targetDate,
+        $lt: nextDate,
+      },
+    }).populate({
+      path: "pet",
+      populate: {
+        path: "owner",
+      },
+    });
+
+    return res.json({
+      success: true,
+      List,
+      message: "List fetched successfullly",
+    });
+  } catch (error) {
+    console.log("error in get visit list controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getScheduledVisit = async (req, res) => {
+  try {
+    const { date } = req.params;
+
+    if (!date) {
+      return res.json({
+        success: false,
+        message: "Please provide a date to see corresponding visit",
+      });
+    }
+
+    const targetDate = new Date(date);
+
+    const List = await scheduledVisit
+      .find({
+        date: targetDate,
+      })
+      .populate({
+        path: "petId",
+        populate: {
+          path: "owner",
+        },
+      });
+
+    return res.json({
+      success: true,
+      List,
+      message: "List fetched successfullly",
+    });
+  } catch (error) {
+    console.log("error in get scheduled visit controller", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.addGroomingVisit = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const {
+      petId,
+      discount = 0,
+      isSubscriptionAvailed,
+      planId,
+      visitType,
+    } = req.body;
+    
+
+    console.log(req.body)
+
+  
+    let price = 0;
+
+    if (!petId) {
+      return res.json({
+        success: false,
+        message: "A pet must be selected to save a visit",
+      });
+    }
+
+    if (!visitType) {
+      return res.json({
+        success: false,
+        message: "A visittype must be selected to save visit",
+      });
+    }
+
+    const visitDetails = await VisitType.findOne({ _id: visitType });
+    details = {};
+
+    if (isSubscriptionAvailed) {
+      const subscription = await Subscription.findOne({ planId, petId });
+      if (!subscription) {
+        return res.json({
+          success: false,
+          message: "No subscription exist for given pet",
+        });
+      }
+      
+      subscription.numberOfGroomings=subscription.numberOfGroomings-1;
+
+      await subscription.save({session})
+      details.subscriptionAvailed="Yes"
+      price = 0;
+    } else {
+      if (discount >= visitDetails?.price) {
+        return res.json({
+          success: false,
+          message: "Discount must be less than original price",
+        });
+      }
+      price = visitDetails?.price - discount;
+    }
+
+  
+    details.price = price;
+
+    const visit = new Visit({
+      pet: petId,
+      visitType,
+      details,
+    });
+
+    await visit.save({ session });
+    
+    await session.commitTransaction()
+    return res.json({
+      success: true,
+      message: "Grooming visit saved successfully",
+    });
+
+  } catch (error) {
+    console.log("error in Grooming Visit controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.getAllVisitType = async (req, res) => {
+  try {
+    const visitTypes = await VisitType.find({});
+
+    return res.json({
+      success: true,
+      visitTypes,
+      message: "Visit Type fetched successfully",
+    });
+  } catch (error) {
+    console.log("error in getallvisittype controller", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getBoardingCategoryList = async (req, res) => {
+  try {
+    const visitTypes = await VisitType.find({ isBoardingAvailable: true });
+
+    return res.json({
+      success: true,
+      visitTypes,
+      message: "Visit Type fetched successfully",
+    });
+  } catch (error) {
+    console.log("error in getallvisittype controller", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
