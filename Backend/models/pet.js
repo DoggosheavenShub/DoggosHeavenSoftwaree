@@ -9,6 +9,9 @@ const petSchema = new mongoose.Schema(
     },
     species: String,
     breed: String,
+    neutered:{
+     type:Boolean
+    },
     sex: {
       type: String,
       enum: ["Male", "Female"],
@@ -47,33 +50,6 @@ const petSchema = new mongoose.Schema(
       required: true,
       default: Date.now,
     },
-    subscriptions: [
-      {
-        type: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "subscription",
-          required: true,
-        },
-        daysLeft: {
-          type: Number,
-          min:0,
-          required: true,
-        },
-        startDate: {
-          type: Date,
-          required: true,
-        },
-        endDate: {
-          type: Date,
-          required: true,
-        },
-        status: {
-          type: String,
-          enum: ["active", "expired", "cancelled"],
-          default: "active",
-        },
-      },
-    ],
   },
   { timestamps: true }
 );
