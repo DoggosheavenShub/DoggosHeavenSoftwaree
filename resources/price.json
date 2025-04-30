@@ -1,0 +1,37 @@
+[
+  {
+    "purpose": "Hostel",
+    "originalPrice": 500,
+    "consultationFees": 0
+  },
+  {
+    "purpose": "Day School",
+    "originalPrice": 350,
+    "consultationFees": 0
+  },
+  {
+    "purpose": "Play School",
+    "originalPrice": 500,
+    "consultationFees": 0
+  },
+  {
+    "purpose": "Day Care",
+    "originalPrice": 600,
+    "consultationFees": 0
+  },
+  {
+    "purpose": "Dog Park",
+    "originalPrice": 350,
+    "consultationFees": 0
+  },
+  {
+    "purpose": "Grooming",
+    "originalPrice": 800,
+    "consultationFees": 0
+  },
+  {
+    "purpose": "Veterinary",
+    "originalPrice": 0,
+    "consultationFees": 400
+  }
+]

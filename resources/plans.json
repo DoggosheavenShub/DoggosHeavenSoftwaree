@@ -1,0 +1,74 @@
+[
+  {
+    "purpose": "Inquiry",
+    "price": 0,
+    "halfdayPrice": null,
+    "isSubscriptionAvailable": false,
+    "consultationPrice": null,
+    "isBoardingAvailable":false
+  },
+  {
+    "purpose": "Dog Park",
+    "price": 666.66,
+    "halfdayPrice": null,
+    "isSubscriptionAvailable": false,
+    "consultationPrice": null,
+    "isBoardingAvailable":true
+  },
+  {
+    "purpose": "Veterinary",
+    "price": 0,
+    "consultationPrice": 400,
+    "halfdayPrice": null,
+    "isSubscriptionAvailable": false,
+    "isBoardingAvailable":false
+  },
+  {
+    "purpose": "Hostel",
+    "price": 1000,
+    "halfdayPrice": 500,
+    "isSubscriptionAvailable": true,
+    "consultationPrice": null,
+    "isBoardingAvailable":true
+  },
+  {
+    "purpose": "Day Care",
+    "price": 600,
+    "halfdayPrice": null,
+    "isSubscriptionAvailable": false,
+    "consultationPrice": null,
+    "isBoardingAvailable":true
+  },
+  {
+    "purpose": "Day School",
+    "price": 350,
+    "halfdayPrice": null,
+    "isSubscriptionAvailable": false,
+    "consultationPrice": null,
+    "isBoardingAvailable":true
+  },
+  {
+    "purpose": "Play School",
+    "price": 500,
+    "halfdayPrice": null,
+    "isSubscriptionAvailable": true,
+    "consultationPrice": null,
+    "isBoardingAvailable":true
+  },
+  {
+    "purpose": "Grooming",
+    "price": 900,
+    "halfdayPrice": null,
+    "isSubscriptionAvailable": true,
+    "consultationPrice": null,
+    "isBoardingAvailable":false
+  },
+  {
+    "purpose": "Shop",
+    "price": null,
+    "halfdayPrice": null,
+    "isSubscriptionAvailable": true,
+    "consultationPrice": null,
+    "isBoardingAvailable":false
+  }
+]
