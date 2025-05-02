@@ -39,7 +39,6 @@ exports.addPet = async (req, res) => {
       species: pet.species,
       breed: pet.breed,
       sex: pet.sex,
-      neutered:pet.neutered,
       color: pet.color,
       dob: pet.dob,
       owner: owner._id,

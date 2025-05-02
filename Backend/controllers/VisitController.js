@@ -183,6 +183,224 @@ exports.getVisit = async (req, res) => {
   }
 };
 
+exports.getVisitDetails = async (req, res) => {
+  try {
+    console.log("Fetching visit with ID:", req.params.id);
+    
+  
+    let Visit, Inventory;
+    try {
+      Visit = require('../models/Visit'); 
+      console.log("Visit model loaded successfully");
+    } catch (error) {
+      console.error("Failed to load Visit model:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error: Visit model not found",
+        error: error.message
+      });
+    }
+    
+    try {
+      Inventory = require('../models/inventory');
+      console.log("Inventory model loaded successfully");
+    } catch (error) {
+      console.error("Failed to load Inventory model:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error: Inventory model not found",
+        error: error.message
+      });
+    }
+    
+    
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid ID format" 
+      });
+    }
+    
+    console.log("Attempting to find visit in database...");
+    let visit;
+    try {
+      visit = await Visit.findById(req.params.id)
+        .populate('pet')
+        .populate('visitType')
+        .populate({
+          path: 'pet',
+          populate: {
+            path: 'owner',
+            model: 'Owner'
+          }
+        });
+      
+      console.log("Database query completed");
+    } catch (dbError) {
+      console.error("Database error when finding visit:", dbError.message);
+      return res.status(500).json({
+        success: false,
+        message: "Database error when finding visit",
+        error: dbError.message
+      });
+    }
+    
+    if (!visit) {
+      console.log("Visit not found with ID:", req.params.id);
+      return res.status(404).json({ success: false, message: "Visit not found" });
+    }
+    
+   
+    const details = visit.details || {};
+   
+    
+    const medicines = Array.isArray(details.medicines) ? details.medicines : [];
+    const vaccines = Array.isArray(details.vaccines) ? details.vaccines : [];
+    
+   
+    
+    
+    const medicineIds = medicines.map(med => {
+      if (!med || typeof med !== 'object') {
+        console.log("Invalid medicine entry:", med);
+        return null;
+      }
+      const id = med.id || med.medicineId;
+      if (!id) {
+        console.log("Medicine with no ID:", med);
+        return null;
+      }
+      const finalId = typeof id === 'object' ? id.toString() : id;
+      console.log("Extracted medicine ID:", finalId);
+      return finalId;
+    }).filter(Boolean);
+    
+    const vaccineIds = vaccines.map(vac => {
+      if (!vac || typeof vac !== 'object') {
+        console.log("Invalid vaccine entry:", vac);
+        return null;
+      }
+      const id = vac.id || vac.vaccineId;
+      if (!id) {
+        console.log("Vaccine with no ID:", vac);
+        return null;
+      }
+      const finalId = typeof id === 'object' ? id.toString() : id;
+      console.log("Extracted vaccine ID:", finalId);
+      return finalId;
+    }).filter(Boolean);
+    
+    console.log("Final medicine IDs:", medicineIds);
+    console.log("Final vaccine IDs:", vaccineIds);
+  
+    const allIds = [...medicineIds, ...vaccineIds];
+    console.log("All inventory IDs to find:", allIds);
+    
+    let inventoryItems = [];
+    if (allIds.length) {
+      try {
+        console.log("Querying inventory items...");
+        inventoryItems = await Inventory.find({ _id: { $in: allIds } });
+        console.log("Found inventory items:", inventoryItems.length);
+        console.log("Inventory items:", JSON.stringify(inventoryItems));
+      } catch (inventoryError) {
+        console.error("Error finding inventory items:", inventoryError.message);
+        
+      }
+    }
+    
+    
+    console.log("Processing visit data...");
+    const visitData = JSON.parse(JSON.stringify(visit));
+    
+    
+    if (!visitData.details) visitData.details = {};
+   
+    if (Array.isArray(visitData.details.medicines) && visitData.details.medicines.length) {
+      visitData.details.medicines = visitData.details.medicines.map(med => {
+        if (!med || typeof med !== 'object') {
+          console.log("Skipping invalid medicine object");
+          return { name: "Invalid Medicine Data" };
+        }
+        
+        const id = med.id || med.medicineId;
+        if (!id) {
+          console.log("Medicine missing ID");
+          return { ...med, name: "Medicine ID Missing" };
+        }
+        
+        const idStr = typeof id === 'object' ? id.toString() : id;
+        const medicineInfo = inventoryItems.find(m => m._id.toString() === idStr);
+        
+        if (medicineInfo) {
+          console.log(`Found inventory item for medicine ID ${idStr}: ${medicineInfo.itemName}`);
+          return {
+            ...med,
+            name: medicineInfo.itemName,
+            unit: medicineInfo.stockUnit || 'units',
+            category: medicineInfo.itemType,
+            manufacturer: medicineInfo.manufacturer || 'Unknown'
+          };
+        } else {
+          console.log(`No inventory item found for medicine ID ${idStr}`);
+          return { ...med, name: "Unknown Medicine" };
+        }
+      });
+    } else {
+      visitData.details.medicines = [];
+    }
+    
+    if (Array.isArray(visitData.details.vaccines) && visitData.details.vaccines.length) {
+      visitData.details.vaccines = visitData.details.vaccines.map(vac => {
+        if (!vac || typeof vac !== 'object') {
+          console.log("Skipping invalid vaccine object");
+          return { name: "Invalid Vaccine Data" };
+        }
+        
+        const id = vac.id || vac.vaccineId;
+        if (!id) {
+          console.log("Vaccine missing ID");
+          return { ...vac, name: "Vaccine ID Missing" };
+        }
+        
+        const idStr = typeof id === 'object' ? id.toString() : id;
+        const vaccineInfo = inventoryItems.find(v => v._id.toString() === idStr);
+        
+        if (vaccineInfo) {
+          console.log(`Found inventory item for vaccine ID ${idStr}: ${vaccineInfo.itemName}`);
+          return {
+            ...vac,
+            name: vaccineInfo.itemName,
+            manufacturer: vaccineInfo.manufacturer || 'Unknown',
+            target: vaccineInfo.target || 'General',
+            type: vaccineInfo.itemType
+          };
+        } else {
+          console.log(`No inventory item found for vaccine ID ${idStr}`);
+          return { ...vac, name: "Unknown Vaccine" };
+        }
+      });
+    } else {
+      visitData.details.vaccines = [];
+    }
+    
+    console.log("Sending successful response");
+    return res.status(200).json({
+      success: true,
+      data: visitData
+    });
+  } catch (error) {
+    console.error("Unhandled error in getVisitDetails:", error);
+    console.error("Error stack:", error.stack);
+    
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching visit details",
+      error: error.message
+    });
+  }
+}
+
 exports.addInquiryVisit = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -952,12 +1170,16 @@ exports.getVisitList = async (req, res) => {
         $gte: targetDate,
         $lt: nextDate,
       },
-    }).populate({
-      path: "pet",
-      populate: {
-        path: "owner",
-      },
-    });
+    }).populate(
+      [  {
+      
+        path: "pet",
+        populate: {
+          
+          path: "owner",
+        },
+      }, {path:"visitType",select:"purpose"}]
+    );
 
     return res.json({
       success: true,
