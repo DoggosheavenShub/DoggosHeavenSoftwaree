@@ -3,21 +3,22 @@ const agenda = require("../config/agenda");
 const Pet = require("../models/pet");
 const { DateTime } = require("luxon");
 const nodemailer = require("nodemailer");
+const ScheduledVisit = require("../models/scheduledVisit");
 
 agenda.define("send email", async (job) => {
-  const details = job.attrs.data?.item;
-  var subject = "Reminder for Visit";
+  const details = job.attrs.data;
+  
 
-  const date = new Date(details?.date);
+  var subject = "Reminder for Visit";
 
   var message = `Hii ${
     details?.ownerName
   } This is reminder for the visit scheduled for your pet.Details of the visit are -\n
-               Pet name : ${details?.name || ""}\n
+               Pet name : ${details?.petName || ""}\n
                Species :${details?.species || ""}\n
                Breed :${details?.breed || ""}\n
-               Date :${details?.date?.substring(0, 10) || ""}\n
-               Time :${date?.getHours()}:${date?.getMinutes() || ""}`;
+               Date :${details?.date || ""}\n
+               Time :${details?.time}`;
 
   const auth = nodemailer.createTransport({
     service: "gmail",
@@ -31,7 +32,7 @@ agenda.define("send email", async (job) => {
 
   const receiver = {
     from: process.env.GMAIL_ACCOUNT,
-    to: details?.ownerEmail,
+    to: details?.email,
     subject: subject,
     text: message,
   };
@@ -44,15 +45,15 @@ agenda.define("send email", async (job) => {
 });
 
 agenda.define("birthday email", async (job) => {
-  const details = job.attrs.data?.item;
-  console.log(details);
+  const details = job.attrs.data;
 
-  var subject = `Happy Birthday to ${details?.name}`;
 
-  var message = `Hii ${details?.owner?.name}\n
-   Just wanted to take a moment to wish a very happy birthday to ${details?.name} 🎂🐾 We hope today is filled with all the things ${details?.name}
+  var subject = `Happy Birthday to ${details?.petName}`;
+
+  var message = `Hii ${details?.ownerName}\n
+   Just wanted to take a moment to wish a very happy birthday to ${details?.petName} 🎂🐾 We hope today is filled with all the things ${details?.petName}
    loves most — whether it's extra treats, fun playtime, or some special pampering.\n
-   Once again a very happy birthday to ${details?.name} 🐾🎉
+   Once again a very happy birthday to ${details?.petName} 🐾🎉
    `;
 
   const auth = nodemailer.createTransport({
@@ -67,7 +68,7 @@ agenda.define("birthday email", async (job) => {
 
   const receiver = {
     from: process.env.GMAIL_ACCOUNT,
-    to: details?.owner?.email,
+    to: details?.email,
     subject: subject,
     text: message,
   };
@@ -220,20 +221,12 @@ exports.sendOverdueReminders = async (req, res) => {
 exports.getRemindersList = async (req, res) => {
   try {
     const { date } = req.params;
-
     const TempDate = new Date(date);
-    const endOfTempDate = new Date(date);
 
-    TempDate.setHours(0, 0, 0, 0);
-    endOfTempDate.setHours(23, 59, 59, 999);
-
-    const FollowUpList = await Visit.find({
-      nextFollowUp: {
-        $gte: TempDate,
-        $lt: endOfTempDate,
-      },
+    const FollowUpList = await ScheduledVisit.find({
+      date: TempDate,
     }).populate({
-      path: "pet",
+      path: "petId",
       populate: {
         path: "owner",
       },
@@ -259,11 +252,11 @@ exports.getRemindersList = async (req, res) => {
     const combinedList = [];
     FollowUpList.forEach((item) => {
       const obj = {};
-      obj["petName"] = item?.pet?.name;
-      obj["ownerName"] = item?.pet?.owner?.name;
-      obj["contact"] = item?.pet?.owner?.phone;
-      obj["purpose"] = item?.followUpPurpose;
-      obj["scheduledDate"] = item?.nextFollowUp;
+      obj["petName"] = item?.petId?.name;
+      obj["ownerName"] = item?.petId?.owner?.name;
+      obj["contact"] = item?.petId?.owner?.phone;
+      obj["purpose"] = item?.purpose;
+      obj["scheduledDate"] = item?.date;
 
       combinedList.push(obj);
     });
@@ -295,36 +288,30 @@ exports.sendRemindersNew = async (req, res) => {
   try {
     const { date } = req.params;
     const TempDate = new Date(date);
-    const endOfTempDate = new Date(date);
 
-    TempDate.setHours(0, 0, 0, 0);
-    endOfTempDate.setHours(23, 59, 59, 999);
-
-    const FollowUpList = await Visit.find({
-      nextFollowUp: {
-        $gte: TempDate,
-        $lt: endOfTempDate,
-      },
+    const FollowUpList = await ScheduledVisit.find({
+      date: TempDate,
     }).populate({
-      path: "pet",
+      path: "petId",
       populate: {
         path: "owner",
+        select:"email name"
       },
     });
-
-    let List = FollowUpList.map((item) => ({
-      name: item?.pet?.name,
-      species: item?.pet?.species,
-      breed: item?.pet?.breed,
-      ownerName: item?.pet?.owner?.name,
-      ownerEmail: item?.pet?.owner?.email,
-      date: item?.nextFollowUp,
-    }));
-
-    List.forEach((item, index) => {
-      agenda.schedule(`in ${index * 5} seconds`, "send email", { item });
-    });
     
+    FollowUpList.forEach((item, index) => {
+      const obj = {};
+      obj["petName"] = item?.petId?.name;
+      obj["ownerName"] = item?.petId?.owner?.name;
+      obj["email"] = item?.petId?.owner?.email;
+      obj["purpose"] = item?.purpose;
+      obj["date"] = date;
+      obj["time"]=item?.time;
+      obj["species"]=item?.petId?.species;
+      obj["breed"]=item?.petId?.breed;
+      agenda.schedule(`in ${index * 5} seconds`, "send email", obj );
+    });
+
     let birthdayDate = new Date(date);
 
     let month = birthdayDate.getMonth() + 1;
@@ -339,13 +326,17 @@ exports.sendRemindersNew = async (req, res) => {
       },
     }).populate({
       path: "owner",
-      select: "name phone",
+      select: "name email",
     });
-    
+
     BirthdayList.forEach((item, index) => {
-      agenda.schedule(`in ${index * 5} seconds`, "birthday email", { item });
+      const obj = {};
+      obj["petName"] = item?.name;
+      obj["ownerName"] = item?.owner?.name;
+      obj["email"] = item?.owner?.email;
+      agenda.schedule(`in ${index * 5} seconds`, "birthday email",  obj );
     });
-    
+
     return res.status(200).json({
       success: true,
       message: "Emails will be sent successfully",

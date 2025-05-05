@@ -6,6 +6,10 @@ const ScheduledVisit = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    time:{
+      type:String,
+      required:true,
+    },
     petId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Pet",

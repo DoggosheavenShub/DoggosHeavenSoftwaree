@@ -12,6 +12,7 @@ import {
 import "../../App.css";
 
 const DogHistory = () => {
+  
   const { petList, getPetListLoading, petDetails, petDetailsLoading } =
     useSelector((state) => state.pets);
   const [error, setError] = useState(null);
@@ -32,7 +33,7 @@ const DogHistory = () => {
       dispatch(filterPetsByNameAndPhone(queryString)).then((data) => {});
     }, 1000);
     return () => clearTimeout(timeout);
-  }, [name, phone]);
+  }, [name, phone,dispatch]);
 
   const navigateToVisit = (_id) => {
     navigate(`/nvisit2`, { state: { _id } });
@@ -90,8 +91,7 @@ const DogHistory = () => {
           </div>
           <div
             className="bg-white mt-5 rounded-xl h-[150vh] overflow-y-scroll hidescroller shadow-lg p-6 backdrop-blur-lg backdrop-filter"
-            initial="hidden"
-            animate="visible"
+          
           >
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">
               All Pets

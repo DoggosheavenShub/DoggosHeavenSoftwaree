@@ -186,116 +186,115 @@ exports.getVisit = async (req, res) => {
 exports.getVisitDetails = async (req, res) => {
   try {
     console.log("Fetching visit with ID:", req.params.id);
-    
-  
+
     let Visit, Inventory;
     try {
-      Visit = require('../models/Visit'); 
+      Visit = require("../models/Visit");
       console.log("Visit model loaded successfully");
     } catch (error) {
       console.error("Failed to load Visit model:", error.message);
       return res.status(500).json({
         success: false,
         message: "Server configuration error: Visit model not found",
-        error: error.message
+        error: error.message,
       });
     }
-    
+
     try {
-      Inventory = require('../models/inventory');
+      Inventory = require("../models/inventory");
       console.log("Inventory model loaded successfully");
     } catch (error) {
       console.error("Failed to load Inventory model:", error.message);
       return res.status(500).json({
         success: false,
         message: "Server configuration error: Inventory model not found",
-        error: error.message
+        error: error.message,
       });
     }
-    
-    
+
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid ID format" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ID format",
       });
     }
-    
+
     console.log("Attempting to find visit in database...");
     let visit;
     try {
       visit = await Visit.findById(req.params.id)
-        .populate('pet')
-        .populate('visitType')
+        .populate("pet")
+        .populate("visitType")
         .populate({
-          path: 'pet',
+          path: "pet",
           populate: {
-            path: 'owner',
-            model: 'Owner'
-          }
+            path: "owner",
+            model: "Owner",
+          },
         });
-      
+
       console.log("Database query completed");
     } catch (dbError) {
       console.error("Database error when finding visit:", dbError.message);
       return res.status(500).json({
         success: false,
         message: "Database error when finding visit",
-        error: dbError.message
+        error: dbError.message,
       });
     }
-    
+
     if (!visit) {
       console.log("Visit not found with ID:", req.params.id);
-      return res.status(404).json({ success: false, message: "Visit not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Visit not found" });
     }
-    
-   
+
     const details = visit.details || {};
-   
-    
+
     const medicines = Array.isArray(details.medicines) ? details.medicines : [];
     const vaccines = Array.isArray(details.vaccines) ? details.vaccines : [];
-    
-   
-    
-    
-    const medicineIds = medicines.map(med => {
-      if (!med || typeof med !== 'object') {
-        console.log("Invalid medicine entry:", med);
-        return null;
-      }
-      const id = med.id || med.medicineId;
-      if (!id) {
-        console.log("Medicine with no ID:", med);
-        return null;
-      }
-      const finalId = typeof id === 'object' ? id.toString() : id;
-      console.log("Extracted medicine ID:", finalId);
-      return finalId;
-    }).filter(Boolean);
-    
-    const vaccineIds = vaccines.map(vac => {
-      if (!vac || typeof vac !== 'object') {
-        console.log("Invalid vaccine entry:", vac);
-        return null;
-      }
-      const id = vac.id || vac.vaccineId;
-      if (!id) {
-        console.log("Vaccine with no ID:", vac);
-        return null;
-      }
-      const finalId = typeof id === 'object' ? id.toString() : id;
-      console.log("Extracted vaccine ID:", finalId);
-      return finalId;
-    }).filter(Boolean);
-    
+
+    const medicineIds = medicines
+      .map((med) => {
+        if (!med || typeof med !== "object") {
+          console.log("Invalid medicine entry:", med);
+          return null;
+        }
+        const id = med.id || med.medicineId;
+        if (!id) {
+          console.log("Medicine with no ID:", med);
+          return null;
+        }
+        const finalId = typeof id === "object" ? id.toString() : id;
+        console.log("Extracted medicine ID:", finalId);
+        return finalId;
+      })
+      .filter(Boolean);
+
+    const vaccineIds = vaccines
+      .map((vac) => {
+        if (!vac || typeof vac !== "object") {
+          console.log("Invalid vaccine entry:", vac);
+          return null;
+        }
+        const id = vac.id || vac.vaccineId;
+        if (!id) {
+          console.log("Vaccine with no ID:", vac);
+          return null;
+        }
+        const finalId = typeof id === "object" ? id.toString() : id;
+        console.log("Extracted vaccine ID:", finalId);
+        return finalId;
+      })
+      .filter(Boolean);
+
     console.log("Final medicine IDs:", medicineIds);
     console.log("Final vaccine IDs:", vaccineIds);
-  
+
     const allIds = [...medicineIds, ...vaccineIds];
     console.log("All inventory IDs to find:", allIds);
-    
+
     let inventoryItems = [];
     if (allIds.length) {
       try {
@@ -305,41 +304,45 @@ exports.getVisitDetails = async (req, res) => {
         console.log("Inventory items:", JSON.stringify(inventoryItems));
       } catch (inventoryError) {
         console.error("Error finding inventory items:", inventoryError.message);
-        
       }
     }
-    
-    
+
     console.log("Processing visit data...");
     const visitData = JSON.parse(JSON.stringify(visit));
-    
-    
+
     if (!visitData.details) visitData.details = {};
-   
-    if (Array.isArray(visitData.details.medicines) && visitData.details.medicines.length) {
-      visitData.details.medicines = visitData.details.medicines.map(med => {
-        if (!med || typeof med !== 'object') {
+
+    if (
+      Array.isArray(visitData.details.medicines) &&
+      visitData.details.medicines.length
+    ) {
+      visitData.details.medicines = visitData.details.medicines.map((med) => {
+        if (!med || typeof med !== "object") {
           console.log("Skipping invalid medicine object");
           return { name: "Invalid Medicine Data" };
         }
-        
+
         const id = med.id || med.medicineId;
         if (!id) {
           console.log("Medicine missing ID");
           return { ...med, name: "Medicine ID Missing" };
         }
-        
-        const idStr = typeof id === 'object' ? id.toString() : id;
-        const medicineInfo = inventoryItems.find(m => m._id.toString() === idStr);
-        
+
+        const idStr = typeof id === "object" ? id.toString() : id;
+        const medicineInfo = inventoryItems.find(
+          (m) => m._id.toString() === idStr
+        );
+
         if (medicineInfo) {
-          console.log(`Found inventory item for medicine ID ${idStr}: ${medicineInfo.itemName}`);
+          console.log(
+            `Found inventory item for medicine ID ${idStr}: ${medicineInfo.itemName}`
+          );
           return {
             ...med,
             name: medicineInfo.itemName,
-            unit: medicineInfo.stockUnit || 'units',
+            unit: medicineInfo.stockUnit || "units",
             category: medicineInfo.itemType,
-            manufacturer: medicineInfo.manufacturer || 'Unknown'
+            manufacturer: medicineInfo.manufacturer || "Unknown",
           };
         } else {
           console.log(`No inventory item found for medicine ID ${idStr}`);
@@ -349,31 +352,38 @@ exports.getVisitDetails = async (req, res) => {
     } else {
       visitData.details.medicines = [];
     }
-    
-    if (Array.isArray(visitData.details.vaccines) && visitData.details.vaccines.length) {
-      visitData.details.vaccines = visitData.details.vaccines.map(vac => {
-        if (!vac || typeof vac !== 'object') {
+
+    if (
+      Array.isArray(visitData.details.vaccines) &&
+      visitData.details.vaccines.length
+    ) {
+      visitData.details.vaccines = visitData.details.vaccines.map((vac) => {
+        if (!vac || typeof vac !== "object") {
           console.log("Skipping invalid vaccine object");
           return { name: "Invalid Vaccine Data" };
         }
-        
+
         const id = vac.id || vac.vaccineId;
         if (!id) {
           console.log("Vaccine missing ID");
           return { ...vac, name: "Vaccine ID Missing" };
         }
-        
-        const idStr = typeof id === 'object' ? id.toString() : id;
-        const vaccineInfo = inventoryItems.find(v => v._id.toString() === idStr);
-        
+
+        const idStr = typeof id === "object" ? id.toString() : id;
+        const vaccineInfo = inventoryItems.find(
+          (v) => v._id.toString() === idStr
+        );
+
         if (vaccineInfo) {
-          console.log(`Found inventory item for vaccine ID ${idStr}: ${vaccineInfo.itemName}`);
+          console.log(
+            `Found inventory item for vaccine ID ${idStr}: ${vaccineInfo.itemName}`
+          );
           return {
             ...vac,
             name: vaccineInfo.itemName,
-            manufacturer: vaccineInfo.manufacturer || 'Unknown',
-            target: vaccineInfo.target || 'General',
-            type: vaccineInfo.itemType
+            manufacturer: vaccineInfo.manufacturer || "Unknown",
+            target: vaccineInfo.target || "General",
+            type: vaccineInfo.itemType,
           };
         } else {
           console.log(`No inventory item found for vaccine ID ${idStr}`);
@@ -383,23 +393,23 @@ exports.getVisitDetails = async (req, res) => {
     } else {
       visitData.details.vaccines = [];
     }
-    
+
     console.log("Sending successful response");
     return res.status(200).json({
       success: true,
-      data: visitData
+      data: visitData,
     });
   } catch (error) {
     console.error("Unhandled error in getVisitDetails:", error);
     console.error("Error stack:", error.stack);
-    
+
     return res.status(500).json({
       success: false,
       message: "Error fetching visit details",
-      error: error.message
+      error: error.message,
     });
   }
-}
+};
 
 exports.addInquiryVisit = async (req, res) => {
   const session = await mongoose.startSession();
@@ -439,6 +449,7 @@ exports.addInquiryVisit = async (req, res) => {
     if (nextFollowUp && followUpPurpose && followUpTime) {
       const newscheduledVisit = new scheduledVisit({
         date: new Date(nextFollowUp),
+        time:followUpTime,
         petId,
         purpose: followUpPurpose,
       });
@@ -1151,35 +1162,95 @@ exports.getAllVisitPrices = async (req, res) => {
 
 exports.getVisitList = async (req, res) => {
   try {
-    const { date } = req.body;
+    // const { date } = req.body;
 
-    if (!date) {
-      return res.json({
-        success: false,
-        message: "Please provide a date to see corresponding visit",
-      });
-    }
+    // if (!date) {
+    //   return res.json({
+    //     success: false,
+    //     message: "Please provide a date to see corresponding visit",
+    //   });
+    // }
 
-    const targetDate = new Date(date);
+    // const targetDate = new Date(date);
 
-    const nextDate = new Date(targetDate);
-    nextDate.setDate(targetDate.getDate() + 1);
+    // const nextDate = new Date(targetDate);
+    // nextDate.setDate(targetDate.getDate() + 1);
 
-    const List = await Visit.find({
-      createdAt: {
+    // const List = await Visit.find({
+    //   createdAt: {
+    //     $gte: targetDate,
+    //     $lt: nextDate,
+    //   },
+    // }).populate(
+    //   [  {
+
+    //     path: "pet",
+    //     populate: {
+
+    //       path: "owner",
+    //     },
+    //   }, {path:"visitType",select:"purpose"}]
+    // );
+
+    const { date, purpose, name } = req.query;
+    
+
+    console.log(date,purpose,name)
+    const query = {};
+
+    // Date filter
+    if (date) {
+      const targetDate = new Date(date);
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(targetDate.getDate() + 1);
+
+      query.createdAt = {
         $gte: targetDate,
         $lt: nextDate,
-      },
-    }).populate(
-      [  {
-      
-        path: "pet",
-        populate: {
-          
-          path: "owner",
+      };
+    }
+
+    const aggregatePipeline = [
+      {
+        $lookup: {
+          from: "visittypes",
+          localField: "visitType",
+          foreignField: "_id",
+          as: "visitType",
         },
-      }, {path:"visitType",select:"purpose"}]
-    );
+      },
+      { $unwind: "$visitType" },
+      {
+        $lookup: {
+          from: "pets",
+          localField: "pet",
+          foreignField: "_id",
+          as: "pet",
+        },
+      },
+      { $unwind: "$pet" },
+      {
+        $lookup: {
+          from: 'owners',
+          localField: 'pet.owner',
+          foreignField: '_id',
+          as: 'pet.owner',
+        },
+      },
+      { $unwind: '$pet.owner' },
+      {
+        $match: {
+          ...query,
+          ...(purpose
+            ? { "visitType.purpose": { $regex: purpose, $options: "i" } }
+            : {}),
+          ...(name ? { "pet.name": { $regex: name, $options: "i" } } : {}),
+        },
+      },
+    ];
+
+    const List = await Visit.aggregate(aggregatePipeline);
+
 
     return res.json({
       success: true,
@@ -1246,11 +1317,9 @@ exports.addGroomingVisit = async (req, res) => {
       planId,
       visitType,
     } = req.body;
-    
 
-    console.log(req.body)
+    console.log(req.body);
 
-  
     let price = 0;
 
     if (!petId) {
@@ -1278,11 +1347,11 @@ exports.addGroomingVisit = async (req, res) => {
           message: "No subscription exist for given pet",
         });
       }
-      
-      subscription.numberOfGroomings=subscription.numberOfGroomings-1;
 
-      await subscription.save({session})
-      details.subscriptionAvailed="Yes"
+      subscription.numberOfGroomings = subscription.numberOfGroomings - 1;
+
+      await subscription.save({ session });
+      details.subscriptionAvailed = "Yes";
       price = 0;
     } else {
       if (discount >= visitDetails?.price) {
@@ -1294,7 +1363,6 @@ exports.addGroomingVisit = async (req, res) => {
       price = visitDetails?.price - discount;
     }
 
-  
     details.price = price;
 
     const visit = new Visit({
@@ -1304,13 +1372,12 @@ exports.addGroomingVisit = async (req, res) => {
     });
 
     await visit.save({ session });
-    
-    await session.commitTransaction()
+
+    await session.commitTransaction();
     return res.json({
       success: true,
       message: "Grooming visit saved successfully",
     });
-
   } catch (error) {
     console.log("error in Grooming Visit controller", error);
     await session.abortTransaction();

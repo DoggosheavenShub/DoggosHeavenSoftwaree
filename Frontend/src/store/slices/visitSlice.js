@@ -290,19 +290,17 @@ export const getAllPrices = createAsyncThunk(
 
 export const getVisitList = createAsyncThunk(
   "/visit/getvisitlist",
-  async (date, { dispatch }) => {
+  async (querystring, { dispatch }) => {
     const token = localStorage.getItem("authtoken") || "";
 
-    console.log(date);
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/v1/visit/getvisitlist`,
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/visit/getvisitlist?${querystring}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: token,
         },
-        body: JSON.stringify({ date }),
       }
     );
 

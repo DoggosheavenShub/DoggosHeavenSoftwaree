@@ -12,7 +12,7 @@ export const getRemindersList = createAsyncThunk(
   async (date, { dispatch }) => {
     const token = localStorage.getItem("authtoken");
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/v1/reminders/getreminderslist/:${date}`,
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/reminders/getreminderslist/${date}`,
       {
         method: "GET",
         headers: {
@@ -30,6 +30,32 @@ export const getRemindersList = createAsyncThunk(
     return data;
   }
 );
+
+export const sendReminders = createAsyncThunk(
+  "/reminders/sendreminders",
+
+  async (date, { dispatch }) => {
+    const token = localStorage.getItem("authtoken");
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/reminders/sendreminders/${date}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        }
+      }
+    );
+
+    if (response.status === 401) {
+      dispatch(logout());
+    }
+
+    const data = await response.json();
+    return data;
+  }
+);
+
 
 const reminderSlice = createSlice({
   name: "reminders",

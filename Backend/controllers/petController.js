@@ -11,7 +11,7 @@ exports.addPet = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { pets, ownerName, phone, email, address, segment } = req.body;
+    const { pets, ownerName, phone, email, address, segment} = req.body;
 
     // First, create or find the owner
     let owner = await Owner.findOne({ email });
@@ -43,6 +43,7 @@ exports.addPet = async (req, res) => {
       dob: pet.dob,
       owner: owner._id,
       vaccinations: pet.vaccinations || [],
+      neutered:pet.neutered,
       registrationDate: pet.registrationDate,
     }));
 

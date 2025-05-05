@@ -81,7 +81,7 @@ exports.dayCareDeboarding = async (req, res) => {
       message: "Pet Deboarded Successfully",
     });
   } catch (error) {
-    console.log("Error in day care deboarding controlller");
+    console.log("Error in day care deboarding controlller",error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -131,7 +131,7 @@ exports.daySchoolDeboarding = async (req, res) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    console.log("Error in day care deboarding controlller");
+    console.log("Error in day school deboarding controlller",error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

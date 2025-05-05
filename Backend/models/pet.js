@@ -9,8 +9,9 @@ const petSchema = new mongoose.Schema(
     },
     species: String,
     breed: String,
-neutered:{
-     type:Boolean
+    neutered: {
+      type: Boolean,
+      default: false,
     },
     sex: {
       type: String,

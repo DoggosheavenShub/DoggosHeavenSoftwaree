@@ -49,8 +49,8 @@ function App() {
  
             <Route path="/salesSection" element={<SalesSection />} />
             <Route path="/saleshistory" element={<SalesHistory />} />
-            <Route path="/reminders" element={<Reminders />} />
-            <Route path="/new" element={<NewReminders />} />
+            <Route path="/reminders" element={<NewReminders/>} />
+            {/* <Route path="/new" element={<NewReminders />} /> */}
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/petByDate" element={<PetByDate />} />
             <Route path="/fill" element={<Hostel />} />

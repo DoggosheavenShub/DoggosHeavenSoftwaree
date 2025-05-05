@@ -10,8 +10,7 @@ const PetForm = () => {
   const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
-    console.log(data);
-    return;
+
     dispatch(addPet(data))
       .then((data) => {
         if (data?.payload?.success) {
