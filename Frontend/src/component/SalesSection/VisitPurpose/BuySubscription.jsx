@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   buySubscription,
@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 const BuySubscription = ({_id,visitPurposeDetails}) => {
   const { subscriptions } = useSelector((state) => state.subscription);
   const { petDetails } = useSelector((state) => state.pets);
-
+  const navigate=useNavigate();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -37,6 +37,7 @@ const BuySubscription = ({_id,visitPurposeDetails}) => {
         setIsLoading(true);
         if (data?.payload?.success) {
           alert("Visit saved successfully");
+          navigate("/dashboard")
         } else alert(data?.payload?.message);
         setIsLoading(false);
       })

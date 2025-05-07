@@ -26,7 +26,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
   const { subscriptionDetails } = useSelector((state) => state.subscription);
   
   const onSubmit = (data) => {
-    console.log(data);
+    
     data.petId=_id;
     data.planId=planId
     data.visitType=visitPurposeDetails._id;
@@ -37,6 +37,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
       .then((data) => {
         if (data?.payload?.success) {
           alert("Visit saved successfully");
+          navigate("/dashboard")
           reset();
         } else alert(data?.payload?.message);
         setIsLoading(false);
@@ -48,7 +49,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
     params.append("petId", _id.trim());
     params.append("visitType", visitPurposeDetails._id.trim());
 
-    console.log(visitPurposeDetails._id)
+  
     const queryString = params.toString();
     dispatch(getSubscriptionDetails(queryString));
   }, []);

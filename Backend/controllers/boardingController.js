@@ -9,16 +9,12 @@ const mongoose=require("mongoose")
 
 exports.dogParkDeboarding = async (req, res) => {
   try {
-    const { petId } = req.body;
+    const { boardingid } = req.body;
 
-    if (!petId)
-      return res.status(400).json({
-        success: false,
-        message: "PetId must be provided",
-      });
-
-    const pet = await Pet.findById(petId);
-    const boardingDetails = await Boarding.findOne({ petId, isBoarded: true });
+    const boardingDetails = await Boarding.findOne({
+      _id: boardingid,
+      isBoarded: true,
+    });
 
     if (!boardingDetails)
       return res.status(400).json({
@@ -26,30 +22,16 @@ exports.dogParkDeboarding = async (req, res) => {
         message: "The given pet is not boarded in dog park",
       });
 
-    if (!pet) {
-      return res.status(400).json({
-        success: false,
-        message: "The pet doesn't exisi",
-      });
-    }
-
     boardingDetails.exitTime = new Date();
+    boardingDetails.isBoarded = false;
     await boardingDetails.save();
-
-    const entryTime = dayjs(boardingDetails.entryTime)
-      .tz("Asia/Kolkata")
-      .format("DD MM YYYY HH:mm:ss");
-
-    const exitTime = dayjs(boardingDetails.exitTime)
-      .tz("Asia/Kolkata")
-      .format("DD MM YYYY HH:mm:ss");
 
     return res.json({
       success: true,
-      message: `${pet.name} came on ${entryTime} and going home on  ${exitTime}`,
+      message: "Pet Deboarded Successfully",
     });
   } catch (error) {
-    console.log("Error in dog Park deboarding controlller");
+    console.log("Error in dog park deboarding controlller",error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -110,10 +92,10 @@ exports.daySchoolDeboarding = async (req, res) => {
 
     if (boardingDetails?.isSubscriptionAvailed) {
       const subscriptionDetails = await Subscription.findOne({
-        planId,
+        planId:boardingDetails?.planId,
         petId: boardingDetails?.petId,
       });
-
+      
       subscriptionDetails.daysLeft -= 1;
       await subscriptionDetails.save({session});
     }
@@ -142,19 +124,12 @@ exports.daySchoolDeboarding = async (req, res) => {
 exports.playSchoolDeboarding = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+
   try {
-    const { petId, planId } = req.body;
+    const { boardingid } = req.body;
 
-    if (!petId)
-      return res.status(400).json({
-        success: false,
-        message: "PetId must be provided",
-      });
-
-    const pet = await Pet.findById(petId);
     const boardingDetails = await Boarding.findOne({
-      petId,
-      planId,
+      _id: boardingid,
       isBoarded: true,
     });
 
@@ -165,44 +140,30 @@ exports.playSchoolDeboarding = async (req, res) => {
       });
     }
 
-    if (!pet) {
-      return res.status(400).json({
-        success: false,
-        message: "The pet doesn't exisi",
+    if (boardingDetails?.isSubscriptionAvailed) {
+      const subscriptionDetails = await Subscription.findOne({
+        planId:boardingDetails?.planId,
+        petId: boardingDetails?.petId,
       });
-    }
-
-    const subscriptionDetails = await Subscription.findOne({
-      planId,
-      petId,
-    });
-
-    if (subscriptionDetails) {
-      if (subscriptionDetails?.daysLeft > 0) {
-        subscriptionDetails.daysLeft = subscriptionDetails?.daysLeft - 1;
-        await subscriptionDetails.save({ session });
-      }
+      
+      subscriptionDetails.daysLeft -= 1;
+      await subscriptionDetails.save({session});
     }
 
     boardingDetails.exitTime = new Date();
+    boardingDetails.isBoarded = false;
+
     await boardingDetails.save({ session });
 
     await session.commitTransaction();
 
-    const entryTime = dayjs(boardingDetails.entryTime)
-      .tz("Asia/Kolkata")
-      .format("DD MM YYYY HH:mm:ss");
-    const exitTime = dayjs(boardingDetails.exitTime)
-      .tz("Asia/Kolkata")
-      .format("DD MM YYYY HH:mm:ss");
-
     return res.json({
       success: true,
-      message: `${pet.name} came on ${entryTime} and going home on  ${exitTime}`,
+      message: `Pet Deboarded usccessfully`,
     });
   } catch (error) {
     await session.abortTransaction();
-    console.log("Error in play school deboarding controlller");
+    console.log("Error in play school deboarding controlller",error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -211,6 +172,9 @@ exports.playSchoolDeboarding = async (req, res) => {
 };
 
 exports.HostelDeboarding = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { boardingid } = req.body;
     const boardingDetails = await Boarding.findOne({
@@ -227,14 +191,26 @@ exports.HostelDeboarding = async (req, res) => {
 
     boardingDetails.isBoarded = false;
     boardingDetails.exitTime = new Date();
+    
+    await boardingDetails.save({session});
 
-    await boardingDetails.save();
+    if (boardingDetails?.isSubscriptionAvailed) {
+      const subscriptionDetails = await Subscription.findOne({
+        planId:boardingDetails?.planId,
+        petId: boardingDetails?.petId,
+      });
+      
+      subscriptionDetails.daysLeft -= boardingDetails?.numberOfDays;
+      await subscriptionDetails.save({session});
+    }
 
+    await session.commitTransaction();
     return res.json({
       success: true,
       message: "Deboarded successfully",
     });
   } catch (error) {
+    await session.abortTransaction();
     console.log("Error in hostel deboarding controlller", error);
     return res.status(500).json({
       success: false,

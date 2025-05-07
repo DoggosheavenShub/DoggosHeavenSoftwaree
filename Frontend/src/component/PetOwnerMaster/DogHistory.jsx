@@ -10,9 +10,10 @@ import {
   getPetDetails,
 } from "../../store/slices/petSlice";
 import "../../App.css";
+import EditPetInfo from "./EditPetInfo";
+import EditOwnerInfo from "./EditOwnerDetails";
 
 const DogHistory = () => {
-  
   const { petList, getPetListLoading, petDetails, petDetailsLoading } =
     useSelector((state) => state.pets);
   const [error, setError] = useState(null);
@@ -20,6 +21,8 @@ const DogHistory = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [editPet, seteditPet] = useState(false);
+  const [editownerinfo,seteditownerinfo]=useState(false)
 
   const navigate = useNavigate();
 
@@ -33,7 +36,7 @@ const DogHistory = () => {
       dispatch(filterPetsByNameAndPhone(queryString)).then((data) => {});
     }, 1000);
     return () => clearTimeout(timeout);
-  }, [name, phone,dispatch]);
+  }, [name, phone, dispatch]);
 
   const navigateToVisit = (_id) => {
     navigate(`/nvisit2`, { state: { _id } });
@@ -89,10 +92,7 @@ const DogHistory = () => {
               className="w-[49%] p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
             />
           </div>
-          <div
-            className="bg-white mt-5 rounded-xl h-[150vh] overflow-y-scroll hidescroller shadow-lg p-6 backdrop-blur-lg backdrop-filter"
-          
-          >
+          <div className="bg-white mt-5 rounded-xl h-[150vh] overflow-y-scroll hidescroller shadow-lg p-6 backdrop-blur-lg backdrop-filter">
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">
               All Pets
             </h2>
@@ -189,16 +189,21 @@ const DogHistory = () => {
                   onClose={() => setIsOpen(false)}
                   vaccinations={petDetails.vaccinations || []}
                 />
+                <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
+                  <button
+                    onClick={() => seteditPet(!editPet)}
+                    className="bg-[#172554] px-5 py-2 rounded-md text-white hover:bg-[#172554] transition-colors duration-300"
+                  >
+                    Edit Pet Details
+                  </button>
+                </div>
               </div>
+
+              {editPet ? <EditPetInfo pet={petDetails} /> : ""}
 
               {/* Owner Details Section with enhanced styling */}
               {petDetails.owner && (
-                <div
-                  className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-100"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
+                <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-100">
                   <h3 className="font-semibold text-lg mb-3 text-gray-800">
                     Owner Information
                   </h3>
@@ -230,8 +235,17 @@ const DogHistory = () => {
                       </div>
                     )}
                   </div>
+                  <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
+                    <button
+                      onClick={() => seteditownerinfo(!editownerinfo)}
+                      className="bg-[#172554] px-5 py-2 rounded-md text-white hover:bg-[#172554] transition-colors duration-300"
+                    >
+                      Edit Owner Details
+                    </button>
+                  </div>
                 </div>
               )}
+              {editownerinfo ? <EditOwnerInfo owner={petDetails?.owner}/> : ""}
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-lg p-8 text-center">

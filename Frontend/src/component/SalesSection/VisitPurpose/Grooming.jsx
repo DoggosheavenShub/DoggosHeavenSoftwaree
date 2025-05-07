@@ -31,7 +31,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
     data.petId=_id;
     data.planId=planId
     data.visitType=visitPurposeDetails._id;
-    console.log(data);
+  
     
     dispatch(addGroomingVisit(data))
       .then((data) => {
@@ -49,7 +49,6 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
     params.append("petId", _id.trim());
     params.append("visitType", visitPurposeDetails._id.trim());
 
-    console.log(visitPurposeDetails._id)
     const queryString = params.toString();
     dispatch(getSubscriptionDetails(queryString));
   }, []);

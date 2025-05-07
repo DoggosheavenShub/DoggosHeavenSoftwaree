@@ -76,7 +76,7 @@ export default function PetManagement() {
         setVisitHistory(data?.payload?.visits)
       })
       .catch((err) => {
-        console.log(err);
+      
       });
   };
 

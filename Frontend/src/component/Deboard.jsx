@@ -53,7 +53,7 @@ const Deboard = () => {
     switch (selectedOption?.purpose) {
       case "Dog Park":
         return (
-          <DogParkDeboard _id={_id} boardingDetailsRef={boardingDetailsRef} />
+          <DogParkDeboard _id={_id} setboardingid={setboardingid} />
         );
       case "Day School":
         return (
@@ -63,7 +63,7 @@ const Deboard = () => {
         return (
           <PlaySchoolDeboard
             _id={_id}
-            boardingDetailsRef={boardingDetailsRef}
+            setboardingid={setboardingid}
           />
         );
       case "Hostel":

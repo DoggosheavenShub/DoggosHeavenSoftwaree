@@ -4,7 +4,7 @@ import "../../../App.css";
 import { useDispatch, useSelector } from "react-redux";
 import { getSubscriptionDetails } from "../../../store/slices/subscriptionSlice";
 import { addHostelVisit } from "../../../store/slices/visitSlice";
-
+import { useNavigate } from "react-router-dom";
 const Hostel = ({ _id, visitPurposeDetails }) => {
   const { isLoading, setIsLoading } = useState(false);
  
@@ -23,6 +23,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
   const [planId, setPlanId] = useState("");
   const discount = watch("discount");
   const isSubscriptionAvailed = watch("isSubscriptionAvailed");
+  const navigate=useNavigate();
 
   const { subscriptionDetails } = useSelector((state) => state.subscription);
   const onSubmit = (data) => {
@@ -31,6 +32,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
     dispatch(addHostelVisit(data)).then((data) => {
       if (data?.payload?.success) {
         alert("Visit saved successfully");
+        navigate("/dashboard")
         reset();
       } else alert(data?.payload?.message);
       setIsLoading(false);

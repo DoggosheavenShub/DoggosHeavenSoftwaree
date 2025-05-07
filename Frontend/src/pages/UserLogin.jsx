@@ -21,7 +21,7 @@ export default function UserLoginPage() {
         });
       } else {
         alert(data?.payload?.message);
-        console.log(data?.payload?.message)
+        
       }
     });
   };

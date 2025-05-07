@@ -44,7 +44,7 @@ const SalesHistory = () => {
   }, [name, purpose, date, dispatch]);
 
   if (visitdetails) {
-    console.log(visitdetails);
+    
     return (
       <VisitHistoryDetails visitdetails={visitdetails} onClose={onClose} />
     );

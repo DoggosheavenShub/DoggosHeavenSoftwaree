@@ -5,6 +5,7 @@ import { addDayCareVisit } from "../../../store/slices/visitSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
+
 const DayCare = ({ _id, visitPurposeDetails }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +20,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
   const navigate = useNavigate();
 
   const onSubmit = (data) => {
-    console.log("Submitted Data:", data);
+  
     data.petId = _id;
     data.visitType = visitPurposeDetails._id;
     setIsLoading(true);

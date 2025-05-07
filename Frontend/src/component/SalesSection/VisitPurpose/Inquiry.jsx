@@ -31,7 +31,7 @@ const Inquiry = ({ _id, visitPurposeDetails }) => {
 
     dispatch(addInquiryDetails(data))
       .then((data) => {
-        console.log(data);
+        
         if (data?.payload?.success) {
           alert("Visit saved successfully");
           reset();

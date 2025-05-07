@@ -362,6 +362,33 @@ export const getBoardingCategoryList = createAsyncThunk(
   }
 );
 
+export const addShoppingVisit = createAsyncThunk(
+  "/visit/addshoppingvisit",
+
+  async (formdata, { dispatch }) => {
+    const token = localStorage.getItem("authtoken") || "";
+
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/visit/addshoppingvisit`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body:JSON.stringify(formdata)
+      }
+    );
+
+    if (response.status === 401) {
+      dispatch(logout());
+    }
+    const data = await response.json();
+    return data;
+  }
+);
+
+
 const visitSlice = createSlice({
   name: "visit",
   initialState,

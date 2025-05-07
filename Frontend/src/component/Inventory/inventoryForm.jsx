@@ -48,7 +48,7 @@ const InventoryForm = () => {
       })
       .catch((err) => {
         alert("Failed to add inventory item");
-        console.log(err);
+        
       });
   };
 

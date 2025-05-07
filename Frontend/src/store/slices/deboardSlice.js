@@ -60,10 +60,9 @@ export const getBoardingDetails = createAsyncThunk(
 
 export const dogParkDeboarding = createAsyncThunk(
   "/pets/dogparkdeboarding",
-  async (petId, { dispatch, rejectWithValue }) => {
+  async (boardingid, { dispatch, rejectWithValue }) => {
     const token = localStorage.getItem("authtoken") || "";
 
-    try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/deboard/dogparkdeboarding`,
         {
@@ -72,7 +71,7 @@ export const dogParkDeboarding = createAsyncThunk(
             Authorization: token,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ petId }),
+          body: JSON.stringify({ boardingid }),
         }
       );
 
@@ -87,10 +86,8 @@ export const dogParkDeboarding = createAsyncThunk(
       }
 
       return data;
-    } catch (err) {
-      return rejectWithValue("Network error");
-    }
-  }
+    } 
+  
 );
 
 export const daySchoolDeboarding = createAsyncThunk(
