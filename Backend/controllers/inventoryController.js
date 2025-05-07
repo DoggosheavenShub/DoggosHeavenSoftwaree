@@ -114,56 +114,48 @@ exports.editInventory = async (req, res) => {
       recommendedDoses,
     } = req.body;
 
-    if (itemType !== "medicine") {
-      if (
-        !_id ||
-        !itemName ||
-        !stockUnit ||
-        !itemType ||
-        !volumeML ||
-        !totalVolume ||
-        !unitCostPrice ||
-        !unitMaxRetailPriceCustomer ||
-        !unitMinRetailPriceNGO ||
-        !recommendedDoses
-      ) {
-        return res.status(400).json({
-          success: false,
-          message: "All fields need to  be filled",
-        });
-      }
-    } else {
-      if (
-        !itemName ||
-        !stockUnit ||
-        !itemType ||
-        !unitCostPrice ||
-        !unitMaxRetailPriceCustomer ||
-        !unitMinRetailPriceNGO
-      )
-        return res.status(400).json({
-          success: false,
-          message: "All fields need to  be filled",
-        });
+   
+    if (!itemName || !stockUnit || !itemType) {
+      return res.status(400).json({
+        success: false,
+        message: "Item name, stock unit, and item type are required fields",
+      });
     }
 
-    const response = await Inventory.findByIdAndUpdate(_id, {
+    
+    const updateData = {
       itemName,
       stockUnit,
       itemType,
-      volumeML,
-      totalVolume,
-      unitCostPrice,
-      unitMaxRetailPriceCustomer,
-      unitMinRetailPriceNGO,
-      recommendedDoses,
-    });
+      unitCostPrice: unitCostPrice || 0,
+      unitMinRetailPriceNGO: unitMinRetailPriceNGO || 0,
+      unitMaxRetailPriceCustomer: unitMaxRetailPriceCustomer || 0,
+    };
+
+    
+    if (itemType !== "medicine") {
+      updateData.volumeML = volumeML || 0;
+      updateData.totalVolume = totalVolume || 0;
+      updateData.recommendedDoses = recommendedDoses || 0;
+    }
+
+  
+    const response = await Inventory.findByIdAndUpdate(_id, updateData, { new: true });
+
+    if (!response) {
+      return res.status(404).json({
+        success: false,
+        message: "Inventory item not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
       message: "Inventory details updated successfully",
+      item: response
     });
   } catch (error) {
+    console.error("Error in editInventory:", error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

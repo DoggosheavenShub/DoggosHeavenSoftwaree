@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   editInventoryItem,
   getInventoryItemDetails,
 } from "../../store/slices/inventorySlice";
-import { useDispatch } from "react-redux";
-import { logout } from "../../store/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const EditInventory = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const { editInventoryLoading } = useSelector((state) => state.inventory);
 
   const { id } = location?.state || "";
   const [formData, setFormData] = useState({
@@ -55,12 +54,21 @@ const EditInventory = () => {
         if (data?.payload?.success) {
           navigate("/inventorylist");
           alert("Inventory item edited successfully!");
-        } 
+        } else alert(data?.payload?.message);
       })
       .catch((err) => {
         alert("Failed to edit the inventory item");
+        console.log(err);
       });
   };
+
+  if (editInventoryLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -71,7 +79,7 @@ const EditInventory = () => {
           <input
             type="text"
             name="itemName"
-            value={formData?.itemName || ""}
+            value={formData.itemName || ""}
             onChange={handleChange}
             required
             className="w-full p-2 border rounded"
@@ -83,7 +91,7 @@ const EditInventory = () => {
           <input
             type="number"
             name="stockUnit"
-            value={formData?.stockUnit || ""}
+            value={formData.stockUnit || 0}
             onChange={handleChange}
             required
             className="w-full p-2 border rounded"
@@ -94,55 +102,60 @@ const EditInventory = () => {
           <label className="block mb-1">Item Type:</label>
           <select
             name="itemType"
-            value={formData?.itemType || ""}
+            value={formData.itemType || "disposable"}
             onChange={handleChange}
             required
             className="w-full p-2 border rounded"
           >
             <option value="disposable">Disposable</option>
             <option value="syringe">Syringe</option>
+            <option value="medicine">Medicine</option>
           </select>
         </div>
 
-        <div>
-          <label className="block mb-1">Recommended Doses:</label>
-          <input
-            type="number"
-            name="recommendedDoses"
-            value={formData?.recommendedDoses || ""}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
+        {formData.itemType !== "medicine" && (
+          <>
+            <div>
+              <label className="block mb-1">Recommended Doses:</label>
+              <input
+                type="number"
+                name="recommendedDoses"
+                value={formData.recommendedDoses || 0}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
 
-        <div>
-          <label className="block mb-1">Volume (ML):</label>
-          <input
-            type="number"
-            name="volumeML"
-            value={formData?.volumeML || ""}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
+            <div>
+              <label className="block mb-1">Volume (ML):</label>
+              <input
+                type="number"
+                name="volumeML"
+                value={formData.volumeML || 0}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
 
-        <div>
-          <label className="block mb-1">Total Volume:</label>
-          <input
-            type="number"
-            name="totalVolume"
-            value={formData?.totalVolume || ""}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
+            <div>
+              <label className="block mb-1">Total Volume:</label>
+              <input
+                type="number"
+                name="totalVolume"
+                value={formData.totalVolume || 0}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+          </>
+        )}
 
         <div>
           <label className="block mb-1">Unit Cost Price:</label>
           <input
             type="number"
             name="unitCostPrice"
-            value={formData?.unitCostPrice || ""}
+            value={formData.unitCostPrice || 0}
             onChange={handleChange}
             className="w-full p-2 border rounded"
           />
@@ -153,7 +166,7 @@ const EditInventory = () => {
           <input
             type="number"
             name="unitMinRetailPriceNGO"
-            value={formData?.unitMinRetailPriceNGO || ""}
+            value={formData.unitMinRetailPriceNGO || 0}
             onChange={handleChange}
             className="w-full p-2 border rounded"
           />
@@ -166,7 +179,7 @@ const EditInventory = () => {
           <input
             type="number"
             name="unitMaxRetailPriceCustomer"
-            value={formData?.unitMaxRetailPriceCustomer || ""}
+            value={formData.unitMaxRetailPriceCustomer || 0}
             onChange={handleChange}
             className="w-full p-2 border rounded"
           />
@@ -174,7 +187,7 @@ const EditInventory = () => {
 
         <button
           type="submit"
-          className="w-full  bg-blue-950 text-white p-2 rounded hover:bg-blue-600"
+          className="w-full bg-blue-950 text-white p-2 rounded hover:bg-blue-600"
         >
           Edit Item
         </button>
