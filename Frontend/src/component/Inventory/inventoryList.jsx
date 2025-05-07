@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getAllInventory } from "../../store/slices/inventorySlice";
-import axios from "axios";
+import { getAllInventory, deleteInventoryItem } from "../../store/slices/inventorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { logout } from "../../store/slices/authSlice";
@@ -11,9 +10,10 @@ const InventoryList = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteItemId, setDeleteItemId] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { getAllInventoryLoading } = useSelector((state) => state.inventory);
+  const { getAllInventoryLoading, deleteInventoryLoading } = useSelector((state) => state.inventory);
   const [searchTerm, setSearchTerm] = useState("");
   const [initialInventory, setInitialInventory] = useState([]);
 
@@ -25,8 +25,8 @@ const InventoryList = () => {
     dispatch(getAllInventory())
       .then((data) => {
         if(data?.payload?.success){
-        setInitialInventory(data?.payload?.items);
-        setInventory(data?.payload?.items);
+          setInitialInventory(data?.payload?.items);
+          setInventory(data?.payload?.items);
         }
       })
       .catch((err) => {
@@ -52,6 +52,32 @@ const InventoryList = () => {
       setSelectedItem(null);
     } else {
       setSelectedItem(itemId);
+    }
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this inventory item?")) {
+      setDeleteItemId(id);
+      
+      dispatch(deleteInventoryItem(id))
+        .then((response) => {
+          if (response?.payload?.success) {
+            // Remove the deleted item from the state
+            const updatedInventory = inventory.filter(item => item._id !== id);
+            setInventory(updatedInventory);
+            setInitialInventory(updatedInventory);
+            alert("Inventory item deleted successfully!");
+          } else {
+            alert("Failed to delete inventory item!");
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting inventory item:", error);
+          alert("An error occurred while deleting the inventory item.");
+        })
+        .finally(() => {
+          setDeleteItemId(null);
+        });
     }
   };
 
@@ -160,12 +186,37 @@ const InventoryList = () => {
                       </p>
                     </div>
                   </div>
-                  <button
-                    className="bg-[green] mt-3 text-[white] px-5 py-2 rounded-lg"
-                    onClick={() => handleEdit(item?._id)}
-                  >
-                    Edit Details
-                  </button>
+                  <div className="flex space-x-3 mt-3">
+                    <button
+                      className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(item?._id);
+                      }}
+                    >
+                      Edit Details
+                    </button>
+                    <button
+                      className="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(item?._id);
+                      }}
+                      disabled={deleteInventoryLoading && deleteItemId === item._id}
+                    >
+                      {deleteInventoryLoading && deleteItemId === item._id ? (
+                        <span className="flex items-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Deleting...
+                        </span>
+                      ) : (
+                        "Delete"
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

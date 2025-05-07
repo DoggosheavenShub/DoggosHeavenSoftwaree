@@ -12,6 +12,7 @@ const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
 const timezone = require("dayjs/plugin/timezone");
 const VisitType = require("../models/visitTypes");
+const SubscriptionPlan =require( "../models/subscriptionPlan");
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -181,6 +182,53 @@ exports.getVisit = async (req, res) => {
       message: "Internal Server Error",
     });
   }
+};
+
+exports.buyy= async(req,res)=>{
+  try {
+    const VisitId = req.params.id;
+    if(!VisitId){
+      return res.status(400).json({
+        success:false,
+        message:"please choose a visit to get its detail",
+      });
+    }
+
+    const VisitSaved=await Visit.findOne({_id:VisitId});
+
+    if(!VisitSaved){
+      return res.status(400).json({
+        success:false,
+        message:"VisitSaved not found",
+      });
+    }
+
+    console.log(VisitSaved);
+
+    const PlanDetails= await SubscriptionPlan.findOne({_id:VisitSaved?.details?.subscriptionPlan}).populate({path:'subscriptionType'});
+
+   console.log(PlanDetails);
+    
+    if(!PlanDetails){
+      return res.status(400).json({
+        success:false,
+        message:"subscription id not found",
+      });
+    }
+
+    return res.status(200).json({
+      success:true,
+      message:"subscription type found",
+      data:PlanDetails
+    });
+  } catch (error) {
+    console.log("error in buy subscription detail controller",error);
+     return res.status(500).json({
+      success:false,
+      message:"something went wrong in buysbscriptionvisitdetail"
+     })
+  }
+    
 };
 
 exports.getVisitDetails = async (req, res) => {

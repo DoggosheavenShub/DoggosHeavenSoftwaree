@@ -5,7 +5,8 @@ const initialState = {
   getAllInventoryLoading: false,
   inventoryList: [],
   editInventoryLoading: false,
-  addInventoryLoading:false
+  addInventoryLoading: false,
+  deleteInventoryLoading: false
 };
 
 export const getAllInventory = createAsyncThunk(
@@ -84,6 +85,31 @@ export const addInventoryItem = createAsyncThunk(
   }
 );
 
+export const deleteInventoryItem = createAsyncThunk(
+  "/inventory/deleteinventoryitem",
+  async (id, {dispatch}) => {
+    const token = localStorage.getItem("authtoken") || ""
+    const response = await fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/api/v1/inventory/deleteinventory/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": token,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (response.status === 401) {
+      dispatch(logout());
+    }
+    const data = await response.json();
+    return data;
+  }
+);
+
 export const getInventoryItemDetails = createAsyncThunk(
   "/inventory/getinventoryitemdetails",
   async (id,{dispatch}) => {
@@ -149,8 +175,18 @@ const inventorySlice = createSlice({
       })
       .addCase(getAllInventory.rejected, (state) => {
         state.getAllInventoryLoading = false;
-      }).addCase(getAlertListOfInventory.fulfilled,(state,action)=>{
+      })
+      .addCase(getAlertListOfInventory.fulfilled,(state,action)=>{
         state.inventoryList=action?.payload?.success?action?.payload?.items:[];
+      })
+      .addCase(deleteInventoryItem.pending, (state) => {
+        state.deleteInventoryLoading = true;
+      })
+      .addCase(deleteInventoryItem.fulfilled, (state, action) => {
+        state.deleteInventoryLoading = false;
+      })
+      .addCase(deleteInventoryItem.rejected, (state) => {
+        state.deleteInventoryLoading = false;
       });
   },
 });

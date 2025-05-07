@@ -171,6 +171,37 @@ exports.editInventory = async (req, res) => {
   }
 };
 
+exports.deleteInventory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Find the inventory item by ID
+    const inventoryItem = await Inventory.findById(id);
+    
+    if (!inventoryItem) {
+      return res.status(404).json({
+        success: false,
+        message: "Inventory item not found"
+      });
+    }
+    
+    // Delete the inventory item
+    await Inventory.findByIdAndDelete(id);
+    
+    return res.status(200).json({
+      success: true,
+      message: "Inventory item deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting inventory item:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete inventory item",
+      error: error.message
+    });
+  }
+};
+
 exports.getInventoryItemDetails = async (req, res) => {
   try {
     const { id } = req.params;
