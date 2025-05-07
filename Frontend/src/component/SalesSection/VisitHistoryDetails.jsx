@@ -24,7 +24,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
         setLoading(true);
 
         const response = await fetch(
-          `http://localhost:5000/api/v1/visit/getvisitdetails/${visitdetails._id}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/visit/getvisitdetails/${visitdetails._id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -45,7 +45,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
         setLoading(false);
       }
     };
-
+    if(visitdetails?.visitType?.purpose==="Veterinary")
     fetchVeterinaryVisitDetail();
   }, [visitdetails]);
 
@@ -69,7 +69,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
        
 
         const response = await fetch(
-          `http://localhost:5000/api/v1/visit/buyy/${visitdetails._id}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/visit/buyy/${visitdetails._id}`,
           {
             method: "GET",
             headers: {
@@ -108,10 +108,11 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
         setLoading(false);
       }
     };
-
+    if(visitdetails?.visitType?.purpose==="Buy Subscription")
     fetchBuySubscriptionDetail();
   }, [visitdetails]);
-
+  
+  console.log("V",visitdetails)
   const formatDate = (dateString) => {
     try {
       return format(new Date(dateString), "d MMM yyyy");
