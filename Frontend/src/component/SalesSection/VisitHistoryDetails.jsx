@@ -6,7 +6,7 @@ import { logout } from "../../store/slices/authSlice";
 const VisitHistoryDetails = ({ visitdetails, onClose }) => {
   const [visitDetail, setVisitDetail] = useState(null);
   const [subscriptionTypeValue, setSubscriptionTypeValue] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -112,7 +112,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
     fetchBuySubscriptionDetail();
   }, [visitdetails]);
   
-  console.log("V",visitdetails)
+
   const formatDate = (dateString) => {
     try {
       return format(new Date(dateString), "d MMM yyyy");
@@ -125,6 +125,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
   const visitDate = details?.createdAt
     ? formatDate(details.createdAt)
     : "Unknown Date";
+
   const visitPurpose = details?.visitType?.purpose || "";
 
   const renderContent = () => {

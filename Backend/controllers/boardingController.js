@@ -96,7 +96,11 @@ exports.daySchoolDeboarding = async (req, res) => {
         petId: boardingDetails?.petId,
       });
       
-      subscriptionDetails.daysLeft -= 1;
+      const temp=subscriptionDetails?.daysLeft;
+      subscriptionDetails.daysLeft =temp-1>=0?temp-1:0; 
+
+      if(temp-1<=0)
+      subscriptionDetails.active=false  
       await subscriptionDetails.save({session});
     }
 
@@ -146,7 +150,10 @@ exports.playSchoolDeboarding = async (req, res) => {
         petId: boardingDetails?.petId,
       });
       
-      subscriptionDetails.daysLeft -= 1;
+      const temp=subscriptionDetails?.daysLeft;
+      subscriptionDetails.daysLeft =temp-1>=0?temp-1:0; 
+      if(temp-1<=0)
+      subscriptionDetails.active=false  
       await subscriptionDetails.save({session});
     }
 
@@ -199,8 +206,20 @@ exports.HostelDeboarding = async (req, res) => {
         planId:boardingDetails?.planId,
         petId: boardingDetails?.petId,
       });
-      
-      subscriptionDetails.daysLeft -= boardingDetails?.numberOfDays;
+
+      const diffInMs = Math.abs(
+        new Date().setHours(0, 0, 0, 0) -
+          new Date(boardingDetails.entryTime).setHours(0, 0, 0, 0)
+      );
+  
+      const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+      const actualnumberOfDays = diffInDays + 1;
+
+      const temp=subscriptionDetails?.daysLeft;
+      subscriptionDetails.daysLeft = temp-actualnumberOfDays>=0?temp-actualnumberOfDays:0; 
+      if(temp-actualnumberOfDays<=0)
+      subscriptionDetails.active=false  
+  
       await subscriptionDetails.save({session});
     }
 

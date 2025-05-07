@@ -15,7 +15,7 @@ const Attendance = () => {
   const dispatch = useDispatch();
 
   const handleupdateAttendance = async (date) => {
-    dispatch(updateAttendance({ date, presentIds,absentIds }))
+    dispatch(updateAttendance({ date, presentIds, absentIds }))
       .then((data) => {
         if (data?.payload?.success) {
           setList(data?.payload?.List);
@@ -31,22 +31,6 @@ const Attendance = () => {
 
     if (!res) return;
 
-    const List = list
-      .map((item, idx) => {
-        if (!item?.present) {
-          return {
-            name: item?.petId?.name,
-            breed: item?.petId?.breed,
-            species: item?.petId?.species,
-            ownerName: item?.petId?.owner?.name,
-            ownerEmail: item?.petId?.owner?.email,
-            date: date,
-            purpose: item?.purpose,
-          };
-        }
-      })
-      .filter((item) => item !== undefined);
-
     const token = localStorage.getItem("authtoken");
     const response = await fetch(
       `${
@@ -59,42 +43,31 @@ const Attendance = () => {
           "Content-Type": "application/json",
           "Accept-Type": "application/json",
         },
-        body: JSON.stringify({ List }),
+        body: JSON.stringify({ date }),
       }
     );
 
     if (response.data === 401) return dispatch(logout());
 
     const data = await response.json();
+
+    if (data?.success) {
+      alert("Reminders will be sent to absentees");
+    } else alert("Error sending reminders");
   };
 
-  // const handleCheckboxChange = (petId) => {
-  //   const attendanceList = [...list];
-  //   const updatedList = attendanceList.map((item) => {
-  //     if (item.petId._id === petId) {
-  //       return { ...item, present: !item.present }; // Toggle the present field
-  //     }
-  //     return item;
-  //   });
-
-  //   setList(updatedList);
-  // };
-
-
-
-  const handleCheckboxChange = (petId) => {
-
+  const handleCheckboxChange = (id) => {
     const updatedList = list.map((item) => {
-      console.log(petId , item?.petId?._id)
-      if (item.petId?._id === petId) {
+    
+      if (item._id === id) {
         const updatedPresent = !item.present;
         // Update present and absent lists
         if (updatedPresent) {
-          setPresentIds((prev) => [...prev, petId]);
-          setAbsentIds((prev) => prev.filter((id) => id !== petId));
+          setPresentIds((prev) => [...prev, id]);
+          setAbsentIds((prev) => prev.filter((id) => id !== id));
         } else {
-          setAbsentIds((prev) => [...prev, petId]);
-          setPresentIds((prev) => prev.filter((id) => id !== petId));
+          setAbsentIds((prev) => [...prev, id]);
+          setPresentIds((prev) => prev.filter((id) => id !== id));
         }
 
         return { ...item, present: updatedPresent };
@@ -122,10 +95,11 @@ const Attendance = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
+
   return (
     <div className="w-screen flex flex-col mt-10 justify-center items-center">
       <h2 className="text-4xl sm:text-3xl tracking-widest md:text-4xl font-semibold text-black text-center py-4">
-        ATTENDANCE LIST
+        SCHEDULED VISIT
       </h2>
 
       <div className="mt-5 flex gap-5 justify-evenly">
@@ -178,7 +152,7 @@ const Attendance = () => {
                           type="checkbox"
                           checked={item?.present}
                           onChange={() =>
-                            handleCheckboxChange(item?.petId?._id)
+                            handleCheckboxChange(item?._id)
                           }
                           className="h-5 w-5 text-[#172554] focus:bg-[#172544] peer-checked:bg-[#172554] border-gray-300 rounded"
                         />

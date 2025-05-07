@@ -1390,8 +1390,13 @@ exports.addGroomingVisit = async (req, res) => {
           message: "No subscription exist for given pet",
         });
       }
+      
+      const temp=subscription.numberOfGroomings;
 
-      subscription.numberOfGroomings = subscription.numberOfGroomings - 1;
+      subscription.numberOfGroomings = temp-1>=0?temp-1:0;
+
+      if(temp-1<=0)
+      subscription.active=false;  
 
       await subscription.save({ session });
       details.subscriptionAvailed = "Yes";
