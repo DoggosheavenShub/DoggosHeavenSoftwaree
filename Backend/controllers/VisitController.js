@@ -497,7 +497,7 @@ exports.addInquiryVisit = async (req, res) => {
     if (nextFollowUp && followUpPurpose && followUpTime) {
       const newscheduledVisit = new scheduledVisit({
         date: new Date(nextFollowUp),
-        time:followUpTime,
+        time: followUpTime,
         petId,
         purpose: followUpPurpose,
       });
@@ -652,6 +652,7 @@ exports.addVeterinaryVisit = async (req, res) => {
       followUpTime,
       customerType,
     } = req.body;
+    
 
     if (medicines.length === 0 && vaccines.length === 0) {
       return res.json({
@@ -663,12 +664,17 @@ exports.addVeterinaryVisit = async (req, res) => {
     if (nextFollowUp && followUpPurpose && followUpTime) {
       const newscheduledVisit = new scheduledVisit({
         date: new Date(nextFollowUp),
+        time: followUpTime,
         petId,
         purpose: followUpPurpose,
       });
 
       await newscheduledVisit.save({ session });
-    } else if (!nextFollowUp && !followUpPurpose && !followUpTime) {
+    }
+    // ... your code here ...}
+    else if (!nextFollowUp && !followUpPurpose && !followUpTime) {
+      // All three variables have falsy values.
+      // ... your code here ...
     } else {
       return res.json({
         succes: false,
@@ -807,16 +813,7 @@ exports.addVeterinaryVisit = async (req, res) => {
 
     await visit.save({ session });
 
-    if (nextFollowUp) {
-      const newscheduledVisit = new scheduledVisit({
-        date: new Date(nextFollowUp),
-        petId,
-        purpose: followUpPurpose,
-      });
-
-      await newscheduledVisit.save({ session });
-    }
-
+   
     await session.commitTransaction();
 
     return res.json({
@@ -1079,6 +1076,7 @@ exports.addDaySchoolVisit = async (req, res) => {
       boardingType: visitType,
       visitId: visit._id,
       isSubscriptionAvailed: isSubscriptionAvailed,
+      planId: isSubscriptionAvailed ? planId : null,
       petId,
       entryTime: new Date(),
     });
@@ -1241,9 +1239,7 @@ exports.getVisitList = async (req, res) => {
     // );
 
     const { date, purpose, name } = req.query;
-    
 
-    console.log(date,purpose,name)
     const query = {};
 
     // Date filter
@@ -1279,13 +1275,13 @@ exports.getVisitList = async (req, res) => {
       { $unwind: "$pet" },
       {
         $lookup: {
-          from: 'owners',
-          localField: 'pet.owner',
-          foreignField: '_id',
-          as: 'pet.owner',
+          from: "owners",
+          localField: "pet.owner",
+          foreignField: "_id",
+          as: "pet.owner",
         },
       },
-      { $unwind: '$pet.owner' },
+      { $unwind: "$pet.owner" },
       {
         $match: {
           ...query,
@@ -1298,7 +1294,6 @@ exports.getVisitList = async (req, res) => {
     ];
 
     const List = await Visit.aggregate(aggregatePipeline);
-
 
     return res.json({
       success: true,
@@ -1468,6 +1463,70 @@ exports.getBoardingCategoryList = async (req, res) => {
     });
   } catch (error) {
     console.log("error in getallvisittype controller", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.addShoppingVisit = async (req, res) => {
+  try {
+    const { items, petId, visitType } = req.body;
+
+    if (!petId) {
+      return res.json({
+        success: false,
+        message: "A pet must be selected to save a visit",
+      });
+    }
+
+    if (!visitType) {
+      return res.json({
+        success: false,
+        message: "A visittype must be selected to save visit",
+      });
+    }
+
+    let price = 0;
+
+    for (let i = 0; i < items.length; i++) {
+      console.log(typeof items[i].price);
+      if (!items[i].name) {
+        return res.json({
+          success: false,
+          message: "Enter valid item name",
+        });
+      }
+
+      if (!items[i].price || items[i]?.price <= 0) {
+        return res.json({
+          success: false,
+          message: "Enter valid item price",
+        });
+      }
+      price += items[i].price;
+    }
+
+    details = {};
+    details.price = price;
+    details.items = items;
+
+    const newVisit = new Visit({
+      visitType,
+      details,
+      pet: petId,
+    });
+
+    await newVisit.save();
+
+    return res.json({
+      success: true,
+      message: "Visit saved successfully",
+    });
+  } catch (error) {
+    console.log("error in addshoppingvisit controller", error);
 
     return res.status(500).json({
       success: false,

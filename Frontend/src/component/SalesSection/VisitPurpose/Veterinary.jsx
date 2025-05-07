@@ -101,7 +101,7 @@ const Veterinary = ({ _id, visitPurposeDetails }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
+
     const formData = {
       customerType,
       medicines,
@@ -112,7 +112,6 @@ const Veterinary = ({ _id, visitPurposeDetails }) => {
       petId: _id,
       visitType: visitPurposeDetails._id,
     };
-    
 
     try {
       const data = await dispatch(addVeterinaryVisit(formData));
@@ -132,6 +131,8 @@ const Veterinary = ({ _id, visitPurposeDetails }) => {
       alert("Error saving data");
     }
   };
+
+  const today = new Date().toISOString().split("T")[0];
 
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
@@ -292,6 +293,39 @@ const Veterinary = ({ _id, visitPurposeDetails }) => {
           >
             + Add Vaccine
           </button>
+        </div>
+
+        {/* Follow-Up Details */}
+        <div className="p-4 rounded-md">
+          <h2 className="text-lg font-semibold mb-3">Follow-Up Details</h2>
+          <div>
+            <label>Follow-up date:</label>
+            <input
+              onChange={(e) => setNextFollowUp(e.target.value)}
+              value={nextFollowUp}
+              type="date"
+              min={today}
+              className="w-full p-2 border rounded-md mb-2"
+            />
+          </div>
+          <div>
+            <label>Follow-up time:</label>
+            <input
+              onChange={(e) => setFollowUpTime(e.target.value)}
+              value={followUpTime}
+              type="time"
+              className="w-full p-2 border rounded-md mb-2"
+            />
+          </div>
+          <div>
+            <label>Follow-up purpose:</label>
+            <input
+              onChange={(e) => setFollowUpPurpose(e.target.value)}
+              value={followUpPurpose}
+              placeholder="Follow-Up Purpose"
+              className="w-full p-2 border rounded-md"
+            />
+          </div>
         </div>
 
         <div className="text-xl font-bold">

@@ -44,7 +44,7 @@ exports.buySubscription = async (req, res) => {
     (details.purpose = subscription
       ? "Renew Subscription"
       : "Buy Subscription"),
-      (details.subscriptionPlan = PlanDetails.subscriptionType);
+      (details.subscriptionPlan =planId);
     details.price = PlanDetails.price;
     price = PlanDetails.price;
 

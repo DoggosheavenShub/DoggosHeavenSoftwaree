@@ -122,43 +122,6 @@ agenda.define("send overdue email", async (job) => {
   });
 });
 
-const sendMail = (details) => {
-  var subject = "Reminder for Visit";
-
-  const date = new Date(details?.date);
-
-  var message = `Hii ${
-    details?.ownerName
-  } This is reminder for the visit scheduled for your pet.Details of the visit are -\n
-               Pet name : ${details?.name || ""}\n
-               Species :${details?.species || ""}\n
-               Breed :${details?.breed || ""}\n
-               Date :${details?.date?.substring(0, 10) || ""}\n
-               Time :${date?.getHours()}:${date?.getMinutes() || ""}`;
-
-  const auth = nodemailer.createTransport({
-    service: "gmail",
-    secure: true,
-    port: 465,
-    auth: {
-      user: process.env.GMAIL_ACCOUNT,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
-  const receiver = {
-    from: process.env.GMAIL_ACCOUNT,
-    to: details?.ownerEmail,
-    subject: subject,
-    text: message,
-  };
-
-  auth.sendMail(receiver, (err, emailResponse) => {
-    if (err) console.log(err);
-    console.log(emailResponse);
-  });
-};
-
 exports.sendReminders = async (req, res) => {
   try {
     const { List } = req.body;
@@ -199,12 +162,14 @@ exports.sendBirthdayReminders = async (req, res) => {
 
 exports.sendOverdueReminders = async (req, res) => {
   try {
-    const { List } = req.body;
+    const { date } = req.body;
+
     List.forEach((item, index) => {
       agenda.schedule(`in ${index * 5} seconds`, "send overdue email", {
         item,
       });
     });
+    
     return res.status(200).json({
       success: true,
       message: "Emails will be sent successfully",

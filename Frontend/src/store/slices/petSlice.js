@@ -183,6 +183,50 @@ export const getPetHistory = createAsyncThunk(
   }
 );
 
+export const editPetDetails=createAsyncThunk("/pet/editpetdetails",
+  async (formdata, { dispatch }) => {
+    const token = localStorage?.getItem("authtoken") || "";
+    const response = await fetch(`${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/v1/pet/editpetdetails`, {
+      method: "POST",
+      headers: {
+        "Authorization": token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formdata),
+    });
+
+    if (response.status === 401) {
+      dispatch(logout());
+    }
+
+    const data = await response.json();
+    return data;
+})
+
+export const editOwnerDetails=createAsyncThunk("/pet/editownerdetails",
+  async (formdata, { dispatch }) => {
+    const token = localStorage?.getItem("authtoken") || "";
+    const response = await fetch(`${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/v1/pet/editownerdetails`, {
+      method: "POST",
+      headers: {
+        "Authorization": token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formdata),
+    });
+
+    if (response.status === 401) {
+      dispatch(logout());
+    }
+
+    const data = await response.json();
+    return data;
+})
+
 const petSlice = createSlice({
   name: "pet",
   initialState,
