@@ -100,7 +100,7 @@ const EditPetInfo = ({ pet }) => {
 
   // Reset form values when pet prop changes
   useEffect(() => {
-    console.log("Received petDetails:", pet);
+
     if (pet) {
       reset({
         name: pet.name || "",
@@ -144,7 +144,7 @@ const EditPetInfo = ({ pet }) => {
   };
 
   const onSubmit = (data) => {
-    console.log("Submitted Data:", data);
+    
     data.id = pet?._id
 
     setIsLoading(true);

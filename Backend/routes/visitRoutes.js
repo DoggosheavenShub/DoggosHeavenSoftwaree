@@ -1,9 +1,5 @@
 const express =require('express');
-<<<<<<< Updated upstream
-const { addVisit, getVisit, addHostelVisit, addInquiryVisit, addDogParkVisit, getAllVisitPrices, addVeterinaryVisit, addDayCareVisit,getVisitList, addGroomingVisit, getAllVisitType, getBoardingCategoryList, addDaySchoolVisit, getVisitDetails, buyy} = require('../controllers/VisitController');
-=======
-const { addVisit, getVisit, addHostelVisit, addInquiryVisit, addDogParkVisit, getAllVisitPrices, addVeterinaryVisit, addDayCareVisit,getVisitList, addGroomingVisit, getAllVisitType, getBoardingCategoryList, addDaySchoolVisit, getVisitDetails, addShoppingVisit } = require('../controllers/VisitController');
->>>>>>> Stashed changes
+const { addVisit, getVisit, addHostelVisit, addInquiryVisit, addDogParkVisit, getAllVisitPrices, addVeterinaryVisit, addDayCareVisit,getVisitList, addGroomingVisit, getAllVisitType, getBoardingCategoryList, addDaySchoolVisit, getVisitDetails, addShoppingVisit,buyy } = require('../controllers/VisitController');
 const {protectedRoute}=require("../middlewares/protectedRoute");
 const { updateHostelVisit } = require('../controllers/boardingController');
 const router=express.Router();
@@ -24,8 +20,7 @@ router.post("/getvisitlist",protectedRoute,getVisitList);
 router.get("/getallvisittypes",protectedRoute,getAllVisitType);
 router.get("/getboardingcategories",protectedRoute,getBoardingCategoryList);
 router.post("/updatehostelvisit",protectedRoute,updateHostelVisit);
-router.get("/getvisitdetails/:id",getVisitDetails);
-
-router.get("/buyy/:id",buyy);
+router.get("/getvisitdetails/:id",protectedRoute,getVisitDetails);
+router.get("/buyy/:id",protectedRoute,buyy);
 
 module.exports=router

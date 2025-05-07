@@ -32,7 +32,7 @@ const EditInventory = () => {
         if (data?.payload?.success) setFormData(data?.payload?.item);
       })
       .catch((err) => {
-        console.log(err);
+      
       });
   };
 

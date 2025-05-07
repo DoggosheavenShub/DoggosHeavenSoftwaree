@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addVeterinaryVisit } from "../../../store/slices/visitSlice";
 import { getAllInventory } from "../../../store/slices/inventorySlice";
+import { useNavigate } from "react-router-dom";
 
 const Veterinary = ({ _id, visitPurposeDetails }) => {
   const dispatch = useDispatch();
@@ -77,6 +78,8 @@ const Veterinary = ({ _id, visitPurposeDetails }) => {
 
     setTotalPrice(medicineTotal + vaccineTotal);
   };
+  
+  const navigate=useNavigate();
 
   useEffect(() => {
     calculateTotalPrice();
@@ -124,6 +127,8 @@ const Veterinary = ({ _id, visitPurposeDetails }) => {
         setFollowUpTime("");
         setFollowUpPurpose("");
         setTotalPrice(0);
+
+        navigate("/dashboard")
       } else {
         alert(data?.payload?.message);
       }

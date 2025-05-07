@@ -31,7 +31,7 @@ const NewReminders = () => {
       setIsLoading(true);
       dispatch(getRemindersList(date))
         .then((data) => {
-          console.log(data);
+          
         })
         .finally(() => {
           setIsLoading(false);

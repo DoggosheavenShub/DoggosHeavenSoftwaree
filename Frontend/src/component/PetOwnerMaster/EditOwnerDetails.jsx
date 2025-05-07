@@ -18,7 +18,6 @@ const EditOwnerInfo = ({ owner }) => {
     const dispatch = useDispatch();
     
   useEffect(() => {
-    console.log("Received owner:", owner);
     if (owner) {
       reset({
         name: owner.name || "",
@@ -31,7 +30,7 @@ const EditOwnerInfo = ({ owner }) => {
   }, [owner, reset]);
 
   const onSubmit = (data) => {
-    console.log("Submitted Data:", data);
+  
     data.id = owner?._id;
 
     setIsLoading(true);

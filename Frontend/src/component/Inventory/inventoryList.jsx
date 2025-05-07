@@ -30,7 +30,7 @@ const InventoryList = () => {
         }
       })
       .catch((err) => {
-        console.log(err);
+      
       });
   };
 
