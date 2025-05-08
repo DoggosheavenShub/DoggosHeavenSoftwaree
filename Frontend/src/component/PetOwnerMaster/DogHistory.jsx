@@ -22,7 +22,7 @@ const DogHistory = () => {
   const [phone, setPhone] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [editPet, seteditPet] = useState(false);
-  const [editownerinfo,seteditownerinfo]=useState(false)
+  const [editownerinfo, seteditownerinfo] = useState(false);
 
   const navigate = useNavigate();
 
@@ -176,6 +176,13 @@ const DogHistory = () => {
                   )}
 
                 <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
+                  <p className="font-semibold text-gray-700">Neutered</p>
+                  <p className="text-gray-600">
+                    {petDetails?.neutered?"Yes":"No"}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
                   <button
                     onClick={() => navigateToVisit(petDetails?._id)}
                     className="bg-[#172554] px-5 py-2 rounded-md text-white hover:bg-[#172554] transition-colors duration-300"
@@ -245,7 +252,7 @@ const DogHistory = () => {
                   </div>
                 </div>
               )}
-              {editownerinfo ? <EditOwnerInfo owner={petDetails?.owner}/> : ""}
+              {editownerinfo ? <EditOwnerInfo owner={petDetails?.owner} /> : ""}
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-lg p-8 text-center">

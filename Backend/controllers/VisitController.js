@@ -12,7 +12,7 @@ const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
 const timezone = require("dayjs/plugin/timezone");
 const VisitType = require("../models/visitTypes");
-const SubscriptionPlan =require( "../models/subscriptionPlan");
+const SubscriptionPlan = require("../models/subscriptionPlan");
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -184,51 +184,52 @@ exports.getVisit = async (req, res) => {
   }
 };
 
-exports.buyy= async(req,res)=>{
+exports.buyy = async (req, res) => {
   try {
     const VisitId = req.params.id;
-    if(!VisitId){
+    if (!VisitId) {
       return res.status(400).json({
-        success:false,
-        message:"please choose a visit to get its detail",
+        success: false,
+        message: "please choose a visit to get its detail",
       });
     }
 
-    const VisitSaved=await Visit.findOne({_id:VisitId});
+    const VisitSaved = await Visit.findOne({ _id: VisitId });
 
-    if(!VisitSaved){
+    if (!VisitSaved) {
       return res.status(400).json({
-        success:false,
-        message:"VisitSaved not found",
+        success: false,
+        message: "VisitSaved not found",
       });
     }
 
     console.log(VisitSaved);
 
-    const PlanDetails= await SubscriptionPlan.findOne({_id:VisitSaved?.details?.subscriptionPlan}).populate({path:'subscriptionType'});
+    const PlanDetails = await SubscriptionPlan.findOne({
+      _id: VisitSaved?.details?.subscriptionPlan,
+    }).populate({ path: "subscriptionType" });
 
-   console.log(PlanDetails);
-    
-    if(!PlanDetails){
+    console.log(PlanDetails);
+
+    if (!PlanDetails) {
       return res.status(400).json({
-        success:false,
-        message:"subscription id not found",
+        success: false,
+        message: "subscription id not found",
       });
     }
 
     return res.status(200).json({
-      success:true,
-      message:"subscription type found",
-      data:PlanDetails
+      success: true,
+      message: "subscription type found",
+      data: PlanDetails,
     });
   } catch (error) {
-    console.log("error in buy subscription detail controller",error);
-     return res.status(500).json({
-      success:false,
-      message:"something went wrong in buysbscriptionvisitdetail"
-     })
+    console.log("error in buy subscription detail controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "something went wrong in buysbscriptionvisitdetail",
+    });
   }
-    
 };
 
 exports.getVisitDetails = async (req, res) => {
@@ -652,7 +653,6 @@ exports.addVeterinaryVisit = async (req, res) => {
       followUpTime,
       customerType,
     } = req.body;
-    
 
     if (medicines.length === 0 && vaccines.length === 0) {
       return res.json({
@@ -813,9 +813,42 @@ exports.addVeterinaryVisit = async (req, res) => {
 
     await visit.save({ session });
 
-   
-    await session.commitTransaction();
+    const vaccineIds = vaccines.map((vac) => vac.id);
+    const vaccineItems = await Inventory.find({ _id: { $in: vaccineIds } })
+      .session(session)
+      .lean();
 
+    const pet = await Pet.findOne({ _id: petId });
+    
+    const updatedVaccinations = [...pet.vaccinations]; // Copy existing vaccinations
+
+    // Step 3: Iterate through vaccineItems to update or add to vaccinations
+    vaccineItems.forEach((item) => {
+      const vaccineIndex = updatedVaccinations.findIndex(
+        (vac) => vac.name === item.itemName // Assuming vaccineItems has a 'name' field
+      );
+
+      if (vaccineIndex !== -1) {
+        // Update existing vaccine
+        updatedVaccinations[vaccineIndex] = {
+          name: item.itemName,
+          numberOfDose:
+           updatedVaccinations[vaccineIndex].numberOfDose+1, // Update dose or keep existing
+        };
+      } else {
+        // Push new vaccine
+        updatedVaccinations.push({
+          name: item.itemName,
+          numberOfDose: 1, // Default to 1 if not provided
+        });
+      }
+    });
+
+    // Step 4: Update the pet's vaccinations array in the database
+    pet.vaccinations=[...updatedVaccinations];
+    await pet.save({session});
+
+    await session.commitTransaction();
     return res.json({
       success: true,
       message: "Veterinary visit saved successfully",
@@ -1390,13 +1423,12 @@ exports.addGroomingVisit = async (req, res) => {
           message: "No subscription exist for given pet",
         });
       }
-      
-      const temp=subscription.numberOfGroomings;
 
-      subscription.numberOfGroomings = temp-1>=0?temp-1:0;
+      const temp = subscription.numberOfGroomings;
 
-      if(temp-1<=0)
-      subscription.active=false;  
+      subscription.numberOfGroomings = temp - 1 >= 0 ? temp - 1 : 0;
+
+      if (temp - 1 <= 0) subscription.active = false;
 
       await subscription.save({ session });
       details.subscriptionAvailed = "Yes";
