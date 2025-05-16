@@ -6,8 +6,12 @@ import { logout } from "../../store/slices/authSlice";
 const VisitHistoryDetails = ({ visitdetails, onClose }) => {
   const [visitDetail, setVisitDetail] = useState(null);
   const [subscriptionTypeValue, setSubscriptionTypeValue] = useState(null);
+<<<<<<< HEAD
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+=======
+  const [loading, setLoading] = useState(false);
+>>>>>>> db32a831a46da1352bd79de0468ae82d2caf4ce5
   const dispatch = useDispatch();
 
   // Set loading to false if visitdetails is null or undefined
@@ -150,6 +154,10 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
     }
   }, [visitdetails, dispatch]);
   
+<<<<<<< HEAD
+=======
+
+>>>>>>> db32a831a46da1352bd79de0468ae82d2caf4ce5
   const formatDate = (dateString) => {
     try {
       return format(new Date(dateString), "d MMM yyyy");
@@ -162,6 +170,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
   const visitDate = details?.createdAt
     ? formatDate(details.createdAt)
     : "Unknown Date";
+
   const visitPurpose = details?.visitType?.purpose || "";
 
   const renderContent = () => {

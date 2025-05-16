@@ -32,6 +32,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     active: {
       type: Boolean,
+      default:true,
     },
   },
   { timestamps: true }

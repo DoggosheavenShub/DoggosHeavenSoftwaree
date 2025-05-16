@@ -58,14 +58,14 @@ exports.updateAttendanceList = async (req, res) => {
 
     if (presentIds.length !== 0) {
       await ScheduledVisit.updateMany(
-        { petId: { $in: presentIds }, date: queryDate },
+        { _id: { $in: presentIds }, date: queryDate },
         { $set: { present: true } }
       );
     }
 
     if (absentIds.length !== 0) {
       await ScheduledVisit.updateMany(
-        { petId: { $in: absentIds }, date: queryDate },
+        { _id: { $in: absentIds }, date: queryDate },
         { $set: { present: false } }
       );
     }

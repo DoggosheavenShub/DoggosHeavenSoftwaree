@@ -37,6 +37,7 @@ exports.buySubscription = async (req, res) => {
       if (PlanDetails?.duration) subscription.daysLeft += days;
       else subscription.numberOfGroomings += PlanDetails?.numberOfGroomings;
       subscription.lastPaymentDate = new Date();
+      subscription.active=true
       await subscription.save({ session });
     }
 
@@ -84,6 +85,7 @@ exports.getSubscriptionDetails = async (req, res) => {
 
     let subscriptions = await Subscription.find({
       petId: petId,
+      active:true,
     }).populate([
       {
         path: "planId",
