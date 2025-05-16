@@ -10,30 +10,15 @@ const Dashboard = () => {
   const inventoryList = () => navigate("/inventoryList");
   const BreedManagement = () => navigate("/BreedManagement");
   const SalesSectionn = () => navigate("/petByDate");
+  const AboutUs = () => navigate("/aboutus");
+  const ContactUs = () => navigate("/contactus");
+  const PrivacyPolicy = () => navigate("/privacypolicy");
+  const RefundPolicy = () => navigate("/refundpolicy");
+  const TermsAndCondition = () => navigate("/termsandcondition");
 
   return (
     <div className="w-screen p-6 space-y-6 bg-gradient-to-br from-white to-blue-50 min-h-screen">
-      {/* Header Messages */}
-      <div className="space-y-4">
-        <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500 hover:shadow-lg transition-shadow duration-300">
-          <h2 className="font-bold text-lg text-green-700">
-            System Validity Renewed
-          </h2>
-          <p className="text-gray-600">
-            Your System validity successfully renewed till Jan 11, 2026.
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-blue-500 hover:shadow-lg transition-shadow duration-300">
-          <h2 className="font-bold text-lg text-blue-700">
-            GST Migration Successful
-          </h2>
-          <p className="text-gray-600">
-            Congratulations! You have successfully migrated to GST regime w.e.f.
-            2018/05/28
-          </p>
-        </div>
-      </div>
+     
 
       {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -136,6 +121,71 @@ const Dashboard = () => {
                   className="flex items-center space-x-2 text-red-600 hover:text-red-800 ml-4"
                 >
                   <span>* Alert List</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* organisation info pages */}
+
+             <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+            <h2 className="text-xl font-bold mb-4 text-gray-800">
+              B. organisation info
+            </h2>
+            <ul className="space-y-3">
+              <li>
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    AboutUs();
+                  }}
+                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 cursor-pointer"
+                >
+                  <span>About us</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    ContactUs();
+                  }}
+                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 cursor-pointer"
+                >
+                  <span>Contact us</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    PrivacyPolicy();
+                  }}
+                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 cursor-pointer"
+                >
+                  <span>Privacy policy</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    RefundPolicy();
+                  }}
+                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 cursor-pointer"
+                >
+                  <span>Refund policy</span>
+                </a>
+              </li>
+                 <li>
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    TermsAndCondition();
+                  }}
+                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 cursor-pointer"
+                >
+                  <span>Terms and Condition</span>
                 </a>
               </li>
             </ul>

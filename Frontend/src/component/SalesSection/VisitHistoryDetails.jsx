@@ -7,21 +7,37 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
   const [visitDetail, setVisitDetail] = useState(null);
   const [subscriptionTypeValue, setSubscriptionTypeValue] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const dispatch = useDispatch();
 
+  // Set loading to false if visitdetails is null or undefined
+  useEffect(() => {
+    if (!visitdetails) {
+      setLoading(false);
+    }
+  }, [visitdetails]);
+
+  // Fetch veterinary visit details
   useEffect(() => {
     const fetchVeterinaryVisitDetail = async () => {
+      // Skip the API call if visit is not veterinary or ID is invalid
       if (
         !visitdetails ||
         !visitdetails._id ||
         visitdetails?.visitType?.purpose !== "Veterinary" ||
         typeof visitdetails._id !== "string" ||
         visitdetails._id.length !== 24
-      )
+      ) {
+        if (visitdetails?.visitType?.purpose === "Veterinary") {
+          setError("Invalid veterinary visit data");
+        }
         return;
+      }
+
       const token = localStorage?.getItem("authtoken") || "";
       try {
         setLoading(true);
+        setError(null);
 
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/v1/visit/getvisitdetails/${visitdetails._id}`,
@@ -35,23 +51,37 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
 
         if (response.status === 401) {
           dispatch(logout());
+          setError("Authentication failed");
+          setLoading(false);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
         }
 
         const data = await response.json();
         setVisitDetail(data.data || data);
       } catch (error) {
         console.error("Error fetching veterinary visit detail:", error);
+        setError("Failed to load veterinary visit details");
       } finally {
         setLoading(false);
       }
     };
-    if(visitdetails?.visitType?.purpose==="Veterinary")
-    fetchVeterinaryVisitDetail();
-  }, [visitdetails]);
+
+    if (visitdetails?.visitType?.purpose === "Veterinary") {
+      fetchVeterinaryVisitDetail();
+    } else if (loading && visitdetails && visitdetails.visitType && visitdetails.visitType.purpose !== "Buy Subscription") {
+      // For non-veterinary, non-subscription visits, just stop loading
+      setLoading(false);
+    }
+  }, [visitdetails, dispatch]);
 
   // Buy Subscription Visit Details
   useEffect(() => {
     const fetchBuySubscriptionDetail = async () => {
+      // Skip the API call if visit is not subscription or ID is invalid
       if (
         !visitdetails ||
         !visitdetails._id ||
@@ -60,13 +90,17 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
         typeof visitdetails._id !== "string" ||
         visitdetails._id.length !== 24
       ) {
-        setLoading(false);
+        if (visitdetails?.visitType?.purpose === "Buy Subscription" || 
+            visitdetails?.visitType?.purpose === "Renew Subscription") {
+          setError("Invalid subscription data");
+        }
         return;
       }
+
       const token = localStorage?.getItem("authtoken") || "";
       try {
         setLoading(true);
-       
+        setError(null);
 
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/v1/visit/buyy/${visitdetails._id}`,
@@ -74,13 +108,16 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-               'Authorization': token,
+              'Authorization': token,
             },
           }
         );
 
         if (response.status === 401) {
           dispatch(logout());
+          setError("Authentication failed");
+          setLoading(false);
+          return;
         }
 
         if (!response.ok) {
@@ -99,20 +136,20 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
           setSubscriptionTypeValue(data);
         }
       } catch (error) {
-        console.error(
-          "Error fetching subscription visit detail:",
-          error.message
-        );
+        console.error("Error fetching subscription visit detail:", error.message);
+        setError("Failed to load subscription details");
         setSubscriptionTypeValue(null);
       } finally {
         setLoading(false);
       }
     };
-    if(visitdetails?.visitType?.purpose==="Buy Subscription")
-    fetchBuySubscriptionDetail();
-  }, [visitdetails]);
+
+    if (visitdetails?.visitType?.purpose === "Buy Subscription" || 
+        visitdetails?.visitType?.purpose === "Renew Subscription") {
+      fetchBuySubscriptionDetail();
+    }
+  }, [visitdetails, dispatch]);
   
-  console.log("V",visitdetails)
   const formatDate = (dateString) => {
     try {
       return format(new Date(dateString), "d MMM yyyy");
@@ -128,6 +165,16 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
   const visitPurpose = details?.visitType?.purpose || "";
 
   const renderContent = () => {
+    if (error) {
+      return (
+        <div className="p-4 bg-red-50 rounded-lg border border-red-200 text-red-700">
+          <p className="font-medium">Error loading details</p>
+          <p className="text-sm">{error}</p>
+          <p className="text-sm mt-2">Please try closing and reopening this dialog.</p>
+        </div>
+      );
+    }
+
     switch (visitPurpose.toLowerCase()) {
       case "veterinary":
         return renderVeterinaryVisit();
@@ -288,6 +335,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
     );
   };
 
+  // Other render functions remain the same...
   const renderHostelVisit = () => {
     return (
       <div className="space-y-4">

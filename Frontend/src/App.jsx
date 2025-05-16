@@ -27,6 +27,12 @@ import NewVisitForm from "./component/SalesSection/NewVisitForm";
 import Deboard from "./component/Deboard"
 import BuySubscription from "./component/SalesSection/VisitPurpose/BuySubscription";
 import NewVisitForm2 from "./component/SalesSection/NewVisitForm2";
+import AboutUs from "./pages/AboutPage";
+import ContactUs from "./pages/ContactUs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsAndCondition";
+import RefundPolicy from "./pages/RefundPolicy";
+
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -58,6 +64,12 @@ function App() {
             <Route path="/buysubscription" element={<BuySubscription/>}/>
             <Route path="/deboard" element={<Deboard />} />
             <Route path="/nvisit2" element={<NewVisitForm2/>}/>
+
+            <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="/contactus" element={<ContactUs />} />
+            <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+            <Route path="/refundpolicy" element={<RefundPolicy />} />
+            <Route path="/termsandcondition" element={<TermsConditions />} />
           </Route>
  
           <Route element={<CheckAuth isAuthenticated={isAuthenticated} />}>
