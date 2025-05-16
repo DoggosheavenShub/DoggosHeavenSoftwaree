@@ -52,9 +52,7 @@ function AboutUs() {
             <img src="./images/g2.jpeg" alt="Person with dog" className="w-full h-full object-cover" />
           </div>
 
-          <div className="absolute -left-20 top-1/2 transform -translate-y-1/2">
-            <ArrowDown className="w-24 h-24 text-black" />
-          </div>
+         
         </div>
       </div>
     </div>
@@ -86,7 +84,7 @@ function AboutUs() {
         </div>
       </div>
 
-         <div className="relative">
+         {/* <div className="relative">
         <div className="absolute top-10 left-20">
           <div className="w-12 h-12 bg-gray-800 rounded-full"></div>
         </div>
@@ -130,7 +128,7 @@ function AboutUs() {
             className="rounded-lg"
           />
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

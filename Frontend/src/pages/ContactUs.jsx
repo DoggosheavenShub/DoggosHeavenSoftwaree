@@ -29,7 +29,7 @@ function ContactUs() {
         </div>
 
         <div>
-          <p className="text-lg mb-2">Call us: +918920322503</p>
+          <p className="text-lg mb-2">Call us:+91 8448461071</p>
           <p className="text-lg mb-2">Email: care@doggosheaven.com</p>
         </div>
       </div>

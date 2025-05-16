@@ -4,7 +4,7 @@ function PrivacyPolicy() {
   <h1 className="text-5xl font-bold text-blue-500 mb-8">Privacy Policy</h1>
   <div>
     <p>
-      This Privacy Policy sets out our commitment to protecting the privacy of personal information provided to us, or otherwise collected by us, offline or online, including through our website (“Site”) in accordance with all applicable privacy laws and regulations. In this Privacy Policy “we”, “us” or “our” means Doggos Heaven (ABN 59 655 437 915).
+      This Privacy Policy sets out our commitment to protecting the privacy of personal information provided to us, or otherwise collected by us, offline or online, including through our website (“Site”) in accordance with all applicable privacy laws and regulations. In this Privacy Policy “we”, “us” or “our” means Doggos Heaven.
     </p>
 
     <ol className="list-decimal ml-6 space-y-4">
@@ -101,7 +101,7 @@ function PrivacyPolicy() {
         <strong>Contact details</strong>
         <ul className="list-disc ml-6 mt-2 space-y-1">
           <li>Doggos Heaven</li>
-          <li>Call:+918920322503</li>
+          <li>Call:+91 8448461071</li>
           <li>Email: care@doggosheaven.com</li>
           <li>Last update: December 2024</li>
         </ul>
