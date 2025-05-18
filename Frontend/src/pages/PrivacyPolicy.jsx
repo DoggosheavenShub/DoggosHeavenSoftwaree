@@ -103,7 +103,7 @@ function PrivacyPolicy() {
           <li>Doggos Heaven</li>
           <li>Call:+91 8448461071</li>
           <li>Email: care@doggosheaven.com</li>
-          <li>Last update: December 2024</li>
+          <li>Last update: May 2025</li>
         </ul>
       </li>
     </ol>

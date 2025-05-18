@@ -10,7 +10,7 @@ function TermsConditions() {
 
       <div className="space-y-8">
         <h2 className="text-2xl font-bold">Terms And Conditions</h2>
-        <p className="text-gray-600">Last Updated: 20-09-2024</p>
+        <p className="text-gray-600">Last Updated: 15-05-2025</p>
 
         <ol className="list-decimal space-y-6 pl-6">
         <li>
