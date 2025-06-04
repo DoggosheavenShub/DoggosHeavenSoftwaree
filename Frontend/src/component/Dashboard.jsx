@@ -105,14 +105,14 @@ const Dashboard = () => {
                   <span>View All Items List</span>
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   href="#"
                   className="flex items-center space-x-2 text-[#3E7B27] hover:text-[#123524]"
                 >
                   <span>Stock Barcoding by choice</span>
                 </a>
-              </li>
+              </li> */}
               <li>
                 <a
                   href="alertlist"
@@ -125,7 +125,7 @@ const Dashboard = () => {
           </div>
 
           {/* Email and Card Reminders */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
+          {/* <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
             <h2 className="text-xl font-bold mb-4 text-[#123524]">
               C. Email and Card Reminders
             </h2>
@@ -147,7 +147,7 @@ const Dashboard = () => {
                 </li>
               ))}
             </ul>
-          </div>
+          </div> */}
         </div>
 
         {/* Right Column */}
@@ -183,7 +183,7 @@ const Dashboard = () => {
           </div>
 
           {/* Sales Panel */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
+          {/* <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
             <h2
               className="text-xl font-bold mb-4 text-[#123524] cursor-pointer"
               onClick={(e) => {
@@ -223,10 +223,10 @@ const Dashboard = () => {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Purchase Panel */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
+          {/* <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
             <h2 className="text-xl font-bold mb-4 text-[#123524]">
               F. Purchase Panel
             </h2>
@@ -252,10 +252,10 @@ const Dashboard = () => {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Events and Tasks & Appointments */}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
+          {/* <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
             <h2 className="text-xl font-bold mb-4 text-[#123524]">
               G. Events and Tasks
             </h2>
@@ -265,7 +265,7 @@ const Dashboard = () => {
             <p className="text-sm text-[#3E7B27]">
               Manage your schedule and appointments here.
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
 
