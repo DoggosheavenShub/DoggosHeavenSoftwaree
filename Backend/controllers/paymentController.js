@@ -9,21 +9,21 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_SECRET,
 });
 
-// Create order for payment
+
 const createOrder = async (req, res) => {
   try {
     const { amount, receipt, notes } = req.body;
     
-    // Log the incoming order data
+  
     console.log('Creating order with amount:', amount, 'receipt:', receipt);
     
-    // Create Razorpay order
+  
     const order = await razorpay.orders.create({
-      amount: amount * 100, // Convert to paise
+      amount: amount * 100,
       currency: 'INR',
       receipt,
       notes,
-      payment_capture: 1 // Auto capture payment
+      payment_capture: 1 
     });
     
     return res.status(200).json({
@@ -40,7 +40,6 @@ const createOrder = async (req, res) => {
   }
 };
 
-// Verify payment and save visit
 const verifyPayment = async (req, res) => {
   try {
     const {
@@ -50,7 +49,7 @@ const verifyPayment = async (req, res) => {
       visitData
     } = req.body;
     
-    // Log the received data to debug
+    
     console.log('Payment verification data received:', {
       razorpay_payment_id,
       razorpay_order_id,
@@ -59,7 +58,7 @@ const verifyPayment = async (req, res) => {
       remainingAmount: visitData.details.payment.remainingAmount
     });
     
-    // Verify signature
+    
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_SECRET)
@@ -75,7 +74,7 @@ const verifyPayment = async (req, res) => {
       });
     }
     
-    // Extract payment details from visitData
+  
     const { 
       paymentType, 
       amount, 

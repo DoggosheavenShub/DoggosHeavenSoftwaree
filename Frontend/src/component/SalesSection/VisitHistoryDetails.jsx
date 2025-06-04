@@ -7,6 +7,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
   const [visitDetail, setVisitDetail] = useState(null);
   const [subscriptionTypeValue, setSubscriptionTypeValue] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error,setError]=useState("");
   const dispatch = useDispatch();
 
   // Set loading to false if visitdetails is null or undefined
@@ -16,10 +17,10 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
     }
   }, [visitdetails]);
 
-  // Fetch veterinary visit details
+  
   useEffect(() => {
     const fetchVeterinaryVisitDetail = async () => {
-      // Skip the API call if visit is not veterinary or ID is invalid
+      
       if (
         !visitdetails ||
         !visitdetails._id ||
