@@ -15,7 +15,12 @@ const Footer = () => {
     { 
       name: "Refund Policy", 
       url: "/refundpolicy" 
+    },
+    { 
+      name: "Shipping and delivery Policy", 
+      url: "/shippingpolicy" 
     }
+    
   ];
 
   // Quick links section

@@ -8,7 +8,7 @@ function ContactUs() {
       <div className="flex-grow overflow-auto">
         <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto bg-white">
           <div className="relative mb-8 md:mb-10">
-            {/* Decorative background elements - smaller and optimized */}
+          
             <div className="absolute -top-8 -left-8 w-24 h-24 md:w-32 md:h-32 bg-[#EFE3C2] rounded-full opacity-50"></div>
             <div className="absolute top-0 right-0 w-20 h-20 md:w-28 md:h-28 bg-[#EFE3C2] rounded-full opacity-50"></div>
             
@@ -30,10 +30,10 @@ function ContactUs() {
             </div>
           </div>
 
-          {/* Contact Info Cards - more compact */}
+  
           <div className="grid md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto mb-8 md:mb-10">
             <div className="bg-[#EFE3C2] p-4 rounded-lg shadow-md relative overflow-hidden">
-              {/* Decorative diagonal line */}
+              
               <div className="absolute top-0 right-0 w-16 h-16">
                 <svg viewBox="0 0 100 100">
                   <path d="M0,0 L100,100" stroke="#85A947" strokeWidth="2" />
@@ -57,7 +57,7 @@ function ContactUs() {
             </div>
 
             <div className="bg-[#EFE3C2] p-4 rounded-lg shadow-md relative overflow-hidden">
-              {/* Decorative paw print */}
+      
               <div className="absolute bottom-1 right-1 text-[#85A947] opacity-20 text-3xl md:text-4xl">🐾</div>
               
               <h3 className="text-lg md:text-xl font-bold mb-3 text-[#123524]">Contact Info</h3>
@@ -87,13 +87,13 @@ function ContactUs() {
             </div>
           </div>
 
-          {/* Map section - reduced height */}
+        
           <div className="mb-8 md:mb-10 relative">
             {/* <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-[#123524] text-white px-4 py-1 md:py-2 rounded-full text-sm md:text-base font-semibold z-10">
               Find Us Here
             </div> */}
             <div className=" rounded-lg overflow-hidden shadow-md h-48 md:h-72 max-w-[70%] mx-auto relative">
-              {/* Map iframe with responsive height */}
+       
               <div className="h-full w-full">
                 <iframe 
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3509.9365510154903!2d76.9700345088445!3d28.39098429491173!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d3d003aac66ab%3A0x32a6dd785b4cbc4f!2sDoggos%20Heaven!5e0!3m2!1sen!2sin!4v1745414318175!5m2!1sen!2sin"
@@ -104,7 +104,7 @@ function ContactUs() {
                 ></iframe>
               </div>
               
-              {/* Corner decorations - smaller */}
+         
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#85A947]"></div>
               <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#85A947]"></div>
               <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#85A947]"></div>
@@ -112,7 +112,6 @@ function ContactUs() {
             </div>
           </div>
 
-          {/* Contact Form Section */}
           <div className="relative">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 flex space-x-1">
               <span className="h-1 w-10 md:w-16 bg-[#85A947] rounded-full"></span>

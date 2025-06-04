@@ -42,6 +42,7 @@ import StaffAppointmentsPage from "./component/OnlineCustomerAppointment";
 import BuySubcriptionCustomer from './CustomerComponent/subscription/BuySubscription'
 import CustomerPetForm from './CustomerComponent/CustomerPetRegistration'
 import CustomerSubcription from './CustomerComponent/subscription/SubcriptionsAvailable'
+import ShippingPolicy from "./pages/Shippinganddelivery";
 
 
 function App() {
@@ -99,6 +100,7 @@ function App() {
             <Route path="/privacypolicy" element={<PrivacyPolicy />} />
             <Route path="/refundpolicy" element={<RefundPolicy />} />
             <Route path="/termsandcondition" element={<TermsConditions />} />
+              <Route path="/shippingpolicy" element={<ShippingPolicy />} />
 
         </Routes>
      
