@@ -69,11 +69,11 @@ const PartialPaymentModal = ({ isOpen, onClose, onConfirm, totalPrice }) => {
   const handleAdvanceChange = (e) => {
     let value = parseInt(e.target.value) || 0;
      console.log("val",value);
-    // Ensure value is valid and recalculate remaining amount
+    
     const minPayment = Math.round(totalPrice * 0.1);
     const maxPayment = Math.round(totalPrice * 0.9);
     
-    // Check boundaries
+    
     if (value < minPayment) {
       setError(`Advance payment must be at least ₹${minPayment} (10% of total)`);
       setIsValid(false);
@@ -184,7 +184,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
   const backendURL = import.meta.env.VITE_BACKEND_URL;
   
   useEffect(() => {
-    // Don't run the effect if _id is not properly set
+  
     if (!_id || _id.trim() === '') {
       console.error("Pet ID is missing or empty");
       return;
@@ -229,7 +229,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
     console.log("Submitting form with pet ID:", _id);
     console.log("Visit purpose details ID:", visitPurposeDetails._id);
     
-    // Validate the IDs to ensure they exist
+    
     if (!_id || _id.trim() === '') {
       console.error("Missing pet ID");
       alert("A pet must be selected. Please select a pet before proceeding.");
@@ -242,10 +242,10 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
       return;
     }
     
-    // Prepare form data in a format matching your schema
+    
     const data = {
-      pet: _id, // Use the pet ID passed as prop
-      visitType: visitPurposeDetails._id, // Use the visit type ID
+      pet: _id, 
+      visitType: visitPurposeDetails._id, 
       details: {
         planId: planId,
         isSubscriptionAvailed,
@@ -518,7 +518,7 @@ const handlePaymentSuccess = (updatedData, response) => {
   setPaymentOption(option);
   setShowPaymentModal(false);
   
-  // Check if formData is properly set
+  
   if (!formData || !formData.pet || !formData.visitType) {
     console.error("Missing critical data in formData:", formData);
     alert("Missing required information. Please try again.");
@@ -526,7 +526,7 @@ const handlePaymentSuccess = (updatedData, response) => {
   }
   
   if (option === "after") {
-    // For "Payment After Service" option, we just save the visit with payment details
+
     console.log("Selected payment after service for pet:", formData.pet);
     
     const updatedData = {
@@ -544,13 +544,13 @@ const handlePaymentSuccess = (updatedData, response) => {
       }
     };
     
-    // Process the visit without payment
+  
     processVisitSave(updatedData, option);
   } else if (option === "partial") {
-    // For partial payment, show the modal to customize the amount
+    
     setShowPartialPaymentModal(true);
   } else {
-    // For advance (full) payment, initialize Razorpay
+  
     initializeRazorpay(option);
   }
 };
@@ -562,8 +562,7 @@ const processVisitSave = (data, paymentType) => {
   console.log("Processing visit save with data:", data);
   console.log("Pet ID:", data.pet);
   console.log("Visit Type ID:", data.visitType);
-  
-  // Make absolutely sure we have valid IDs before proceeding
+
   if (!data.pet || typeof data.pet !== 'string' || data.pet.trim() === '') {
     console.error("Invalid pet ID:", data.pet);
     alert("Invalid pet ID. Please select a pet before proceeding.");
@@ -578,7 +577,7 @@ const processVisitSave = (data, paymentType) => {
     return;
   }
   
-  // Create the request body that matches backend expectations
+  
   const requestBody = {
     petId: data.pet.trim(),
     visitType: data.visitType.trim(),
@@ -597,7 +596,7 @@ const processVisitSave = (data, paymentType) => {
   
   console.log("Saving visit with data:", requestBody);
   
-  // Use the Redux action to save the visit
+
   dispatch(addGroomingVisit(requestBody))
     .then((result) => {
       console.log("Save result:", result);
@@ -727,15 +726,3 @@ const processVisitSave = (data, paymentType) => {
 
 export default Grooming;
 
-
-// import React from 'react'
-
-// const Grooming = () => {
-//   return (
-//     <div>
-//       <p>hi</p>
-//     </div>
-//   )
-// }
-
-// export default Grooming

@@ -270,7 +270,7 @@ const Dashboard = () => {
       </div>
 
       {/* Footer Links */}
-      <div className="flex justify-end space-x-4 mt-6">
+      {/* <div className="flex justify-end space-x-4 mt-6">
         {["Delete", "Recover Delete", "Cancel", "Revive Cancel"].map(
           (item, index) => (
             <a
@@ -282,7 +282,7 @@ const Dashboard = () => {
             </a>
           )
         )}
-      </div>
+      </div> */}
     </div>
   );
 };
