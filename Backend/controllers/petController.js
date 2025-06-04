@@ -47,6 +47,7 @@ exports.addPet = async (req, res) => {
       registrationDate: pet.registrationDate,
     }));
 
+    console.log(petDocuments);
     // Save all pets
     const savedPets = await Pet.create(petDocuments, { session });
 

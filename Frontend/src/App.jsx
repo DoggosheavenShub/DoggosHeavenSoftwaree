@@ -32,6 +32,17 @@ import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsAndCondition";
 import RefundPolicy from "./pages/RefundPolicy";
+import Footer from "./HomepageComponent/Footer";
+import CustomerDashboard from "./CustomerComponent/CustomerDashboard"
+import CustomerSignupPage from "./pages/Signup";
+import CustomerService from "./CustomerComponent/Services/ServicePage"
+import AppointmentBooking from "./CustomerComponent/Appointment/BookingForm";
+import AppointmentsPage from "./CustomerComponent/Appointment/AppointmentPage";
+import StaffAppointmentsPage from "./component/OnlineCustomerAppointment";
+import BuySubcriptionCustomer from './CustomerComponent/subscription/BuySubscription'
+import CustomerPetForm from './CustomerComponent/CustomerPetRegistration'
+import CustomerSubcription from './CustomerComponent/subscription/SubcriptionsAvailable'
+
 
 function App() {
   const dispatch = useDispatch();
@@ -64,19 +75,33 @@ function App() {
             <Route path="/buysubscription" element={<BuySubscription/>}/>
             <Route path="/deboard" element={<Deboard />} />
             <Route path="/nvisit2" element={<NewVisitForm2/>}/>
+            <Route path="/onlinecustomerappointment" element={<StaffAppointmentsPage/>} />
+            
+            <Route path="/customerdaashboard" element={<CustomerDashboard />} />
+            <Route path="/customerservice" element={<CustomerService />} />
+            <Route path="/bookappointment" element={<AppointmentBooking />} />
+            <Route path="/seeappointment" element={<AppointmentsPage />} />
+            <Route path="/customerbuysubscription" element={<BuySubcriptionCustomer/>} />
+             <Route path="/customerpetform" element={<CustomerPetForm />} />
+               <Route path="/customersubscription" element={<CustomerSubcription />} />
 
+          </Route>
+ 
+          <Route element={<CheckAuth isAuthenticated={isAuthenticated} />}>
+            <Route path="/login" element={<UserLoginPage />} />
+
+          </Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<CustomerSignupPage/>}/>
+      
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/contactus" element={<ContactUs />} />
             <Route path="/privacypolicy" element={<PrivacyPolicy />} />
             <Route path="/refundpolicy" element={<RefundPolicy />} />
             <Route path="/termsandcondition" element={<TermsConditions />} />
-          </Route>
- 
-          <Route element={<CheckAuth isAuthenticated={isAuthenticated} />}>
-            <Route path="/login" element={<UserLoginPage />} />
-          </Route>
-          <Route path="/" element={<Home />} />
+
         </Routes>
+     
       </BrowserRouter>
     </div>
   );

@@ -80,26 +80,8 @@ const PetForm = () => {
       "Rajapalayan",
       "Gaddi Kutta",
       "Indie",
-    ],
-    cat: [
-      "Persian",
-      "Maine Coon",
-      "Siamese",
-      "Ragdoll",
-      "Sphynx",
-      "British Shorthair",
-    ],
-    bird: ["Parrot", "Canary", "Cockatiel", "Finch", "Budgerigar"],
-    fish: ["Betta Fish", "Goldfish", "Guppy", "Angelfish", "Cichlid"],
-    rabbit: ["Himalayan", "Holland Lop", "Mini Rex", "Netherland Dwarf"],
-    reptile: [
-      "Bearded Dragon",
-      "Leopard Gecko",
-      "Corn Snake",
-      "Chameleon",
-      "Turtle",
-    ],
-    hamster: ["Syrian Hamster", "Dwarf Hamster", "Roborovski Hamster"],
+    ]
+    
   };
 
   const handleAddPet = () => {

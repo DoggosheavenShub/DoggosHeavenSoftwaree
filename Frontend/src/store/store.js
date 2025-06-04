@@ -7,6 +7,8 @@ import attendanceSlice from "./slices/attendanceSlice.js"
 import reminderSlice from "./slices/remindersSlice.js"
 import subscriptionSlice from "./slices/subscriptionSlice.js"
 import deboardSlice from "./slices/deboardSlice.js"
+import servicesSlice from './slices/customerServiceSlice.js'; 
+import appointSlice from "./slices/CustomerAppointmentslice.js"
 
 export const store=configureStore({
     reducer:{
@@ -18,5 +20,7 @@ export const store=configureStore({
         reminders:reminderSlice,
         subscription:subscriptionSlice,
         deboard:deboardSlice,
+        services: servicesSlice,
+        appointments:appointSlice,
     }
 })

@@ -12,6 +12,9 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const subscriptionRoutes=require("./routes/subscriptionRoutes");
 const boardingRoutes=require("./routes/boardingRoutes")
 const paymentRoutes=require("./routes/paaymentroutes")
+const customerServicesRoutes=require("./routes/CustomerServiceRoutes")
+const customerAppointment = require("./routes/CustomerAppointmentroutes")
+const onlineCustomer = require("./routes/OnlineCustomerRoutes");
 
 const app = express();
 
@@ -20,7 +23,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization","Accept-Type"],
   })
 );
@@ -42,6 +45,10 @@ app.use("/api/v1/attendance", attendanceRoutes);
 app.use("/api/v1/subscription",subscriptionRoutes);
 app.use("/api/v1/boarding",boardingRoutes);
 app.use("/api/v1/payments",paymentRoutes);
+app.use("/api/v1/customerservices",customerServicesRoutes);
+app.use("/api/v1/customerappointment",customerAppointment);
+app.use("/api/v1/appointment",onlineCustomer);
+
 
 // Start Server
 const PORT = process.env.PORT || 5000;

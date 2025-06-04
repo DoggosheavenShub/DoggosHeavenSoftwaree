@@ -2,6 +2,74 @@ const SubscriptionPlan = require("../models/subscriptionPlan");
 const Subscription = require("../models/subscription");
 const Visit = require("../models/Visit");
 const mongoose = require("mongoose");
+const User = require('./../models/user');
+const Pet = require('./../models/pet');
+const Owner = require('./../models/Owner');
+
+
+exports.getCustomerSubscriptions = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email parameter is required'
+      });
+    }
+
+    // Find the owner by email and populate pets
+    const owner = await Owner.findOne({ email: email }).populate('pets');
+    
+    if (!owner) {
+      return res.status(404).json({
+        success: false,
+        message: 'Owner not found'
+      });
+    }
+
+    if (!owner.pets || owner.pets.length === 0) {
+      return res.status(200).json({
+        success: true,
+        subscriptions: [],
+        message: 'No pets found for this owner'
+      });
+    }
+
+    const petIds = owner.pets.map(pet => pet._id);
+
+    // Find all subscriptions for these pets
+    const subscriptions = await Subscription.find({
+      petId: { $in: petIds }
+    })
+    .populate({
+      path: 'planId',
+      select: 'subscriptionType duration price numberOfGroomings',
+      populate: {
+        path: 'subscriptionType',
+        select: 'purpose'
+      }
+    })
+    .populate({
+      path: 'petId',
+      select: 'name breed species sex color owner'
+    })
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      subscriptions: subscriptions
+    });
+
+  } catch (error) {
+    console.error('Error fetching customer subscriptions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 
 exports.buySubscription = async (req, res) => {
   const session = await mongoose.startSession();

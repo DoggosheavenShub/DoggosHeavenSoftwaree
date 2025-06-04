@@ -7,7 +7,7 @@ const ownerSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true
+    required: false
   },
   email: {
     type: String,
@@ -15,12 +15,12 @@ const ownerSchema = new mongoose.Schema({
   },
   address: {
     type:String,
-    required:true,
+    required:false,
   },
   segment: {
     type: String,
     enum: ['Day Care', 'Veterinary'],
-    required: true
+    required: false
   },
   pets: [{
     type: mongoose.Schema.Types.ObjectId,
