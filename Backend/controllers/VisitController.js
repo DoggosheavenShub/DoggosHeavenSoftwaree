@@ -973,10 +973,11 @@ exports.addHostelVisit = async (req, res) => {
 };
 
 exports.addDayCareVisit = async (req, res) => {
+  console.log(req.body);
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { petId, discount = 0, visitType } = req.body;
+    const { petId, discount = 0, visitType, details} = req.body;
 
     if (!petId) {
       return res.json({
@@ -1007,10 +1008,9 @@ exports.addDayCareVisit = async (req, res) => {
       });
     }
 
-    // Create a new visit record
-
-    details = {};
+  
     details.price = visitDetails?.price - discount;
+   
 
     const visit = new Visit({
       pet: petId,
@@ -1395,6 +1395,7 @@ exports.addGroomingVisit = async (req, res) => {
       isSubscriptionAvailed,
       planId,
       visitType,
+      payment,
     } = req.body;
 
     console.log(req.body);
@@ -1447,6 +1448,7 @@ exports.addGroomingVisit = async (req, res) => {
     }
 
     details.price = price;
+    details.payment=payment;
 
     const visit = new Visit({
       pet: petId,

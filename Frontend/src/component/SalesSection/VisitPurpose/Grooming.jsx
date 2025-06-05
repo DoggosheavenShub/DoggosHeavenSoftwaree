@@ -268,8 +268,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
 
 
   const handlePartialPaymentConfirm = (advance, remaining) => {
-  console.log("kiya hua:", advance);
-  console.log("bacha hua:", remaining);
+ 
   
   setAdvanceAmount(advance);
   setRemainingAmount(remaining);
@@ -277,14 +276,14 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
 
   
   setShowPartialPaymentModal(false);
-  initializeRazorpay("partial", advance);
+  initializeRazorpay("partial", advance, remaining);
   };
 
-  const initializeRazorpay = (paymentType, customAmount = null) => {
+  const initializeRazorpay = (paymentType, advanceAmt = null, remainingAmt = null) => {
     let amount;
     
-    if (customAmount !== null) {
-      amount = customAmount;
+    if (advanceAmt !== null) {
+      amount = advanceAmt;
     } else {
       amount = paymentType === "advance" ? getTotalPrice() : Math.round(getTotalPrice() * 0.5);
     }
@@ -293,14 +292,14 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.async = true;
-      script.onload = () => createRazorpayOrder(amount, paymentType);
+      script.onload = () => createRazorpayOrder(amount, paymentType,remainingAmount);
       document.body.appendChild(script);
     } else {
-      createRazorpayOrder(amount, paymentType);
+      createRazorpayOrder(amount, paymentType,remainingAmount);
     }
   };
 
-  const createRazorpayOrder = (amount, paymentType) => {
+  const createRazorpayOrder = (amount, paymentType,advanceAmt = null, remainingAmt = null) => {
     setIsLoading(true);
     
     fetch(`${backendURL}/api/v1/payments/create-order`, {
@@ -333,7 +332,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
       try {
         const data = JSON.parse(responseText);
         if (data.success) {
-          openRazorpayCheckout(data.order, paymentType);
+          openRazorpayCheckout(data.order, paymentType,advanceAmount,remainingAmount);
         } else {
           alert(data.message || 'Failed to create payment order');
         }
@@ -351,7 +350,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
     });
   };
 
- const openRazorpayCheckout = (orderData, paymentType) => {
+ const openRazorpayCheckout = (orderData, paymentType,advanceAmt = null, remainingAmt = null) => {
   const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY; 
   
   if (!razorpayKeyId) {
@@ -365,14 +364,15 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
   let paymentDescription;
   let paymentAmount;
   let remainingPaymentAmount;
+
   
   if (paymentType === "advance") {
     paymentDescription = "Full Payment";
     paymentAmount = getTotalPrice();
     remainingPaymentAmount = 0;
   } else if (paymentType === "partial") {
-    paymentAmount = advanceAmount;
-    remainingPaymentAmount = remainingAmount;
+    paymentAmount = advanceAmt;
+    remainingPaymentAmount = remainingAmt;
     paymentDescription = `Partial Payment (₹${paymentAmount} now, ₹${remainingPaymentAmount} later)`;
   } else {
   

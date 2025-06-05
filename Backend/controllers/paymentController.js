@@ -4,6 +4,7 @@ const Visit = require('../models/Visit');
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY,
   key_secret: process.env.RAZORPAY_SECRET,
@@ -25,6 +26,8 @@ const createOrder = async (req, res) => {
       notes,
       payment_capture: 1 
     });
+
+    console.log(amount);
     
     return res.status(200).json({
       success: true,
@@ -42,6 +45,7 @@ const createOrder = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
   try {
+    // console.log("visit", req.body.visitData);
     const {
       razorpay_payment_id,
       razorpay_order_id, 
@@ -49,14 +53,15 @@ const verifyPayment = async (req, res) => {
       visitData
     } = req.body;
     
+
     
-    console.log('Payment verification data received:', {
-      razorpay_payment_id,
-      razorpay_order_id,
-      paymentType: visitData.details.payment.paymentType,
-      amount: visitData.details.payment.amount,
-      remainingAmount: visitData.details.payment.remainingAmount
-    });
+    // console.log('Payment verification data received:', {
+    //   razorpay_payment_id,
+    //   razorpay_order_id,
+    //   paymentType: visitData.details.payment.paymentType,
+    //   amount: visitData.details.payment.amount,
+    //   remainingAmount: visitData.details.payment.remainingAmount
+    // });
     
     
     const body = razorpay_order_id + '|' + razorpay_payment_id;
@@ -81,84 +86,83 @@ const verifyPayment = async (req, res) => {
       remainingAmount 
     } = visitData.details.payment;
     
-    // Different handling based on payment type
-    let visitToSave;
     
-    if (paymentType === 'after') {
-      // For payment after service
-      visitToSave = {
-        pet: visitData.pet,
-        visitType: visitData.visitType,
-        details: {
-          ...visitData.details,
-          payment: {
-            paymentType: 'after',
-            isPaid: false,
-            amount: 0,
-            paidAt: null,
-            remainingAmount: visitData.details.finalPrice,
-            isRemainingPaid: false
-          }
-        }
-      };
-    } else if (paymentType === 'partial') {
-      // For partial payment
-      visitToSave = {
-        pet: visitData.pet,
-        visitType: visitData.visitType,
-        details: {
-          ...visitData.details,
-          payment: {
-            paymentType: 'partial',
-            razorpay_payment_id,
-            razorpay_order_id,
-            razorpay_signature,
-            isPaid: true,
-            amount: amount, // This is the advance amount paid
-            paidAt: new Date().toISOString(),
-            remainingAmount: remainingAmount, // The amount to be paid later
-            isRemainingPaid: false
-          }
-        }
-      };
-    } else {
-      // For advance (full) payment
-      visitToSave = {
-        pet: visitData.pet,
-        visitType: visitData.visitType,
-        details: {
-          ...visitData.details,
-          payment: {
-            paymentType: 'advance',
-            razorpay_payment_id,
-            razorpay_order_id,
-            razorpay_signature,
-            isPaid: true,
-            amount: visitData.details.finalPrice, // Full amount
-            paidAt: new Date().toISOString(),
-            remainingAmount: 0,
-            isRemainingPaid: true
-          }
-        }
-      };
-    }
+    // let visitToSave;
     
-    // Log what we're about to save
-    console.log('Saving visit with payment details:', {
-      paymentType: visitToSave.details.payment.paymentType,
-      amount: visitToSave.details.payment.amount,
-      remainingAmount: visitToSave.details.payment.remainingAmount
-    });
+    // if (paymentType === 'after') {
+      
+    //   visitToSave = {
+    //     pet: visitData.petId,
+    //     visitType: visitData.visitType,
+    //     details: {
+    //       ...visitData.details,
+    //       payment: {
+    //         paymentType: 'after',
+    //         isPaid: false,
+    //         amount: 0,
+    //         paidAt: null,
+    //         remainingAmount: visitData.details.finalPrice,
+    //         isRemainingPaid: false
+    //       }
+    //     }
+    //   };
+    // } else if (paymentType === 'partial') {
+      
+    //   visitToSave = {
+    //     pet: visitData.petId,
+    //     visitType: visitData.visitType,
+    //     details: {
+    //       ...visitData.details,
+    //       payment: {
+    //         paymentType: 'partial',
+    //         razorpay_payment_id,
+    //         razorpay_order_id,
+    //         razorpay_signature,
+    //         isPaid: true,
+    //         amount: amount, 
+    //         paidAt: new Date().toISOString(),
+    //         remainingAmount: remainingAmount, 
+    //         isRemainingPaid: false
+    //       }
+    //     }
+    //   };
+    // } else {
     
-    // Create and save the visit
-    const newVisit = new Visit(visitToSave);
-    await newVisit.save();
+    //   visitToSave = {
+    //     pet: visitData.petId,
+    //     visitType: visitData.visitType,
+    //     details: {
+    //       ...visitData.details,
+    //       payment: {
+    //         paymentType: 'advance',
+    //         razorpay_payment_id,
+    //         razorpay_order_id,
+    //         razorpay_signature,
+    //         isPaid: true,
+    //         amount: visitData.details.finalPrice, 
+    //         paidAt: new Date().toISOString(),
+    //         remainingAmount: 0,
+    //         isRemainingPaid: true
+    //       }
+    //     }
+    //   };
+    // }
     
-    // Return success response
+    
+    // console.log('Saving visit with payment details:', {
+    //   paymentType: visitToSave.details.payment.paymentType,
+    //   amount: visitToSave.details.payment.amount,
+    //   remainingAmount: visitToSave.details.payment.remainingAmount
+    // });
+    
+
+    // const newVisit = new Visit(visitToSave);
+    // await newVisit.save();
+    
+
     return res.status(200).json({
       success: true,
       message: 'Payment verified and visit saved successfully',
-      data: newVisit
     });
   } catch (error) {
     console.error('Error in verifyPayment:', error);

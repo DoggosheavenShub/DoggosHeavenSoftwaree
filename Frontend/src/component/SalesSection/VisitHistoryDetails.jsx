@@ -10,7 +10,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
   const [error,setError]=useState("");
   const dispatch = useDispatch();
 
-  // Set loading to false if visitdetails is null or undefined
+  
   useEffect(() => {
     if (!visitdetails) {
       setLoading(false);
@@ -73,15 +73,15 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
     if (visitdetails?.visitType?.purpose === "Veterinary") {
       fetchVeterinaryVisitDetail();
     } else if (loading && visitdetails && visitdetails.visitType && visitdetails.visitType.purpose !== "Buy Subscription") {
-      // For non-veterinary, non-subscription visits, just stop loading
+    
       setLoading(false);
     }
   }, [visitdetails, dispatch]);
 
-  // Buy Subscription Visit Details
+  
   useEffect(() => {
     const fetchBuySubscriptionDetail = async () => {
-      // Skip the API call if visit is not subscription or ID is invalid
+    
       if (
         !visitdetails ||
         !visitdetails._id ||
@@ -336,7 +336,7 @@ const VisitHistoryDetails = ({ visitdetails, onClose }) => {
     );
   };
 
-  // Other render functions remain the same...
+  
   const renderHostelVisit = () => {
     return (
       <div className="space-y-4">
