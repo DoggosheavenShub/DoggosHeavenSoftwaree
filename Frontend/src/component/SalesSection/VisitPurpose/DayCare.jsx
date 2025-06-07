@@ -4,7 +4,12 @@ import "../../../App.css";
 import { addDayCareVisit } from "../../../store/slices/visitSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { PaymentOptionModal, PartialPaymentModal, PaymentService, usePaymentFlow } from './PaymentComponents'
+import { 
+  PaymentOptionModal, 
+  PartialPaymentModal, 
+} from './PaymentComponents/PaymentModals';
+import {PaymentService} from './PaymentComponents/PaymentService'
+import {usePaymentFlow} from './PaymentComponents/PaymentHooks'
 
 const DayCare = ({ _id, visitPurposeDetails }) => {
   const dispatch = useDispatch();

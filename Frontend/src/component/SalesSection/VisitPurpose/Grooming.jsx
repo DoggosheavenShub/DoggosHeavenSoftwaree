@@ -734,13 +734,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { getSubscriptionDetails } from "../../../store/slices/subscriptionSlice";
 import { addGroomingVisit } from "../../../store/slices/visitSlice";
 
-// Import modular payment components
 import { 
   PaymentOptionModal, 
   PartialPaymentModal, 
-  PaymentService, 
-  usePaymentFlow 
-} from './PaymentComponents';
+} from './PaymentComponents/PaymentModals';
+import {PaymentService} from './PaymentComponents/PaymentService'
+import {usePaymentFlow} from './PaymentComponents/PaymentHooks'
 
 const Grooming = ({ _id, visitPurposeDetails }) => {
   const dispatch = useDispatch();

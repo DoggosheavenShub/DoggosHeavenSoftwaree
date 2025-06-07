@@ -6,13 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { getSubscriptionDetails } from "../../../store/slices/subscriptionSlice";
 import { addDaySchoolVisit } from "../../../store/slices/visitSlice";
 
-// Import modular payment components
 import { 
   PaymentOptionModal, 
   PartialPaymentModal, 
-  PaymentService, 
-  usePaymentFlow 
-} from './PaymentComponents';
+} from './PaymentComponents/PaymentModals';
+import {PaymentService} from './PaymentComponents/PaymentService'
+import {usePaymentFlow} from './PaymentComponents/PaymentHooks'
 
 const Hostel = ({ _id, visitPurposeDetails }) => {
   const dispatch = useDispatch();
