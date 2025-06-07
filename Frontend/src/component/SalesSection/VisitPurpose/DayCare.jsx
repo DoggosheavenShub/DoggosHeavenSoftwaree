@@ -4,167 +4,19 @@ import "../../../App.css";
 import { addDayCareVisit } from "../../../store/slices/visitSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
-const PaymentOptionModal = ({ isOpen, onClose, onSelectOption, totalPrice }) => {
-  if (!isOpen) return null;
-
-  const paymentOptions = [
-    { id: "advance", label: "Advance Payment", description: "Pay the full amount now" },
-    { id: "partial", label: "Partial Payment", description: "Pay a portion now and rest later" },
-    { id: "after", label: "Payment After Service", description: "Pay after the service is completed" }
-  ];
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Select Payment Option</h2>
-        <div className="space-y-3">
-          {paymentOptions.map((option) => (
-            <div 
-              key={option.id}
-              onClick={() => onSelectOption(option.id)}
-              className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition"
-            >
-              <h3 className="font-medium text-lg">{option.label}</h3>
-              <p className="text-gray-600 text-sm">{option.description}</p>
-              {option.id === "advance" && (
-                <p className="text-sm font-medium mt-1">
-                  Amount: ₹{totalPrice}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-        <button 
-          onClick={onClose}
-          className="mt-4 w-full py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const PartialPaymentModal = ({ isOpen, onClose, onConfirm, totalPrice }) => {
-  const [advanceAmount, setAdvanceAmount] = useState(0);
-  const [remainingAmount, setRemainingAmount] = useState(0);
-  const [error, setError] = useState("");
-  const [isValid, setIsValid] = useState(true);
-
-  React.useEffect(() => {
-    if (isOpen) {
-      const defaultAdvance = Math.round(totalPrice * 0.5);
-      setAdvanceAmount(defaultAdvance);
-      setRemainingAmount(totalPrice - defaultAdvance);
-      setError("");
-      setIsValid(true);
-    }
-  }, [isOpen, totalPrice]);
-
-  const handleAdvanceChange = (e) => {
-    let value = parseInt(e.target.value) || 0;
-    console.log("val",value);
-    
-    const minPayment = Math.round(totalPrice * 0.1);
-    const maxPayment = Math.round(totalPrice * 0.9);
-    
-    if (value < minPayment) {
-      setError(`Advance payment must be at least ₹${minPayment} (10% of total)`);
-      setIsValid(false);
-    } else if (value > maxPayment) {
-      setError(`Advance payment cannot exceed ₹${maxPayment} (90% of total)`);
-      setIsValid(false);
-    } else {
-      setError("");
-      setIsValid(true);
-    }
-    
-    const clampedValue = Math.max(Math.min(value, totalPrice), 0);
-    
-    setAdvanceAmount(value); 
-    setRemainingAmount(totalPrice - clampedValue); 
-  };
-
-  const handleSubmit = () => {
-    if (isValid) {
-      const minPayment = Math.round(totalPrice * 0.1);
-      const maxPayment = Math.round(totalPrice * 0.9);
-      
-      const finalAdvance = Math.max(Math.min(advanceAmount, maxPayment), minPayment);
-      const finalRemaining = totalPrice - finalAdvance;
-      
-      console.log("Partial payment confirmed:", {
-        advance: finalAdvance,
-        remaining: finalRemaining,
-        total: totalPrice
-      });
-      
-      onConfirm(finalAdvance, finalRemaining);
-    }
-  };
-
-  return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${isOpen ? 'block' : 'hidden'}`}>
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Customize Partial Payment</h2>
-        
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2 font-medium">Total Price: ₹{totalPrice}</label>
-          
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Pay Now:</label>
-            <input
-              type="number"
-              value={advanceAmount}
-              onChange={handleAdvanceChange}
-              className={`w-full p-2 border rounded-lg ${!isValid ? 'border-red-500' : ''}`}
-              min={Math.round(totalPrice * 0.1)}
-              max={Math.round(totalPrice * 0.9)}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              (Should be between 10% to 90% of total price)
-            </p>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Pay After Service:</label>
-            <div className="p-2 bg-gray-100 rounded-lg font-medium">₹{remainingAmount}</div>
-          </div>
-          
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-        </div>
-        
-        <div className="flex space-x-3">
-          <button 
-            onClick={onClose}
-            className="flex-1 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-          >
-            Cancel
-          </button>
-          <button 
-            onClick={handleSubmit}
-            disabled={!isValid}
-            className={`flex-1 py-2 ${!isValid ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg transition`}
-          >
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { PaymentOptionModal, PartialPaymentModal, PaymentService, usePaymentFlow } from './PaymentComponents'
 
 const DayCare = ({ _id, visitPurposeDetails }) => {
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showPartialPaymentModal, setShowPartialPaymentModal] = useState(false);
+  const navigate = useNavigate();
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
+  const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY;
+  
   const [formData, setFormData] = useState(null);
-  const [paymentOption, setPaymentOption] = useState(null);
-  const [advanceAmount, setAdvanceAmount] = useState(0);
-  const [remainingAmount, setRemainingAmount] = useState(0);
-
+  
+  // Initialize payment service
+  const paymentService = new PaymentService(backendURL, razorpayKeyId);
+  
   const { register, handleSubmit, watch } = useForm({
     defaultValues: {
       discount: 0,
@@ -172,16 +24,28 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
   });
 
   const discount = watch("discount");
-  const navigate = useNavigate();
-  const backendURL = import.meta.env.VITE_BACKEND_URL;
 
   const getTotalPrice = () => {
     return visitPurposeDetails.price - discount > 0 ? visitPurposeDetails.price - discount : 0;
   };
 
+  // Use payment hook
+  const {
+    isLoading,
+    setIsLoading,
+    showPaymentModal,
+    setShowPaymentModal,
+    showPartialPaymentModal,
+    setShowPartialPaymentModal,
+    paymentOption,
+    advanceAmount,
+    remainingAmount,
+    handlePartialPaymentConfirm,
+    handlePaymentOptionSelect,
+    processPaymentFlow
+  } = usePaymentFlow(paymentService, getTotalPrice);
+
   const onSubmit = (data) => {
-    console.log("Submitting form with pet ID:", _id);
-    console.log("Visit purpose details ID:", visitPurposeDetails._id);
     
     if (!_id || _id.trim() === '') {
       console.error("Missing pet ID");
@@ -212,14 +76,6 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
     }
   };
 
-  const handlePartialPaymentConfirm = (advance, remaining) => {
-    console.log("rem",remaining);
-    setAdvanceAmount(advance);
-    setRemainingAmount(remaining);
-    setShowPartialPaymentModal(false);
-    initializeRazorpay("partial", advance, remaining);
-  };
-
   const initializeRazorpay = (paymentType, advanceAmt = null, remainingAmt = null) => {
     let amount;
     
@@ -229,85 +85,20 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       amount = paymentType === "advance" ? getTotalPrice() : Math.round(getTotalPrice() * 0.5);
     }
     
-    if (!window.Razorpay) {
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.async = true;
-          openRazorpayCheckout(data.order, paymentType, advanceAmt, remainingAmt);
-      script.onload = () => createRazorpayOrder(amount, paymentType,advanceAmt, remainingAmt);
-      document.body.appendChild(script);
-    } else {
-      createRazorpayOrder(amount, paymentType,advanceAmt, remainingAmt);
-    }
-  };
-
-  const createRazorpayOrder = (amount, paymentType, advanceAmt = null, remainingAmt = null) => {
-    setIsLoading(true);
-     console.log("remamth",remainingAmt);
-    
-    fetch(`${backendURL}/api/v1/payments/create-order`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('authtoken')
-      },
-      body: JSON.stringify({ 
-        amount: amount,
-        receipt: `pet_daycare_${_id}`,
-        notes: {
-          petId: _id,
-          visitType: visitPurposeDetails._id,
-          paymentType: paymentType
-        }
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`);
+    const orderData = {
+      receipt: `pet_daycare_${_id}`,
+      notes: {
+        petId: _id,
+        visitType: visitPurposeDetails._id,
+        paymentType: paymentType
       }
-      return response.text(); 
-    })
-    .then(responseText => {
-      if (!responseText) {
-        throw new Error('Empty response received from server');
-      }
-      
-      try {
-        const data = JSON.parse(responseText);
-        if (data.success) {
-          openRazorpayCheckout(data.order, paymentType, advanceAmt, remainingAmt);
-        } else {
-          alert(data.message || 'Failed to create payment order');
-        }
-      } catch (jsonError) {
-        console.error('Failed to parse JSON:', responseText);
-        throw new Error('Invalid JSON response from server');
-      }
-    })
-    .catch(error => {
-      console.error('Error creating order:', error);
-      alert('Failed to initialize payment. Please try again.');
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
-  };
-
-  const openRazorpayCheckout = (orderData, paymentType, advanceAmt = null, remainingAmt = null) => {
-    const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY; 
-    
-    if (!razorpayKeyId) {
-      console.error('Razorpay Key is missing');
-      alert('Payment configuration error. Please contact support.');
-      setIsLoading(false);
-      return;
-    }
+    };
 
     let paymentDescription;
     let paymentAmount;
     let remainingPaymentAmount;
 
-      console.log("remamt",remainingAmt);
+    console.log("remamt", remainingAmt);
 
     if (paymentType === "advance") {
       paymentDescription = "Full Payment";
@@ -323,83 +114,46 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       paymentDescription = "Payment After Service";
     }
 
-    console.log("Payment setup:", {
-      paymentType,
-      paymentAmount,
-      remainingPaymentAmount,
-      totalPrice: getTotalPrice()
-    });
-
-    const options = {
-      key: razorpayKeyId,
-      amount: orderData.amount,
-      currency: orderData.currency,
-      name: "Pet DayCare Service",
+    const customData = {
+      businessName: "Pet DayCare Service",
       description: paymentDescription,
-      order_id: orderData.id,
-      
-      method: {
-        netbanking: true,
-        card: true,
-        wallet: true,
-        upi: true,
-        paylater: true
-      },
-      
-      config: {
-        display: {
-          blocks: {
-            utib: {
-              name: 'Pay using UPI',
-              instruments: [
-                {
-                  method: 'upi'
-                }
-              ]
-            }
-          },
-          sequence: ['block.utib'],
-          preferences: {
-            show_default_blocks: true
-          }
-        }
-      },
-      handler: function(response) {
-        const updatedData = {
-          ...formData,
-          details: {
-             ...formData.details,
-            discount: formData.discount || 0,
-            Price: formData.finalPrice,
-            payment: {
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-              paymentType: paymentType,
-              amount: paymentAmount, 
-              paidAt: new Date().toISOString(),
-              isPaid: paymentAmount > 0, 
-              remainingAmount: remainingPaymentAmount, 
-              isRemainingPaid: remainingPaymentAmount === 0 
-            }
-          }
-        };
-        
-        handlePaymentSuccess(updatedData, response);
-      },
+      themeColor: "#3399cc",
       prefill: {
         name: "",
         email: "",
         contact: ""
-      },
-      theme: {
-        color: "#3399cc"
       }
     };
 
-    const razorpayInstance = new window.Razorpay(options);
-    razorpayInstance.open();
-    setIsLoading(false);
+    const onPaymentSuccess = (response) => {
+      const updatedData = {
+        ...formData,
+        details: {
+           ...formData.details,
+          discount: formData.discount || 0,
+          Price: formData.finalPrice,
+          payment: {
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            paymentType: paymentType,
+            amount: paymentAmount, 
+            paidAt: new Date().toISOString(),
+            isPaid: paymentAmount > 0, 
+            remainingAmount: remainingPaymentAmount, 
+            isRemainingPaid: remainingPaymentAmount === 0 
+          }
+        }
+      };
+      
+      handlePaymentSuccess(updatedData, response);
+    };
+
+    const onPaymentError = (error) => {
+      alert(error);
+    };
+
+    processPaymentFlow(paymentType, amount, orderData, customData, onPaymentSuccess, onPaymentError);
   };
 
   const handlePaymentSuccess = (updatedData, response) => {
@@ -418,79 +172,40 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       visitData: updatedData
     };
     
-    fetch(`${backendURL}/api/v1/payments/verify-payment`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('authtoken'),
-      },
-      body: JSON.stringify(paymentData)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`);
-      }
-      return response.json(); 
-    })
-    .then(data => {
-      if (data.success) {
-      
-        dispatch(addDayCareVisit(updatedData));
-        alert("Payment successful and visit saved!");
-        navigate("/dashboard");
-      } else {
-        alert(data.message || "Payment verification failed");
-      }
-    })
-    .catch(error => {
-      console.error("Error verifying payment:", error);
-      alert("An error occurred during payment verification");
-    })
-    .finally(() => {
+    const onVerifySuccess = (data) => {
+      dispatch(addDayCareVisit(updatedData));
+      alert("Payment successful and visit saved!");
+      navigate("/dashboard");
       setIsLoading(false);
-    });
+    };
+
+    const onVerifyError = (error) => {
+      alert(error);
+      setIsLoading(false);
+    };
+
+    paymentService.verifyPayment(paymentData, onVerifySuccess, onVerifyError);
   };
 
-  const handlePaymentOptionSelect = (option) => {
-    setPaymentOption(option);
-    setShowPaymentModal(false);
-    
-    if (!formData || !formData.petId || !formData.visitType) {
-      console.error("Missing critical data in formData:", formData);
-      alert("Missing required information. Please try again.");
-      return;
-    }
-    
-    if (option === "after") {
-      console.log("Selected payment after service for pet:", formData.petId);
-      
-      const updatedData = {
-        ...formData,
-        details: {
-          payment: {
-            paymentType: "after",
-            amount: 0, 
-            isPaid: false,
-            paidAt: null,
-            remainingAmount: getTotalPrice(), 
-            isRemainingPaid: false
-          }
-        }
-      };
-      
-      processVisitSave(updatedData, option);
-    } else if (option === "partial") {
-      setShowPartialPaymentModal(true);
-    } else {
-      initializeRazorpay(option);
-    }
+  const onPaymentOptionSelect = (option) => {
+    handlePaymentOptionSelect(
+      option,
+      formData,
+      processVisitSave, // onAfterPayment
+      () => {}, // onPartialPayment
+      initializeRazorpay // onAdvancePayment
+    );
+  };
+
+  const onPartialPaymentConfirm = (advance, remaining) => {
+    handlePartialPaymentConfirm(advance, remaining, (adv, rem) => {
+      initializeRazorpay("partial", adv, rem);
+    });
   };
 
   const processVisitSave = (data, paymentType) => {
     setIsLoading(true);
     
-   
-
     if (!data.petId || typeof data.petId !== 'string' || data.petId.trim() === '') {
       console.error("Invalid pet ID:", data.petId);
       alert("Invalid pet ID. Please select a pet before proceeding.");
@@ -594,14 +309,14 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       <PaymentOptionModal 
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        onSelectOption={handlePaymentOptionSelect}
+        onSelectOption={onPaymentOptionSelect}
         totalPrice={getTotalPrice()}
       />
 
       <PartialPaymentModal 
         isOpen={showPartialPaymentModal}
         onClose={() => setShowPartialPaymentModal(false)}
-        onConfirm={handlePartialPaymentConfirm}
+        onConfirm={onPartialPaymentConfirm}
         totalPrice={getTotalPrice()}
       />
     </div>
