@@ -156,6 +156,7 @@ const PartialPaymentModal = ({ isOpen, onClose, onConfirm, totalPrice }) => {
 };
 
 const DayCare = ({ _id, visitPurposeDetails }) => {
+
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -294,6 +295,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
   };
 
   const openRazorpayCheckout = (orderData, paymentType, advanceAmt = null, remainingAmt = null) => {
+   
     const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY; 
     
     if (!razorpayKeyId) {
@@ -307,7 +309,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
     let paymentAmount;
     let remainingPaymentAmount;
 
-      console.log("remamt",remainingAmt);
+    console.log("remamt",remainingAmt);
 
     if (paymentType === "advance") {
       paymentDescription = "Full Payment";
@@ -364,6 +366,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
           }
         }
       },
+      
       handler: function(response) {
         const updatedData = {
           ...formData,
@@ -485,7 +488,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       initializeRazorpay(option);
     }
   };
-
+  
   const processVisitSave = (data, paymentType) => {
     setIsLoading(true);
     

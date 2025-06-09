@@ -46,8 +46,6 @@ const PaymentOptionModal = ({ isOpen, onClose, onSelectOption, totalPrice }) => 
   );
 };
 
-
-
 const PartialPaymentModal = ({ isOpen, onClose, onConfirm, totalPrice }) => {
   const [advanceAmount, setAdvanceAmount] = useState(0);
   const [remainingAmount, setRemainingAmount] = useState(0);

@@ -1,44 +1,38 @@
 // Updated backend payment controller for handling all payment types correctly
 
-const Visit = require('../models/Visit');
-const crypto = require('crypto');
-const Razorpay = require('razorpay');
-
+const Visit = require("../models/Visit");
+const crypto = require("crypto");
+const Razorpay = require("razorpay");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY,
   key_secret: process.env.RAZORPAY_SECRET,
 });
 
-
 const createOrder = async (req, res) => {
   try {
     const { amount, receipt, notes } = req.body;
-    
-  
-    console.log('Creating order with amount:', amount, 'receipt:', receipt);
-    
-  
+
+    console.log("Creating order with amount:", amount, "receipt:", receipt);
+
     const order = await razorpay.orders.create({
       amount: amount * 100,
-      currency: 'INR',
+      currency: "INR",
       receipt,
       notes,
-      payment_capture: 1 
+      payment_capture: 1,
     });
 
-    console.log(amount);
-    
     return res.status(200).json({
       success: true,
-      order
+      order,
     });
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error("Error creating order:", error);
     return res.status(500).json({
       success: false,
-      message: 'Could not create order',
-      error: error.message
+      message: "Could not create order",
+      error: error.message,
     });
   }
 };
@@ -48,13 +42,11 @@ const verifyPayment = async (req, res) => {
     // console.log("visit", req.body.visitData);
     const {
       razorpay_payment_id,
-      razorpay_order_id, 
+      razorpay_order_id,
       razorpay_signature,
-      visitData
+      visitData,
     } = req.body;
-    
 
-    
     // console.log('Payment verification data received:', {
     //   razorpay_payment_id,
     //   razorpay_order_id,
@@ -62,124 +54,85 @@ const verifyPayment = async (req, res) => {
     //   amount: visitData.details.payment.amount,
     //   remainingAmount: visitData.details.payment.remainingAmount
     // });
-    
-    
-    const body = razorpay_order_id + '|' + razorpay_payment_id;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_SECRET)
+      .createHmac("sha256", process.env.RAZORPAY_SECRET)
       .update(body)
-      .digest('hex');
-    
+      .digest("hex");
+
     const isSignatureValid = expectedSignature === razorpay_signature;
-    
+
     if (!isSignatureValid) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid payment signature'
+        message: "Invalid payment signature",
       });
     }
-    
-  
-    const { 
-      paymentType, 
-      amount, 
-      remainingAmount 
-    } = visitData.details.payment;
-    
-    
-    // let visitToSave;
-    
-    // if (paymentType === 'after') {
-      
-    //   visitToSave = {
-    //     pet: visitData.petId,
-    //     visitType: visitData.visitType,
-    //     details: {
-    //       ...visitData.details,
-    //       payment: {
-    //         paymentType: 'after',
-    //         isPaid: false,
-    //         amount: 0,
-    //         paidAt: null,
-    //         remainingAmount: visitData.details.finalPrice,
-    //         isRemainingPaid: false
-    //       }
-    //     }
-    //   };
-    // } else if (paymentType === 'partial') {
-      
-    //   visitToSave = {
-    //     pet: visitData.petId,
-    //     visitType: visitData.visitType,
-    //     details: {
-    //       ...visitData.details,
-    //       payment: {
-    //         paymentType: 'partial',
-    //         razorpay_payment_id,
-    //         razorpay_order_id,
-    //         razorpay_signature,
-    //         isPaid: true,
-    //         amount: amount, 
-    //         paidAt: new Date().toISOString(),
-    //         remainingAmount: remainingAmount, 
-    //         isRemainingPaid: false
-    //       }
-    //     }
-    //   };
-    // } else {
-    
-    //   visitToSave = {
-    //     pet: visitData.petId,
-    //     visitType: visitData.visitType,
-    //     details: {
-    //       ...visitData.details,
-    //       payment: {
-    //         paymentType: 'advance',
-    //         razorpay_payment_id,
-    //         razorpay_order_id,
-    //         razorpay_signature,
-    //         isPaid: true,
-    //         amount: visitData.details.finalPrice, 
-    //         paidAt: new Date().toISOString(),
-    //         remainingAmount: 0,
-    //         isRemainingPaid: true
-    //       }
-    //     }
-    //   };
-    // }
-    
-    
-    // console.log('Saving visit with payment details:', {
-    //   paymentType: visitToSave.details.payment.paymentType,
-    //   amount: visitToSave.details.payment.amount,
-    //   remainingAmount: visitToSave.details.payment.remainingAmount
-    // });
-    
 
-    // const newVisit = new Visit(visitToSave);
-    // await newVisit.save();
-    
+    const { paymentType, amount, remainingAmount } = visitData.details.payment;
 
     return res.status(200).json({
       success: true,
-      message: 'Payment verified and visit saved successfully',
+      message: "Payment verified and visit saved successfully",
     });
   } catch (error) {
-    console.error('Error in verifyPayment:', error);
+    console.error("Error in verifyPayment:", error);
     return res.status(500).json({
       success: false,
-      message: 'Error verifying payment',
-      error: error.message
+      message: "Error verifying payment",
+      error: error.message,
+    });
+  }
+};
+
+const verifyPendingPayment = async (req, res) => {
+  try {
+   
+    const { razorpay_payment_id, visitId } = req.body;
+
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
+    if (payment.status === "captured") {
+      const visitDetails = await Visit.findOne({
+        _id: visitId,
+      }).populate({
+        path: "visitType",
+        select: "price",
+      });
+      
+      const details = visitDetails.details;
+      details.payment.remainingAmount=0;
+      details.payment.isRemainingPaid=true;
+      details.payment.remainingAmountRazorpayId=razorpay_payment_id
+      visitDetails.details ;
+      visitDetails.markModified("details");
+      await visitDetails.save();
+    } else {
+
+      res.status(400).json({ success: false, message: "Payment not captured" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment verified and visit updated successfully",
+    });
+  } catch (error) {
+    console.error("Error in verify-Pending-Payment:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error verifying pending payment",
+      error: error.message,
     });
   }
 };
 
 module.exports = {
   createOrder,
-  verifyPayment
+  verifyPayment,
+  verifyPendingPayment
 };
-
-
 
 // // Updated backend payment controller for PayU integration
 
@@ -189,18 +142,18 @@ module.exports = {
 // // Generate PayU hash for payment initialization
 // const generatePayUHash = async (req, res) => {
 //   try {
-//     const { 
-//       amount, 
-//       txnid, 
-//       productinfo, 
-//       firstname, 
-//       email, 
+//     const {
+//       amount,
+//       txnid,
+//       productinfo,
+//       firstname,
+//       email,
 //       phone,
 //       paymentType,
 //       petId,
 //       visitTypeId
 //     } = req.body;
-    
+
 //     // Log the incoming payment data
 //     console.log('Generating PayU hash for:', {
 //       amount,
@@ -209,34 +162,34 @@ module.exports = {
 //       petId,
 //       visitTypeId
 //     });
-    
+
 //     // PayU merchant key and salt from environment variables
 //     const key = process.env.PAYU_MERCHANT_KEY;
 //     const salt = process.env.PAYU_SALT;
-    
+
 //     if (!key || !salt) {
 //       return res.status(500).json({
 //         success: false,
 //         message: 'PayU configuration missing'
 //       });
 //     }
-    
+
 //     // Save payment info temporarily in session or DB if needed
 //     // This is optional but useful for tracking initiated payments
-    
+
 //     // Generate hash string for PayU
 //     // Format: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt
 //     const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|${paymentType}|${amount}|0|||||||${salt}`;
-    
+
 //     const hash = crypto
 //       .createHash('sha512')
 //       .update(hashString)
 //       .digest('hex');
-    
+
 //     // Create payment data for frontend
 //     const paymentData = {
-//       action: process.env.NODE_ENV === 'production' 
-//         ? 'https://secure.payu.in/_payment' 
+//       action: process.env.NODE_ENV === 'production'
+//         ? 'https://secure.payu.in/_payment'
 //         : 'https://sandboxsecure.payu.in/_payment',
 //       fields: {
 //         key,
@@ -253,7 +206,7 @@ module.exports = {
 //         service_provider: 'payu_paisa'
 //       }
 //     };
-    
+
 //     return res.status(200).json({
 //       success: true,
 //       paymentData
@@ -281,7 +234,7 @@ module.exports = {
 //       udf3, // remaining amount (for partial payments)
 //       visitData
 //     } = req.body;
-    
+
 //     // Log the received data to debug
 //     console.log('Payment verification data received:', {
 //       status,
@@ -291,26 +244,26 @@ module.exports = {
 //       amountPaid: udf2,
 //       remainingAmount: udf3
 //     });
-    
+
 //     // Verify hash if needed (implementation depends on your PayU setup)
 //     // Note: For proper production implementation, you should verify the payment
 //     // with PayU's verification API or using the hash
-    
+
 //     if (status !== 'success') {
 //       return res.status(400).json({
 //         success: false,
 //         message: 'Payment was not successful'
 //       });
 //     }
-    
+
 //     // Extract payment details
 //     const paymentType = udf1;
 //     const amount = parseFloat(udf2);
 //     const remainingAmount = parseFloat(udf3 || 0);
-    
+
 //     // Different handling based on payment type
 //     let visitToSave;
-    
+
 //     if (paymentType === 'after') {
 //       // For payment after service
 //       visitToSave = {
@@ -367,18 +320,18 @@ module.exports = {
 //         }
 //       };
 //     }
-    
+
 //     // Log what we're about to save
 //     console.log('Saving visit with payment details:', {
 //       paymentType: visitToSave.details.payment.paymentType,
 //       amount: visitToSave.details.payment.amount,
 //       remainingAmount: visitToSave.details.payment.remainingAmount
 //     });
-    
+
 //     // Create and save the visit
 //     const newVisit = new Visit(visitToSave);
 //     await newVisit.save();
-    
+
 //     // Return success response
 //     return res.status(200).json({
 //       success: true,
@@ -400,15 +353,15 @@ module.exports = {
 //   try {
 //     // PayU sends payment status updates via webhooks
 //     const paymentData = req.body;
-    
+
 //     console.log('PayU webhook received:', paymentData);
-    
+
 //     // Verify the authenticity of the webhook
 //     // Implementation depends on PayU's webhook format
-    
+
 //     // Process payment status update
 //     // Update the visit or payment status in database
-    
+
 //     // Respond to PayU
 //     return res.status(200).json({
 //       success: true,
@@ -428,10 +381,10 @@ module.exports = {
 // const checkPaymentStatus = async (req, res) => {
 //   try {
 //     const { txnid } = req.params;
-    
+
 //     // Implement PayU payment verification API call
 //     // This would typically involve making an API call to PayU's verification endpoint
-    
+
 //     // Example pseudocode (actual implementation will depend on PayU's API):
 //     /*
 //     const response = await axios.post('https://info.payu.in/merchant/postservice', {
@@ -440,10 +393,10 @@ module.exports = {
 //       var1: txnid,
 //       hash: generatedHash // Generate as per PayU's requirements
 //     });
-    
+
 //     const paymentStatus = response.data;
 //     */
-    
+
 //     // For now, we'll just return a placeholder
 //     return res.status(200).json({
 //       success: true,
@@ -464,25 +417,25 @@ module.exports = {
 // const recordRemainingPayment = async (req, res) => {
 //   try {
 //     const { visitId, paymentDetails } = req.body;
-    
+
 //     // Find the visit
 //     const visit = await Visit.findById(visitId);
-    
+
 //     if (!visit) {
 //       return res.status(404).json({
 //         success: false,
 //         message: 'Visit not found'
 //       });
 //     }
-    
+
 //     // Update payment details
 //     visit.details.payment.isRemainingPaid = true;
 //     visit.details.payment.remainingPaidAt = new Date().toISOString();
 //     visit.details.payment.remainingPaymentId = paymentDetails.mihpayid || paymentDetails.id;
-    
+
 //     // Save the updated visit
 //     await visit.save();
-    
+
 //     return res.status(200).json({
 //       success: true,
 //       message: 'Remaining payment recorded successfully',
@@ -505,4 +458,3 @@ module.exports = {
 //   checkPaymentStatus,
 //   recordRemainingPayment
 // };
-

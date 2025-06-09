@@ -5,7 +5,7 @@ import {
   daySchoolDeboarding,
   getBoardingDetails,
 } from "../../store/slices/deboardSlice";
-
+import { loadRazorpayScript } from "../../utils/loadRazorpayScript";
 const PlaySchoolDebaord = ({ _id, setboardingid }) => {
   const dispatch = useDispatch();
   const { boardingDetails } = useSelector((state) => state.deboard);
@@ -27,7 +27,80 @@ const PlaySchoolDebaord = ({ _id, setboardingid }) => {
         setLoading(false);
       });
   };
-
+  
+    const startPayment = async (amount) => {
+      const razorpayLoaded = await loadRazorpayScript(
+        "https://checkout.razorpay.com/v1/checkout.js"
+      );
+  
+      if (!razorpayLoaded) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        return;
+      }
+  
+      // 1. Create order on backend
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/payments/create-order`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: localStorage.getItem("authtoken"),
+          },
+          body: JSON.stringify({
+            amount: amount,
+            receipt: `left_amt_board:${_id}`,
+            notes: {
+              boardingId: _id,
+            },
+          }),
+        }
+      );
+  
+      const { order } = await res.json();
+  
+      // 2. Setup Razorpay options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY, // Replace with your Razorpay key_id
+        amount: order.amount,
+        currency: "INR",
+        name: "Doggos Heaven",
+        description: "Test Transaction",
+        order_id: order.id,
+        handler: async function (response) {
+          // 3. Verify payment on backend
+          const verifyRes = await fetch(
+            `${
+              import.meta.env.VITE_BACKEND_URL
+            }/api/v1/payments/verify-pending-payment`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: localStorage.getItem("authtoken") || "",
+              },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                visitId: boardingDetails?.visitId?._id,
+              }),
+            }
+          );
+  
+          const result = await verifyRes.json();
+  
+          if (result.success) {
+            alert("✅ Payment Done Successfully!");
+          } else {
+            alert("❌ Payment Failed!");
+          }
+        },
+        theme: { color: "#528FF0" },
+      };
+  
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    };
+  
   useEffect(() => {
     dispatch(getBoardingDetails(_id));
   }, []);
@@ -127,26 +200,80 @@ const PlaySchoolDebaord = ({ _id, setboardingid }) => {
           </span>
         </div>
 
-        <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-          <button
-            disabled={loading}
-            onClick={handleDeboard}
-            className={`ml-4 px-6 py-3 text-sm font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
-              loading
-                ? "bg-[#123524]/50 text-white cursor-not-allowed"
-                : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
-            }`}
-          >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span>Processing...</span>
-              </div>
-            ) : (
-              "Deboard"
-            )}
-          </button>
+          <div className="p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+              <span className="text-[#3E7B27] font-bold text-lg">
+                Remaining Amount:
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-[#123524] font-semibold">
+                {boardingDetails?.visitId?.details?.payment?.remainingAmount ||
+                  0}
+              </span>
+            </div>
+          </div>
         </div>
+
+           {!boardingDetails?.visitId?.details?.payment?.isRemainingPaid ||
+        boardingDetails?.visitId?.details?.payment?.remainingAmount !== 0 ? (
+          <div className="flex justify-center pt-4">
+            <button
+              disabled={loading}
+              onClick={() =>
+                startPayment(
+                  boardingDetails?.visitId?.details?.payment?.remainingAmount
+                )
+              }
+              className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
+                loading
+                  ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                  : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>Pay Remaining Amount</span>
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="flex justify-center pt-4">
+            <button
+              disabled={loading}
+              onClick={handleDeboard}
+              className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
+                loading
+                  ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                  : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>Deboard Pet</span>
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
