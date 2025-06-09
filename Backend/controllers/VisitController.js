@@ -1058,7 +1058,10 @@ exports.addDaySchoolVisit = async (req, res) => {
       isSubscriptionAvailed,
       planId,
       visitType,
+      details: details_new,
     } = req.body;
+
+    const {payment}=details_new;
 
     let price = 0;
 
@@ -1099,6 +1102,7 @@ exports.addDaySchoolVisit = async (req, res) => {
 
     details = {};
     details.price = price;
+    details.payment=payment;
 
     const visit = new Visit({
       pet: petId,
@@ -1387,6 +1391,7 @@ exports.getScheduledVisit = async (req, res) => {
 exports.addGroomingVisit = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+ 
 
   try {
     const {
@@ -1395,10 +1400,11 @@ exports.addGroomingVisit = async (req, res) => {
       isSubscriptionAvailed,
       planId,
       visitType,
-      payment,
+     details : details_new, 
     } = req.body;
 
-    console.log(req.body);
+    const {payment}=details_new;
+    console.log("payment",payment);
 
     let price = 0;
 
@@ -1415,6 +1421,8 @@ exports.addGroomingVisit = async (req, res) => {
         message: "A visittype must be selected to save visit",
       });
     }
+
+     console.log("hi2");
 
     const visitDetails = await VisitType.findOne({ _id: visitType });
     details = {};
@@ -1447,9 +1455,14 @@ exports.addGroomingVisit = async (req, res) => {
       price = visitDetails?.price - discount;
     }
 
+     console.log("hi3");
+
     details.price = price;
     details.payment=payment;
 
+     console.log("hi4");
+     
+    console.log(details);
     const visit = new Visit({
       pet: petId,
       visitType,

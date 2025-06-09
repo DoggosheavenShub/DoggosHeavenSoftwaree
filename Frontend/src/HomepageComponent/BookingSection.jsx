@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Clock, DollarSign, ChevronRight, ChevronLeft, Check, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const PetBookingApp = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -59,7 +60,7 @@ const PetBookingApp = () => {
 
   const handleServiceSelect = (service) => {
     setSelectedService(service);
-    setSelectedTimeSlot(null); // Reset time slot when service changes
+    setSelectedTimeSlot(null); 
   };
 
   const handleTimeSlotSelect = (timeSlot) => {
@@ -75,7 +76,7 @@ const PetBookingApp = () => {
   };
 
   const handleSubmit = () => {
-    // In a real app, you would send the data to your backend here
+    
     setBookingComplete(true);
   };
 
@@ -225,18 +226,21 @@ const PetBookingApp = () => {
                   }`}
                   onClick={() => handleServiceSelect(service)}
                 >
-                  <input
+                <Link to='/login'>
+                     <input
                     type="checkbox"
                     className="h-5 w-5"
                     checked={selectedService?.id === service.id}
                     onChange={() => handleServiceSelect(service)}
                   />
+                </Link>
+                 
                   <div className="ml-3 flex-1">
                     <div className="font-medium">{service.name}</div>
                     <div className="flex items-center mt-1">
                       <Clock size={16} className="mr-1" />
                       <span className="text-sm mr-4">{service.duration} min</span>
-                      <DollarSign size={16} className="mr-1" />
+                     
                       <span className="text-sm">₹{service.price.toFixed(2)}</span>
                     </div>
                   </div>

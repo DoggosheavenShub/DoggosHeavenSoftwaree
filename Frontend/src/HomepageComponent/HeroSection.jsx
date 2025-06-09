@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
@@ -24,12 +25,17 @@ const HeroSection = () => {
               Premium pet care services tailored to your furry friend's needs. Because they deserve nothing but the best.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <button className="bg-[#123524] text-[#EFE3C2] px-6 py-3 rounded-full font-bold text-base hover:bg-[#3E7B27] transform hover:scale-105 transition-all shadow-md">
+            <Link to='/aboutus'>
+                  <button className="bg-[#123524] text-[#EFE3C2] px-6 py-3 rounded-full font-bold text-base hover:bg-[#3E7B27] transform hover:scale-105 transition-all shadow-md">
                 Learn more
               </button>
-              <button className="bg-[#85A947] text-[#123524] px-6 py-3 rounded-full font-bold text-base hover:bg-[#3E7B27] hover:text-[#EFE3C2] transform hover:scale-105 transition-all shadow-md">
+            </Link>
+             <Link to='/signup'>
+                   <button className="bg-[#85A947] text-[#123524] px-6 py-3 rounded-full font-bold text-base hover:bg-[#3E7B27] hover:text-[#EFE3C2] transform hover:scale-105 transition-all shadow-md">
                 Make a reservation
               </button>
+             </Link>
+             
             </div>
           </div>
           
