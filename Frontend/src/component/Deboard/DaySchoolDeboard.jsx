@@ -13,6 +13,7 @@ const DaySchoolDebaord = ({ _id, setboardingid }) => {
   const navigate = useNavigate();
 
   const startPayment = async (amount) => {
+    
     const razorpayLoaded = await loadRazorpayScript(
       "https://checkout.razorpay.com/v1/checkout.js"
     );
