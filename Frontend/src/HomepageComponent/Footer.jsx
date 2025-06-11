@@ -26,20 +26,18 @@ const Footer = () => {
   // Quick links section
   const quickLinks = [
     { name: "About Us", url: "/aboutus" },
-    { name: "Services", url: "/services" },
-    { name: "Booking", url: "/booking" },
-    { name: "FAQs", url: "/faqs" },
-    { name: "Contact Us", url: "/contact" }
+    { name: "Services", url: "/customerservice" },
+    { name: "Booking", url: "/customerservice" },
+    { name: "Contact Us", url: "/contactus" }
   ];
 
   // Our services section
   const ourServices = [
-    { name: "Boarding", url: "/services/boarding" },
-    { name: "Day School", url: "/services/day-school" },
-    { name: "Play School", url: "/services/play-school" },
-    { name: "Veterinary", url: "/services/veterinary" },
-    { name: "Grooming", url: "/services/grooming" },
-    { name: "Picnic", url: "/services/picnic" }
+    { name: "Boarding", url: "/customerservice" },
+    { name: "Day School", url: "/customerservice" },
+    { name: "Play School", url: "/customerservice" },
+    { name: "Veterinary", url: "/customerservice" },
+    { name: "Grooming", url: "/customerservice" },
   ];
 
   return (
