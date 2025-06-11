@@ -18,17 +18,18 @@ const onlineCustomer = require("./routes/OnlineCustomerRoutes");
 
 const app = express();
 
-// Middleware
+
 app.use(express.json());
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization","Accept-Type"],
   })
 );
 
-//db connection
+
 const dbConnect = require("./config/db");
 dbConnect();
 agenda.start().then(() => {

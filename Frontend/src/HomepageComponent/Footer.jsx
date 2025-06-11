@@ -2,7 +2,7 @@ import React from 'react';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, ChevronRight } from 'lucide-react';
 
 const Footer = () => {
-  // Important links with distinct URLs for each
+  
   const importantLinks = [
     { 
       name: "Privacy Policy", 
@@ -23,7 +23,6 @@ const Footer = () => {
     
   ];
 
-  // Quick links section
   const quickLinks = [
     { name: "About Us", url: "/aboutus" },
     { name: "Services", url: "/customerservice" },
@@ -31,7 +30,7 @@ const Footer = () => {
     { name: "Contact Us", url: "/contactus" }
   ];
 
-  // Our services section
+
   const ourServices = [
     { name: "Boarding", url: "/customerservice" },
     { name: "Day School", url: "/customerservice" },
@@ -137,7 +136,7 @@ const Footer = () => {
               <Mail className="w-5 h-5 mr-2 mt-1 text-[#85A947]" />
               <div>
                 <p className="font-semibold">Email Us</p>
-                <p className="text-sm">info@doggosheaven.com</p>
+                <p className="text-sm">care@doggosheaven.com</p>
               </div>
             </div>
             
