@@ -153,10 +153,13 @@ exports.signUp = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
-    console.log(email, password, role);
+    // console.log(email, password, role);
+
 
     // Find user with email and role
     const user = await User.findOne({ email, role });
+
+    // console.log(user);
 
     if (!user) {
       return res

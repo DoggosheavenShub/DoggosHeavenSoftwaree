@@ -14,9 +14,6 @@ const timezone = require("dayjs/plugin/timezone");
 const VisitType = require("../models/visitTypes");
 const SubscriptionPlan = require("../models/subscriptionPlan");
 
-
- 
-
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -557,9 +554,10 @@ exports.addDogParkVisit = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { petId, discount = 0, visitType } = req.body;
+    const { petId, discount = 0, visitType, details: details_new,
+    } = req.body;
 
-    let price = 0;
+    const {payment}=details_new;
 
     if (!petId) {
       return res.json({
@@ -593,6 +591,7 @@ exports.addDogParkVisit = async (req, res) => {
     // Create a new visit record
     const details = {};
     details.price = visitDetails.price - discount;
+    details.payment=payment;
 
     const visit = new Visit({
       pet: petId,
@@ -655,7 +654,10 @@ exports.addVeterinaryVisit = async (req, res) => {
       nextFollowUp,
       followUpTime,
       customerType,
+      details:details_new,
     } = req.body;
+
+    const {payment}=details_new
 
     if (medicines.length === 0 && vaccines.length === 0) {
       return res.json({
@@ -807,6 +809,8 @@ exports.addVeterinaryVisit = async (req, res) => {
     details.followUpPurpose = followUpPurpose ? followUpPurpose : "";
     details.customerType = customerType;
     details.price = totalPrice;
+    details.payment=payment
+    
 
     const visit = new Visit({
       pet: petId,
@@ -878,10 +882,15 @@ exports.addHostelVisit = async (req, res) => {
       numberOfDays,
       isSubscriptionAvailed,
       planId,
+      price,
       visitType,
+       details: details_new,
     } = req.body;
 
-    let price = 0;
+
+    const {payment}=details_new;
+
+    let pricee = price;
 
     if (!petId) {
       return res.json({
@@ -889,6 +898,7 @@ exports.addHostelVisit = async (req, res) => {
         message: "A pet must be selected to save a visit",
       });
     }
+       
 
     if (!visitType) {
       return res.json({
@@ -905,7 +915,7 @@ exports.addHostelVisit = async (req, res) => {
           message: "The pet has no subscription for given plan",
         });
       }
-      price = 0;
+      pricee = 0;
     } else if (discount) {
       const Hostel = await VisitType.findOne({ _id: visitType });
 
@@ -916,20 +926,26 @@ exports.addHostelVisit = async (req, res) => {
         });
       }
 
-      price = (Hostel?.price - discount) * numberOfDays;
-    } else {
-      return res.json({
-        success: false,
-        message: "Either avail subscription or buy for some days",
-      });
+      pricee = (Hostel?.price - discount) * numberOfDays;
     }
+    //  else {
+    //   console.log("hii")
+    //   return res.json({
+    //     success: false,
+    //     message: "Either avail subscription or buy for some days",
+    //   });
+    // }
+     
 
     const details = {};
 
     details["isSubscriptionAvailed"] = isSubscriptionAvailed;
-    details["price"] = price;
+    details["price"] = pricee;
     details["numberOfDays"] = numberOfDays;
     details["discount"] = discount;
+
+    details.payment=payment;
+
 
     const visit = new Visit({
       pet: petId,
@@ -1151,7 +1167,12 @@ exports.addPlaySchoolVisit = async (req, res) => {
       isSubscriptionAvailed,
       planId,
       visitType,
+      details: details_new,
     } = req.body;
+
+    const {payment}=details_new;
+
+    console.log(planId)
 
     let price = 0;
 
@@ -1192,6 +1213,9 @@ exports.addPlaySchoolVisit = async (req, res) => {
 
     details = {};
     details.price = price;
+     details.payment=payment;
+
+     console.log("hi");
 
     const visit = new Visit({
       pet: petId,
@@ -1206,6 +1230,7 @@ exports.addPlaySchoolVisit = async (req, res) => {
       visitId: visit._id,
       isSubscriptionAvailed: isSubscriptionAvailed,
       petId,
+      planId,
       entryTime: new Date(),
     });
 
@@ -1528,7 +1553,8 @@ exports.getBoardingCategoryList = async (req, res) => {
 
 exports.addShoppingVisit = async (req, res) => {
   try {
-    const { items, petId, visitType } = req.body;
+    const { items, petId, visitType, details:details_new } = req.body;
+    const {payment} =details_new
 
     if (!petId) {
       return res.json({
@@ -1567,6 +1593,7 @@ exports.addShoppingVisit = async (req, res) => {
     details = {};
     details.price = price;
     details.items = items;
+    details.payment=payment
 
     const newVisit = new Visit({
       visitType,

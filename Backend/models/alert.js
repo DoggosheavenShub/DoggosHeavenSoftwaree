@@ -7,17 +7,17 @@ const alertSchema = new mongoose.Schema({
     required: true,
   },
   itemName: {
-    type: String, // Relevant only for inventory alerts
+    type: String, 
   },
   stockUnit: {
-    type: Number, // Relevant only for inventory alerts
+    type: Number, 
   },
   threshold: {
-    type: Number, // Relevant only for inventory alerts
+    type: Number, 
     default: 100,
   },
   petInfo: {
-    type: mongoose.Schema.Types.ObjectId, // Relevant only for vaccination alerts
+    type: mongoose.Schema.Types.ObjectId, 
     ref: 'Pet',
   },
   alertDate: {

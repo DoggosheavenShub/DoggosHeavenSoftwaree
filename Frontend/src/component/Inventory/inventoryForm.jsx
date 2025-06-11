@@ -7,11 +7,8 @@ const InventoryForm = () => {
 
   const [formData, setFormData] = useState({
     itemName: "",
-    stockUnit: 0,
+    stock: 0,
     itemType: "disposable",
-    volumeML: 0,
-    totalVolume: 0,
-    recommendedDoses: 0,
     unitCostPrice: 0,
     unitMinRetailPriceNGO: 0,
     unitMaxRetailPriceCustomer: 0,
@@ -35,11 +32,8 @@ const InventoryForm = () => {
           alert("Inventory item added successfully!");
           setFormData({
             itemName: "",
-            stockUnit: 0,
+            stock: 0,
             itemType: "disposable",
-            volumeML: 0,
-            totalVolume: 0,
-            recommendedDoses: 0,
             unitCostPrice: 0,
             unitMinRetailPriceNGO: 0,
             unitMaxRetailPriceCustomer: 0,
@@ -51,169 +45,7 @@ const InventoryForm = () => {
       });
   };
 
-  // if (addInventoryLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center h-screen">
-  //       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-  //     </div>
-  //   );
-  // } else
-  //   return (
-  //     <div className="max-w-2xl mx-auto p-6">
-  //       <h2 className="text-2xl font-bold mb-4">Add Inventory Item</h2>
-  //       <form onSubmit={handleSubmit} className="space-y-4">
-  //         <div>
-  //           <label className="block mb-1">Item Name:</label>
-  //           <input
-  //             type="text"
-  //             name="itemName"
-  //             value={formData.itemName}
-  //             onChange={handleChange}
-  //             required
-  //             className="w-full p-2 border rounded"
-  //           />
-  //         </div>
-
-  //         <div>
-  //           <label className="block mb-1">Stock Unit:</label>
-  //           <input
-  //             type="number"
-  //             name="stockUnit"
-  //             value={formData.stockUnit}
-  //             onChange={handleChange}
-  //             required
-  //             className="w-full p-2 border rounded"
-  //           />
-  //         </div>
-
-  //         <div>
-  //           <label className="block mb-1">Item Type:</label>
-  //           <select
-  //             name="itemType"
-  //             value={formData.itemType}
-  //             onChange={handleChange}
-  //             required
-  //             className="w-full p-2 border rounded"
-  //           >
-  //             <option value="disposable">Disposable</option>
-  //             <option value="syringe">Syringe</option>
-  //             <option value="medicine">Medicine</option>
-  //           </select>
-  //         </div>
-  //         {/* <div>
-  //         <label className="block mb-1">Recommended Doses:</label>
-  //         <input
-  //           type="number"
-  //           name="recommendedDoses"
-  //           value={formData.recommendedDoses}
-  //           onChange={handleChange}
-  //           className="w-full p-2 border rounded"
-  //         />
-  //       </div>
-
-  //       <div>
-  //         <label className="block mb-1">Volume (ML):</label>
-  //         <input
-  //           type="number"
-  //           name="volumeML"
-  //           value={formData.volumeML}
-  //           onChange={handleChange}
-  //           className="w-full p-2 border rounded"
-  //         />
-  //       </div>
-
-  //       <div>
-  //         <label className="block mb-1">Total Volume:</label>
-  //         <input
-  //           type="number"
-  //           name="totalVolume"
-  //           value={formData.totalVolume}
-  //           onChange={handleChange}
-  //           className="w-full p-2 border rounded"
-  //         />
-  //       </div> */}
-
-  //         {formData.itemType !== "medicine" && (
-  //           <>
-  //             <div>
-  //               <label className="block mb-1">Recommended Doses:</label>
-  //               <input
-  //                 type="number"
-  //                 name="recommendedDoses"
-  //                 value={formData.recommendedDoses}
-  //                 onChange={handleChange}
-  //                 className="w-full p-2 border rounded"
-  //               />
-  //             </div>
-
-  //             <div>
-  //               <label className="block mb-1">Volume (ML):</label>
-  //               <input
-  //                 type="number"
-  //                 name="volumeML"
-  //                 value={formData.volumeML}
-  //                 onChange={handleChange}
-  //                 className="w-full p-2 border rounded"
-  //               />
-  //             </div>
-
-  //             <div>
-  //               <label className="block mb-1">Total Volume:</label>
-  //               <input
-  //                 type="number"
-  //                 name="totalVolume"
-  //                 value={formData.totalVolume}
-  //                 onChange={handleChange}
-  //                 className="w-full p-2 border rounded"
-  //               />
-  //             </div>
-  //           </>
-  //         )}
-
-  //         <div>
-  //           <label className="block mb-1">Unit Cost Price:</label>
-  //           <input
-  //             type="number"
-  //             name="unitCostPrice"
-  //             value={formData.unitCostPrice}
-  //             onChange={handleChange}
-  //             className="w-full p-2 border rounded"
-  //           />
-  //         </div>
-
-  //         <div>
-  //           <label className="block mb-1">Unit Min Retail Price (NGO):</label>
-  //           <input
-  //             type="number"
-  //             name="unitMinRetailPriceNGO"
-  //             value={formData.unitMinRetailPriceNGO}
-  //             onChange={handleChange}
-  //             className="w-full p-2 border rounded"
-  //           />
-  //         </div>
-
-  //         <div>
-  //           <label className="block mb-1">
-  //             Unit Max Retail Price (Customer):
-  //           </label>
-  //           <input
-  //             type="number"
-  //             name="unitMaxRetailPriceCustomer"
-  //             value={formData.unitMaxRetailPriceCustomer}
-  //             onChange={handleChange}
-  //             className="w-full p-2 border rounded"
-  //           />
-  //         </div>
-
-  //         <button
-  //           type="submit"
-  //           className="w-full  bg-blue-950 text-white p-2 rounded hover:bg-blue-600"
-  //         >
-  //           Add Item
-  //         </button>
-  //       </form>
-  //     </div>
-  //   );
+ 
   if (addInventoryLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10">
@@ -257,23 +89,56 @@ const InventoryForm = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-bold text-[#3E7B27] mb-2">
-                    Stock Unit
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      name="stockUnit"
-                      value={formData.stockUnit}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
-                      placeholder="Enter stock quantity"
-                    />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
-                  </div>
-                </div>
+             <div className="flex flex-row gap-4"> {/* Flex container with gap */}
+  {/* Stock Input */}
+  <div className="flex-1 min-w-[150px]"> {/* Takes available space */}
+    <div className="space-y-2">
+      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
+        Stock
+      </label>
+      <div className="relative">
+        <input
+          type="number"
+          name="stock"
+          value={formData.stock}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+          placeholder="Enter stock quantity"
+        />
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
+      </div>
+    </div>
+  </div>
+
+  {/* Stock Unit Dropdown */}
+        <div className="flex-1 min-w-[150px]"> {/* Takes available space */}
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-[#3E7B27] mb-2">
+              Stock Unit
+            </label>
+            <div className="relative">
+              <select
+                name="stockUnit"
+                value={formData.stockUnit || "ml"} 
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200 appearance-none"
+              >
+                <option value="ml">Ml</option>
+                <option value="item">Item</option>
+                <option value="tablet">Tablet</option>
+                <option value="mg">Mg</option>
+              </select>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-[#85A947]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
                 <div className="space-y-2 md:col-span-2">
                   <label className="block text-sm font-bold text-[#3E7B27] mb-2">
@@ -290,6 +155,7 @@ const InventoryForm = () => {
                       <option value="disposable">Disposable</option>
                       <option value="syringe">Syringe</option>
                       <option value="medicine">Medicine</option>
+                       <option value="medicine">Vaccine</option>
                     </select>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                       <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#3E7B27]"></div>
@@ -298,69 +164,6 @@ const InventoryForm = () => {
                 </div>
               </div>
 
-              {formData.itemType !== "medicine" && (
-                <div className="bg-[#EFE3C2]/20 rounded-xl p-6 border border-[#85A947]/20">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-                    <h3 className="text-lg font-bold text-[#123524]">
-                      Additional Details
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
-                        Recommended Doses
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          name="recommendedDoses"
-                          value={formData.recommendedDoses}
-                          onChange={handleChange}
-                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
-                          placeholder="Enter doses"
-                        />
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
-                        Volume (ML)
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          name="volumeML"
-                          value={formData.volumeML}
-                          onChange={handleChange}
-                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
-                          placeholder="Enter volume"
-                        />
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
-                        Total Volume
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          name="totalVolume"
-                          value={formData.totalVolume}
-                          onChange={handleChange}
-                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
-                          placeholder="Enter total volume"
-                        />
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <div className="bg-[#85A947]/10 rounded-xl p-6 border border-[#85A947]/20">
                 <div className="flex items-center gap-3 mb-6">

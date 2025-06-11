@@ -614,11 +614,6 @@ const PetForm = () => {
                           <option value="">Select a species</option>
                           <option value="dog">Dog</option>
                           <option value="cat">Cat</option>
-                          <option value="bird">Bird</option>
-                          <option value="fish">Fish</option>
-                          <option value="rabbit">Rabbit</option>
-                          <option value="reptile">Reptile</option>
-                          <option value="hamster">Hamster</option>
                           <option value="other">Other</option>
                         </select>
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">

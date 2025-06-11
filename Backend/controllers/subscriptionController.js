@@ -75,8 +75,11 @@ exports.buySubscription = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { petId, planId, visitType } = req.body;
+    const { petId, visitType,planId, details:details_new } = req.body;
 
+
+    const { payment}=details_new;
+    
     if (!petId || !planId) {
       return res.status(400).json({
         success: false,
@@ -116,6 +119,7 @@ exports.buySubscription = async (req, res) => {
       (details.subscriptionPlan =planId);
     details.price = PlanDetails.price;
     price = PlanDetails.price;
+    details.payment=payment;
 
     const visit = new Visit({
       pet: petId,

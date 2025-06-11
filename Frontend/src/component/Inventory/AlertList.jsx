@@ -140,7 +140,7 @@ const AlertList = () => {
                 <th className="px-8 py-5 text-center font-bold text-lg">
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-2 h-2 bg-white rounded-full"></div>
-                    Total Volume
+                    Stock
                   </div>
                 </th>
                 <th className="px-8 py-5 text-center font-bold text-lg">
@@ -183,7 +183,7 @@ const AlertList = () => {
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                         <span className="font-bold text-orange-600 text-lg">
-                          {item?.totalVolume}
+                          {item?.stock}
                         </span>
                       </div>
                     </td>

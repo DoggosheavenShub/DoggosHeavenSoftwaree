@@ -91,8 +91,10 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
     console.log("Form data prepared:", formattedData);
     setFormData(formattedData);
     
-    if (isSubscriptionAvailed || getTotalPrice() === 0) {
-      processVisitSave(formattedData, "after"); 
+    if (isSubscriptionAvailed  ) {
+      processVisitSave(formattedData, "subscriptionAvailed"); 
+    }else if(getTotalPrice() === 0){
+       processVisitSave(formattedData, "after"); 
     } else {
       setShowPaymentModal(true);
     }
@@ -300,7 +302,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
           amount: 0,
           paidAt: null,
           remainingAmount: getTotalPrice(),
-          isRemainingPaid: false
+          isRemainingPaid: paymentType==="after"?false:true
         }
       }
     };

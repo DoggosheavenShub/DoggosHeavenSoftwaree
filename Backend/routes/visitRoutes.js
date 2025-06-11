@@ -1,5 +1,5 @@
 const express =require('express');
-const { addVisit, getVisit, addHostelVisit, addInquiryVisit, addDogParkVisit, getAllVisitPrices, addVeterinaryVisit, addDayCareVisit,getVisitList, addGroomingVisit, getAllVisitType, getBoardingCategoryList, addDaySchoolVisit, getVisitDetails, addShoppingVisit,buyy } = require('../controllers/VisitController');
+const { addVisit, getVisit, addHostelVisit, addInquiryVisit, addDogParkVisit, getAllVisitPrices, addVeterinaryVisit, addDayCareVisit,getVisitList, addGroomingVisit, getAllVisitType, getBoardingCategoryList, addDaySchoolVisit, getVisitDetails, addShoppingVisit, addPlaySchoolVisit, buyy } = require('../controllers/VisitController');
 const {protectedRoute}=require("../middlewares/protectedRoute");
 const { updateHostelVisit } = require('../controllers/boardingController');
 const router=express.Router();
@@ -13,6 +13,7 @@ router.get("/getallvisitprices",protectedRoute,getAllVisitPrices);
 router.post("/addveterinaryvisit",protectedRoute,addVeterinaryVisit);
 router.post("/addhostelvisit",protectedRoute,addHostelVisit);
 router.post("/adddayschoolvisit",protectedRoute,addDaySchoolVisit);
+router.post("/addplayschoolvisit",protectedRoute,addPlaySchoolVisit);
 router.post("/adddaycarevisit",protectedRoute,addDayCareVisit);
 router.post("/addgroomingvisit",protectedRoute,addGroomingVisit);
 router.post("/addshoppingvisit",protectedRoute,addShoppingVisit);
