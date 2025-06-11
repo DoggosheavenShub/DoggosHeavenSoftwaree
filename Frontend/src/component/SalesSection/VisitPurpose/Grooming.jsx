@@ -14,37 +14,37 @@
 //     { id: "after", label: "Payment After Service", description: "Pay after the service is completed" }
 //   ];
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Select Payment Option</h2>
-        <div className="space-y-3">
-          {paymentOptions.map((option) => (
-            <div 
-              key={option.id}
-              onClick={() => onSelectOption(option.id)}
-              className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition"
-            >
-              <h3 className="font-medium text-lg">{option.label}</h3>
-              <p className="text-gray-600 text-sm">{option.description}</p>
-              {option.id === "advance" && (
-                <p className="text-sm font-medium mt-1">
-                  Amount: ₹{totalPrice}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-        <button 
-          onClick={onClose}
-          className="mt-4 w-full py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+//       <div className="bg-white rounded-lg p-6 w-full max-w-md">
+//         <h2 className="text-xl font-semibold mb-4">Select Payment Option</h2>
+//         <div className="space-y-3">
+//           {paymentOptions.map((option) => (
+//             <div 
+//               key={option.id}
+//               onClick={() => onSelectOption(option.id)}
+//               className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition"
+//             >
+//               <h3 className="font-medium text-lg">{option.label}</h3>
+//               <p className="text-gray-600 text-sm">{option.description}</p>
+//               {option.id === "advance" && (
+//                 <p className="text-sm font-medium mt-1">
+//                   Amount: ₹{totalPrice}
+//                 </p>
+//               )}
+//             </div>
+//           ))}
+//         </div>
+//         <button 
+//           onClick={onClose}
+//           className="mt-4 w-full py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+//         >
+//           Cancel
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
 
 
 
