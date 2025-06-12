@@ -1,7 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const HeroSection = () => {
+  const { user } = useSelector((state) => state.auth);
+  const navigate=useNavigate();
+
+
   return (
     <div className="relative bg-gradient-to-br from-[#EFE3C2] to-[#EFE3C2] overflow-hidden min-h-[90vh] flex items-center">
       {/* Reduced size and opacity of background decorative elements */}
@@ -30,11 +35,20 @@ const HeroSection = () => {
                 Learn more
               </button>
             </Link>
-             <Link to='/signup'>
-                   <button className="bg-[#85A947] text-[#123524] px-6 py-3 rounded-full font-bold text-base hover:bg-[#3E7B27] hover:text-[#EFE3C2] transform hover:scale-105 transition-all shadow-md">
+            <button 
+                onClick={() => {
+                  if (!user) {
+                    navigate('/login');
+                  } else if (user.role === 'customer') {
+                    navigate('/customerpetform');
+                  } else {
+                    navigate('/login'); 
+                  }
+                }}
+                className="bg-[#85A947] text-[#123524] px-6 py-3 rounded-full font-bold text-base hover:bg-[#3E7B27] hover:text-[#EFE3C2] transform hover:scale-105 transition-all shadow-md"
+                >
                 Make a reservation
-              </button>
-             </Link>
+                </button>
              
             </div>
           </div>

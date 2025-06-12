@@ -648,8 +648,10 @@ exports.addVeterinaryVisit = async (req, res) => {
     const {
       petId,
       visitType,
-      medicines,
-      vaccines,
+      items,
+      tablets,
+      ml,
+      mg,
       followUpPurpose,
       nextFollowUp,
       followUpTime,
@@ -659,10 +661,10 @@ exports.addVeterinaryVisit = async (req, res) => {
 
     const {payment}=details_new
 
-    if (medicines.length === 0 && vaccines.length === 0) {
+    if (items.length === 0 && tablets.length === 0 && ml.length === 0 && mg.length === 0) {
       return res.json({
         success: false,
-        message: "select medicines or vaccines to save the visit",
+        message: "select atleast any to save the visit",
       });
     }
 
@@ -676,10 +678,9 @@ exports.addVeterinaryVisit = async (req, res) => {
 
       await newscheduledVisit.save({ session });
     }
-    // ... your code here ...}
+    
     else if (!nextFollowUp && !followUpPurpose && !followUpTime) {
-      // All three variables have falsy values.
-      // ... your code here ...
+    
     } else {
       return res.json({
         succes: false,
@@ -688,104 +689,203 @@ exports.addVeterinaryVisit = async (req, res) => {
     }
 
     const calculateTotalPriceAndUpdateStock = async () => {
-      // Extract all unique IDs from medicines and vaccines
-      const medicineIds = medicines.map((med) => med.id);
-      const vaccineIds = vaccines.map((vac) => vac.id);
-      const allIds = [...new Set([...medicineIds, ...vaccineIds])]; // Remove duplicates
+      const itemIds = items.map((it) => it.id);
+      const TabIds = tablets.map((tb) => tb.id);
+      const MlIds = ml.map((m) => m.id);
+      const MgIds = mg.map((g) => g.id);
+      const allIds = [...new Set([...itemIds, ...TabIds, ...MlIds, ...MgIds])]; 
 
-      // Fetch all inventory items in one query using $in
+      
       const inventoryItems = await Inventory.find({ _id: { $in: allIds } })
         .session(session)
         .lean();
 
-      // Create a map for quick lookup by ID
+    
       const inventoryMap = inventoryItems.reduce((map, item) => {
         map[item._id.toString()] = item;
         return map;
       }, {});
 
-      // Validate and calculate medicine total
-      let medicineTotal = 0;
-      for (const med of medicines) {
-        const medicine = inventoryMap[med.id];
-        if (!medicine) {
+      //items k liy
+      let itemTotal = 0;
+      for (const med of items) {
+        const item = inventoryMap[med.id];
+        if (!item) {
           throw new Error(`Inventory item with ID ${med.id} not found`);
         }
         if (!med.id || !med.quantity || med.quantity <= 0) {
           throw new Error(
-            "Each medicine must have a valid ID and positive quantity"
+            "Each item must have a valid ID and positive quantity"
           );
         }
-        if (medicine.stockUnit < med.quantity) {
-          throw new Error(`Insufficient stock for ${medicine.name}`);
+        if (item.stock < med.quantity) {
+          throw new Error(`Insufficient stock for ${item.name}`);
         }
         const price =
           customerType === "NGO"
-            ? medicine.unitMinRetailPriceNGO
-            : medicine.unitMaxRetailPriceCustomer;
-        medicineTotal += price * med.quantity;
+            ? item.unitMinRetailPriceNGO
+            : item.unitMaxRetailPriceCustomer;
+        itemTotal += price * med.quantity;
       }
 
-      // Validate and calculate vaccine total
-      let vaccineTotal = 0;
-      for (const vac of vaccines) {
-        const vaccine = inventoryMap[vac.id];
-        if (!vaccine) {
-          throw new Error(`Inventory item with ID ${vac.id} not found`);
+// tablets k liy
+       let tabletsTotal = 0;
+      for (const tb of tablets) {
+        const tablet = inventoryMap[tb.id];
+        if (!tablet) {
+          throw new Error(`Inventory item with ID ${tb.id} not found`);
         }
-        if (!vac.id || !vac.volume || vac.volume <= 0) {
+        if (!tb.id || !tb.quantity || tb.quantity <= 0) {
           throw new Error(
-            "Each vaccine must have a valid ID and positive volume"
+            "Each item must have a valid ID and positive quantity"
           );
         }
-        const requiredStock = vac.volume / vaccine.volumeML;
-        if (vaccine.stockUnit < requiredStock) {
-          throw new Error(`Insufficient stock for ${vaccine.name}`);
-        }
-        if (vaccine.totalVolume < vac.volume) {
-          throw new Error(`Insufficient volume for vaccine: ${vaccine.name}`);
+        if (tablet.stock < tb.quantity) {
+          throw new Error(`Insufficient stock for ${item.name}`);
         }
         const price =
           customerType === "NGO"
-            ? vaccine.unitMinRetailPriceNGO
-            : vaccine.unitMaxRetailPriceCustomer;
-        vaccineTotal += price * vac.volume;
+            ? tablet.unitMinRetailPriceNGO
+            : tablet.unitMaxRetailPriceCustomer;
+        tabletsTotal += price * tb.quantity;
       }
+
+// ml k liy
+       let MlTotal = 0;
+      for (const m of ml) {
+        const mll = inventoryMap[m.id];
+        if (!mll) {
+          throw new Error(`Inventory item with ID ${m.id} not found`);
+        }
+        if (!m.id || !m.quantity || m.quantity <= 0) {
+          throw new Error(
+            "Each item must have a valid ID and positive quantity"
+          );
+        }
+        if (mll.stock < m.quantity) {
+          throw new Error(`Insufficient stock for ${mll.name}`);
+        }
+        const price =
+          customerType === "NGO"
+            ? mll.unitMinRetailPriceNGO
+            : mll.unitMaxRetailPriceCustomer;
+        MlTotal += price * m.quantity;
+      }
+
+
+      // mg k liy
+       let mgTotal = 0;
+      for (const g of mg) {
+        const mgg = inventoryMap[g.id];
+        if (!mgg) {
+          throw new Error(`Inventory mgg with ID ${g.id} not found`);
+        }
+        if (!g.id || !g.quantity || g.quantity <= 0) {
+          throw new Error(
+            "Each mgg must have a valid ID and positive quantity"
+          );
+        }
+        if (mgg.stock < g.quantity) {
+          throw new Error(`Insufficient stock for ${mgg.name}`);
+        }
+        const price =
+          customerType === "NGO"
+            ? mgg.unitMinRetailPriceNGO
+            : mgg.unitMaxRetailPriceCustomer;
+        mgTotal += price * g.quantity;
+      }
+
+
+      // Validate and calculate vaccine total
+      // let tabletsTotal = 0;
+      // for (const vac of tablets) {
+      //   const Tablet = inventoryMap[vac.id];
+      //   if (!Tablet) {
+      //     throw new Error(`Inventory item with ID ${vac.id} not found`);
+      //   }
+      //   if (!vac.id || !vac.volume || vac.volume <= 0) {
+      //     throw new Error(
+      //       "Each vaccine must have a valid ID and positive volume"
+      //     );
+      //   }
+      //   const requiredStock = vac.volume / Tablet.volumeML;
+      //   if (vaccine.stockUnit < requiredStock) {
+      //     throw new Error(`Insufficient stock for ${vaccine.name}`);
+      //   }
+      //   if (vaccine.totalVolume < vac.volume) {
+      //     throw new Error(`Insufficient volume for vaccine: ${vaccine.name}`);
+      //   }
+      //   const price =
+      //     customerType === "NGO"
+      //       ? vaccine.unitMinRetailPriceNGO
+      //       : vaccine.unitMaxRetailPriceCustomer;
+      //   vaccineTotal += price * vac.volume;
+      // }
 
       // Prepare bulk updates
       const bulkOps = [];
 
       // Update medicine stock
-      for (const med of medicines) {
-        const medicine = inventoryMap[med.id];
+      for (const med of items) {
+        const item = inventoryMap[med.id];
         bulkOps.push({
           updateOne: {
-            filter: { _id: medicine._id },
-            update: { $inc: { stockUnit: -med.quantity } },
+            filter: { _id: item._id },
+            update: { $inc: { stock: -med.quantity } },
+          },
+        });
+      }
+
+       for (const med of tablets) {
+        const item = inventoryMap[med.id];
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: item._id },
+            update: { $inc: { stock: -med.quantity } },
+          },
+        });
+      }
+
+       for (const med of ml) {
+        const item = inventoryMap[med.id];
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: item._id },
+            update: { $inc: { stock: -med.quantity } },
+          },
+        });
+      }
+
+       for (const med of mg) {
+        const item = inventoryMap[med.id];
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: item._id },
+            update: { $inc: { stock: -med.quantity } },
           },
         });
       }
 
       // Update vaccine stock and volume
-      for (const vac of vaccines) {
-        const vaccine = inventoryMap[vac.id];
-        const requiredStock = vac.volume / vaccine.volumeML;
-        bulkOps.push({
-          updateOne: {
-            filter: { _id: vaccine._id },
-            update: {
-              $inc: {
-                stockUnit: -requiredStock,
-                totalVolume: -vac.volume,
-              },
-              $set: {
-                stockUnit:
-                  vaccine.totalVolume - vac.volume <= 0 ? 0 : undefined,
-              },
-            },
-          },
-        });
-      }
+      // for (const vac of vaccines) {
+      //   const vaccine = inventoryMap[vac.id];
+      //   const requiredStock = vac.volume / vaccine.volumeML;
+      //   bulkOps.push({
+      //     updateOne: {
+      //       filter: { _id: vaccine._id },
+      //       update: {
+      //         $inc: {
+      //           stockUnit: -requiredStock,
+      //           totalVolume: -vac.volume,
+      //         },
+      //         $set: {
+      //           stockUnit:
+      //             vaccine.totalVolume - vac.volume <= 0 ? 0 : undefined,
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
 
       // Execute bulk updates
       if (bulkOps.length > 0) {
@@ -793,15 +893,18 @@ exports.addVeterinaryVisit = async (req, res) => {
       }
 
       // Return total price
-      return medicineTotal + vaccineTotal;
+      return itemTotal + tabletsTotal + MlTotal + mgTotal;
     };
 
     const totalPrice = await calculateTotalPriceAndUpdateStock();
 
     // Create a new visit record
     const details = {};
-    details.medicines = medicines.length ? medicines : null;
-    details.vaccines = vaccines.length ? vaccines : null;
+    details.items = items.length ? items : null;
+    details.tablets = tablets.length ? tablets : null;
+    details.ml = ml.length ? ml : null;
+    details.mg = mg.length ? mg : null;
+
     details.nextFollowUp =
       nextFollowUp && followUpTime
         ? new Date(`${nextFollowUp}T${followUpTime}`)

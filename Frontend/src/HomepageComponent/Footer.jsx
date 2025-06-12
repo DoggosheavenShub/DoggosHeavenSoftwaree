@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, ChevronRight } from 'lucide-react';
 
-const Footer = ({onServiceClick}) => {
+const Footer = ({onServiceClick,onBookingClick}) => {
 
     const closeMenu = () => {
     setIsMenuOpen(false);
@@ -83,14 +83,30 @@ const Footer = ({onServiceClick}) => {
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
-                  <a
-                    {...(link.name === "service"
-                      ? { onClick: onServiceClick }
-                      : { href: link.url })}
-                    className="text-[#EFE3C2] hover:text-[#85A947] transition-colors flex items-center"
-                  >
-                    {link.name}
-                  </a>
+                
+{link.name === "Services" ? (
+ <a
+   onClick={onServiceClick}
+   className="text-[#EFE3C2] hover:text-[#85A947] transition-colors flex items-center cursor-pointer"
+ >
+   {link.name}
+ </a>
+) : link.name === "Booking" ? (
+ <a
+   onClick={onBookingClick}
+   className="text-[#EFE3C2] hover:text-[#85A947] transition-colors flex items-center cursor-pointer"
+ >
+   {link.name}
+ </a>
+) : (
+ <a
+   href={link.url}
+   className="text-[#EFE3C2] hover:text-[#85A947] transition-colors flex items-center"
+ >
+   {link.name}
+ </a>
+)}
+
 
                 </li>
               ))}
@@ -99,11 +115,11 @@ const Footer = ({onServiceClick}) => {
 
           {/* Our Services Column */}
           <div>
-            <h3 className="text-xl font-bold mb-6 text-[#EFE3C2] border-b border-[#3E7B27] pb-2">Our Services</h3>
-            <ul className="space-y-3">
+            <h3 className="text-xl font-bold mb-6 text-[#EFE3C2]  border-b border-[#3E7B27] pb-2">Our Services</h3>
+            <ul className="space-y-3 cursor-pointer">
               {ourServices.map((service, index) => (
                 <li key={index}>
-                  <a href={service.url} className="text-[#EFE3C2] hover:text-[#85A947] transition-colors flex items-center">
+                  <a  onClick={onBookingClick} className="text-[#EFE3C2] hover:text-[#85A947] transition-colors flex items-center">
                     <ChevronRight className="w-4 h-4 mr-2" />
                     {service.name}
                   </a>

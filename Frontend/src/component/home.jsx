@@ -15,6 +15,7 @@ import { useRef } from 'react';
 const home = () => {
 
   const serviceRef = useRef(null);
+  const bookingRef= useRef(null);
 
   const scrollToSection = (section) => {
     if(section.current){
@@ -30,10 +31,10 @@ const home = () => {
         <WhyRelySection />
         <div ref={serviceRef}> <ServicesSection /></div>
         <InstagramReelsGrid/>
-        <BookingSection />
-        <FAQSection />
-        <Footer  onServiceClick={()=> scrollToSection(serviceRef)}
-/>
+        <div ref={bookingRef}>  <BookingSection /> </div>
+        <FAQSection/>
+        <Footer onServiceClick={()=> scrollToSection(serviceRef)} 
+               onBookingClick={()=> scrollToSection(bookingRef)} />
     </div>
   )
 }
