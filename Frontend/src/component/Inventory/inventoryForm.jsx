@@ -26,6 +26,7 @@ const InventoryForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData, "formdata");
     dispatch(addInventoryItem(formData))
       .then((data) => {
         if (data?.payload?.success) {
@@ -45,7 +46,6 @@ const InventoryForm = () => {
       });
   };
 
- 
   if (addInventoryLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10">
@@ -89,56 +89,72 @@ const InventoryForm = () => {
                   </div>
                 </div>
 
-             <div className="flex flex-row gap-4"> {/* Flex container with gap */}
-  {/* Stock Input */}
-  <div className="flex-1 min-w-[150px]"> {/* Takes available space */}
-    <div className="space-y-2">
-      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
-        Stock
-      </label>
-      <div className="relative">
-        <input
-          type="number"
-          name="stock"
-          value={formData.stock}
-          onChange={handleChange}
-          required
-          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
-          placeholder="Enter stock quantity"
-        />
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
-      </div>
-    </div>
-  </div>
-
-  {/* Stock Unit Dropdown */}
-        <div className="flex-1 min-w-[150px]"> {/* Takes available space */}
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-[#3E7B27] mb-2">
-              Stock Unit
-            </label>
-            <div className="relative">
-              <select
-                name="stockUnit"
-                value={formData.stockUnit || "ml"} 
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200 appearance-none"
-              >
-                <option value="ml">Ml</option>
-                <option value="item">Item</option>
-                <option value="tablet">Tablet</option>
-                <option value="mg">Mg</option>
-              </select>
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <svg className="w-4 h-4 text-[#85A947]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                <div className="flex flex-row gap-4">
+                  {" "}
+                  {/* Flex container with gap */}
+                  {/* Stock Input */}
+                  <div className="flex-1 min-w-[150px]">
+                    {" "}
+                    {/* Takes available space */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
+                        Stock
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          name="stock"
+                          value={formData.stock}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+                          placeholder="Enter stock quantity"
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Stock Unit Dropdown */}
+                  <div className="flex-1 min-w-[150px]">
+                    {" "}
+                    {/* Takes available space */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
+                        Stock Unit
+                      </label>
+                      <div className="relative">
+                        <select
+                          name="stockUnit"
+                          value={formData.stockUnit || "ml"}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200 appearance-none"
+                        >
+                          <option value="ml">Ml</option>
+                          <option value="item">Item</option>
+                          <option value="tablet">Tablet</option>
+                          <option value="mg">Mg</option>
+                        </select>
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <svg
+                            className="w-4 h-4 text-[#85A947]"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="space-y-2 md:col-span-2">
                   <label className="block text-sm font-bold text-[#3E7B27] mb-2">
@@ -155,7 +171,7 @@ const InventoryForm = () => {
                       <option value="disposable">Disposable</option>
                       <option value="syringe">Syringe</option>
                       <option value="medicine">Medicine</option>
-                       <option value="medicine">Vaccine</option>
+                      <option value="medicine">Vaccine</option>
                     </select>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                       <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#3E7B27]"></div>
@@ -163,7 +179,6 @@ const InventoryForm = () => {
                   </div>
                 </div>
               </div>
-
 
               <div className="bg-[#85A947]/10 rounded-xl p-6 border border-[#85A947]/20">
                 <div className="flex items-center gap-3 mb-6">
