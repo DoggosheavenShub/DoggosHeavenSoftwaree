@@ -8,7 +8,7 @@ const InventoryForm = () => {
   const [formData, setFormData] = useState({
     itemName: "",
     stock: 0,
-    stockUnit: "",
+    stockUnit: "ml",
     itemType: "disposable",
     unitCostPrice: 0,
     unitMinRetailPriceNGO: 0,

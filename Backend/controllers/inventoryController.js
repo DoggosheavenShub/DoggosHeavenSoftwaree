@@ -54,7 +54,8 @@ exports.addinventory = async (req, res) => {
     if (!validItemTypes.includes(itemType)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid item type. Must be one of: disposable, syringe, medicine, vaccine",
+        message:
+          "Invalid item type. Must be one of: disposable, syringe, medicine, vaccine",
       });
     }
 
@@ -84,13 +85,14 @@ exports.addinventory = async (req, res) => {
       message: "Inventory item created successfully",
       item: savedItem,
     });
-
   } catch (error) {
     console.log("Error in add inventory controller:", error);
-    
+
     // Handle mongoose validation errors
-    if (error.name === 'ValidationError') {
-      const validationErrors = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -174,7 +176,8 @@ exports.editInventory = async (req, res) => {
     if (!validItemTypes.includes(itemType)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid item type. Must be one of: disposable, syringe, medicine, vaccine",
+        message:
+          "Invalid item type. Must be one of: disposable, syringe, medicine, vaccine",
       });
     }
 
@@ -200,7 +203,10 @@ exports.editInventory = async (req, res) => {
       });
     }
 
-    if (unitMaxRetailPriceCustomer !== undefined && unitMaxRetailPriceCustomer < 0) {
+    if (
+      unitMaxRetailPriceCustomer !== undefined &&
+      unitMaxRetailPriceCustomer < 0
+    ) {
       return res.status(400).json({
         success: false,
         message: "Customer price must be non-negative",
@@ -209,8 +215,8 @@ exports.editInventory = async (req, res) => {
 
     // Validate pricing logic if both prices are provided
     if (
-      unitMinRetailPriceNGO !== undefined && 
-      unitMaxRetailPriceCustomer !== undefined && 
+      unitMinRetailPriceNGO !== undefined &&
+      unitMaxRetailPriceCustomer !== undefined &&
       unitMinRetailPriceNGO > unitMaxRetailPriceCustomer
     ) {
       return res.status(400).json({
@@ -237,7 +243,9 @@ exports.editInventory = async (req, res) => {
       updateData.unitMinRetailPriceNGO = Number(unitMinRetailPriceNGO);
     }
     if (unitMaxRetailPriceCustomer !== undefined) {
-      updateData.unitMaxRetailPriceCustomer = Number(unitMaxRetailPriceCustomer);
+      updateData.unitMaxRetailPriceCustomer = Number(
+        unitMaxRetailPriceCustomer
+      );
     }
 
     // Check if item exists before updating
@@ -250,27 +258,24 @@ exports.editInventory = async (req, res) => {
     }
 
     // Update the inventory item
-    const updatedItem = await Inventory.findByIdAndUpdate(
-      _id, 
-      updateData, 
-      { 
-        new: true, // Return the updated document
-        runValidators: true // Run mongoose validators
-      }
-    );
+    const updatedItem = await Inventory.findByIdAndUpdate(_id, updateData, {
+      new: true, // Return the updated document
+      runValidators: true, // Run mongoose validators
+    });
 
     return res.status(200).json({
       success: true,
       message: "Inventory details updated successfully",
       item: updatedItem,
     });
-
   } catch (error) {
     console.error("Error in editInventory:", error);
 
     // Handle mongoose validation errors
-    if (error.name === 'ValidationError') {
-      const validationErrors = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -279,7 +284,7 @@ exports.editInventory = async (req, res) => {
     }
 
     // Handle invalid ObjectId
-    if (error.name === 'CastError' && error.kind === 'ObjectId') {
+    if (error.name === "CastError" && error.kind === "ObjectId") {
       return res.status(400).json({
         success: false,
         message: "Invalid item ID format",
@@ -305,30 +310,30 @@ exports.editInventory = async (req, res) => {
 exports.deleteInventory = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Find the inventory item by ID
     const inventoryItem = await Inventory.findById(id);
-    
+
     if (!inventoryItem) {
       return res.status(404).json({
         success: false,
-        message: "Inventory item not found"
+        message: "Inventory item not found",
       });
     }
-    
+
     // Delete the inventory item
     await Inventory.findByIdAndDelete(id);
-    
+
     return res.status(200).json({
       success: true,
-      message: "Inventory item deleted successfully"
+      message: "Inventory item deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting inventory item:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to delete inventory item",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -374,5 +379,3 @@ exports.getAlertListOfInventory = async (req, res) => {
     });
   }
 };
-
-
