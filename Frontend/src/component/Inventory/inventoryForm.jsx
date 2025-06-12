@@ -8,6 +8,7 @@ const InventoryForm = () => {
   const [formData, setFormData] = useState({
     itemName: "",
     stock: 0,
+    stockUnit:"",
     itemType: "disposable",
     unitCostPrice: 0,
     unitMinRetailPriceNGO: 0,
@@ -26,6 +27,7 @@ const InventoryForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData);
     dispatch(addInventoryItem(formData))
       .then((data) => {
         if (data?.payload?.success) {

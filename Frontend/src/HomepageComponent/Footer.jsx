@@ -1,7 +1,20 @@
 import React from 'react';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, ChevronRight } from 'lucide-react';
 
-const Footer = () => {
+const Footer = ({onServiceClick}) => {
+
+    const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const scrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+    closeMenu();
+  };
+
   
   const importantLinks = [
     { 
@@ -70,10 +83,15 @@ const Footer = () => {
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
-                  <a href={link.url} className="text-[#EFE3C2] hover:text-[#85A947] transition-colors flex items-center">
-                    <ChevronRight className="w-4 h-4 mr-2" />
+                  <a
+                    {...(link.name === "service"
+                      ? { onClick: onServiceClick }
+                      : { href: link.url })}
+                    className="text-[#EFE3C2] hover:text-[#85A947] transition-colors flex items-center"
+                  >
                     {link.name}
                   </a>
+
                 </li>
               ))}
             </ul>
