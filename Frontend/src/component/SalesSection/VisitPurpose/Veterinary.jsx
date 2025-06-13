@@ -1595,7 +1595,11 @@ const Veterinary = ({ _id, visitPurposeDetails }) => {
               onChange={(e) => setNextFollowUp(e.target.value)}
               value={nextFollowUp}
               type="date"
-              min={today}
+              min={
+                new Date(new Date().getTime() + 86400000)
+                  .toISOString()
+                  .split("T")[0]
+              }
               className="w-full p-2 border rounded-md mb-2"
             />
           </div>
