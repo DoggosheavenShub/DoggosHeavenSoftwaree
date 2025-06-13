@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SubscriptionPopup from "./SubscriptionPopup";
 
 import VaccinationPopup from "./VaccinationPopup";
 
@@ -56,224 +57,9 @@ const DogHistory = () => {
   if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
   return (
-    // <div className="container w-screen mx-auto p-4 min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-    //   <div className="flex justify-between items-center mb-8">
-    //     <Link to="/BreedManagement">
-    //       {" "}
-    //       <h2 className="text-blue-950"> ◉ Filter pets by breed</h2>
-    //     </Link>
-    //     <h1 className="text-4xl font-bold text-gray-800 ml-[27rem]">
-    //       Pet Records
-    //     </h1>
-
-    //     <Link to="/pet">
-    //       <button className="py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white  bg-blue-950 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-    //         Add Pet
-    //       </button>
-    //     </Link>
-    //   </div>
-
-    //   <div className="grid mt-5 grid-cols-1 md:grid-cols-3 gap-6">
-    //     {/* Dog List */}
-    //     <div className="md:col-span-1">
-    //       <div className="w-full flex justify-between">
-    //         <input
-    //           type="text"
-    //           value={name}
-    //           placeholder="Pet name"
-    //           onChange={(e) => setName(e.target.value)}
-    //           className="w-[49%] p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
-    //         />
-    //         <input
-    //           type="text"
-    //           placeholder="Phone No."
-    //           value={phone}
-    //           onChange={(e) => setPhone(e.target.value)}
-    //           className="w-[49%] p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
-    //         />
-    //       </div>
-    //       <div className="bg-white mt-5 rounded-xl h-[150vh] overflow-y-scroll hidescroller shadow-lg p-6 backdrop-blur-lg backdrop-filter">
-    //         <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-    //           All Pets
-    //         </h2>
-    //         <div className="space-y-3">
-    //           {petList?.map((dog) => (
-    //             <button
-    //               key={dog._id}
-    //               onClick={() => fetchDogDetails(dog._id)}
-    //               className="w-full text-left p-4 hover:bg-blue-50 rounded-lg transition-all duration-300 border border-gray-100 hover:border-blue-200 hover:shadow-md"
-    //             >
-    //               <p className="font-medium text-gray-800">{dog.name}</p>
-    //               <p className="text-sm text-gray-600">
-    //                 {dog.breed || dog.species}
-    //                 {dog.owner && ` - Owner: ${dog.owner.name}`}
-    //               </p>
-    //             </button>
-    //           ))}
-    //         </div>
-    //       </div>
-    //     </div>
-
-    //     {/* Dog Details */}
-    //     <div className="md:col-span-2">
-    //       {petDetails ? (
-    //         <div className="bg-white rounded-xl shadow-lg p-8">
-    //           <h2 className="text-3xl font-bold mb-6 text-gray-800">
-    //             {petDetails.name}
-    //           </h2>
-
-    //           {/* Pet Details Grid */}
-    //           <div className="grid grid-cols-2 gap-6 mb-8">
-    //             {/* ... existing pet details code with enhanced styling ... */}
-    //             {petDetails.species && (
-    //               <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                 <p className="font-semibold text-gray-700">Species</p>
-    //                 <p className="text-gray-600">{petDetails.species}</p>
-    //               </div>
-    //             )}
-
-    //             {petDetails.breed && (
-    //               <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                 <p className="font-semibold text-gray-700">Breed</p>
-    //                 <p className="text-gray-600">{petDetails.breed}</p>
-    //               </div>
-    //             )}
-
-    //             <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //               <p className="font-semibold text-gray-700">Sex</p>
-    //               <p className="text-gray-600">{petDetails.sex}</p>
-    //             </div>
-
-    //             {petDetails.color && (
-    //               <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                 <p className="font-semibold text-gray-700">Color</p>
-    //                 <p className="text-gray-600">{petDetails.color}</p>
-    //               </div>
-    //             )}
-
-    //             {petDetails.dob && (
-    //               <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                 <p className="font-semibold text-gray-700">Date of Birth</p>
-    //                 <p className="text-gray-600">
-    //                   {new Date(petDetails.dob).toLocaleDateString()}
-    //                 </p>
-    //               </div>
-    //             )}
-
-    //             {petDetails?.vaccinations &&
-    //               petDetails?.vaccinations.length > 0 && (
-    //                 <div
-    //                   className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300 cursor-pointer"
-    //                   onClick={() => setIsOpen(true)}
-    //                 >
-    //                   <p className="font-semibold text-gray-700">
-    //                     Vaccinations
-    //                   </p>
-    //                   <p className="text-gray-500 text-sm">
-    //                     Click to view details
-    //                   </p>
-    //                 </div>
-    //               )}
-
-    //             <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //               <p className="font-semibold text-gray-700">Neutered</p>
-    //               <p className="text-gray-600">
-    //                 {petDetails?.neutered?"Yes":"No"}
-    //               </p>
-    //             </div>
-
-    //             <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //               <button
-    //                 onClick={() => navigateToVisit(petDetails?._id)}
-    //                 className="bg-[#172554] px-5 py-2 rounded-md text-white hover:bg-[#172554] transition-colors duration-300"
-    //               >
-    //                 Add Visit
-    //               </button>
-    //             </div>
-    //             {/* Popup Component */}
-    //             <VaccinationPopup
-    //               isOpen={isOpen}
-    //               onClose={() => setIsOpen(false)}
-    //               vaccinations={petDetails.vaccinations || []}
-    //             />
-    //             <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //               <button
-    //                 onClick={() => seteditPet(!editPet)}
-    //                 className="bg-[#172554] px-5 py-2 rounded-md text-white hover:bg-[#172554] transition-colors duration-300"
-    //               >
-    //                 Edit Pet Details
-    //               </button>
-    //             </div>
-    //           </div>
-
-    //           {editPet ? <EditPetInfo pet={petDetails} /> : ""}
-
-    //           {/* Owner Details Section with enhanced styling */}
-    //           {petDetails.owner && (
-    //             <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-100">
-    //               <h3 className="font-semibold text-lg mb-3 text-gray-800">
-    //                 Owner Information
-    //               </h3>
-    //               <div className="grid grid-cols-2 gap-4">
-    //                 <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                   <p className="font-semibold">Name</p>
-    //                   <p className="text-gray-600">{petDetails.owner.name}</p>
-    //                 </div>
-    //                 <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                   <p className="font-semibold">Phone</p>
-    //                   <p className="text-gray-600">{petDetails.owner.phone}</p>
-    //                 </div>
-    //                 <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                   <p className="font-semibold">Email</p>
-    //                   <p className="text-gray-600">{petDetails.owner.email}</p>
-    //                 </div>
-    //                 <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                   <p className="font-semibold">Segment</p>
-    //                   <p className="text-gray-600">
-    //                     {petDetails.owner.segment}
-    //                   </p>
-    //                 </div>
-    //                 {petDetails.owner.address && (
-    //                   <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                     <p className="font-semibold">Address</p>
-    //                     <p className="text-gray-600">
-    //                       {petDetails.owner.address}
-    //                     </p>
-    //                   </div>
-    //                 )}
-    //               </div>
-    //               <div className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300">
-    //                 <button
-    //                   onClick={() => seteditownerinfo(!editownerinfo)}
-    //                   className="bg-[#172554] px-5 py-2 rounded-md text-white hover:bg-[#172554] transition-colors duration-300"
-    //                 >
-    //                   Edit Owner Details
-    //                 </button>
-    //               </div>
-    //             </div>
-    //           )}
-    //           {editownerinfo ? <EditOwnerInfo owner={petDetails?.owner} /> : ""}
-    //         </div>
-    //       ) : (
-    //         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-    //           <p className="text-gray-500 text-lg">
-    //             Select a pet to view details
-    //           </p>
-    //         </div>
-    //       )}
-    //     </div>
-    //   </div>
-    // </div>
     <div className="container w-screen mx-auto p-4 min-h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10">
       <div className="flex justify-between items-center mb-8">
-        <Link to="/BreedManagement">
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-xl border border-[#85A947]/30 hover:bg-[#EFE3C2] transition-all duration-300 shadow-md hover:shadow-lg">
-            <div className="w-3 h-3 bg-[#3E7B27] rounded-full"></div>
-            <h2 className="text-[#123524] font-semibold">
-              Filter pets by breed
-            </h2>
-          </div>
-        </Link>
+        
 
         <h1 className="text-4xl font-bold text-[#123524] flex items-center gap-3">
           <div className="w-2 h-10 bg-gradient-to-b from-[#3E7B27] to-[#85A947] rounded-full"></div>
@@ -420,6 +206,21 @@ const DogHistory = () => {
                     </div>
                   )}
 
+                    {petDetails?.vaccinations &&
+                  petDetails?.vaccinations.length > 0 && (
+                    <div
+                      className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#EFE3C2]/50 hover:from-[#85A947]/30 hover:to-[#EFE3C2] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
+                      onClick={() => setIsOpen(true)}
+                    >
+                      <p className="font-bold text-[#3E7B27] mb-1 group-hover:text-[#123524] transition-colors duration-200">
+                        Subscriptions
+                      </p>
+                      <p className="text-[#123524]/70 text-sm font-medium">
+                        Click to view details
+                      </p>
+                    </div>
+                  )}
+
                 <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
                   <p className="font-bold text-[#3E7B27] mb-1">Neutered</p>
                   <p className="text-[#123524] font-medium">
@@ -442,6 +243,13 @@ const DogHistory = () => {
                   onClose={() => setIsOpen(false)}
                   vaccinations={petDetails.vaccinations || []}
                 />
+
+                 <SubscriptionPopup
+                  isOpen={isOpen}
+                  onClose={() => setIsOpen(false)}
+                  petId={petDetails?._id}
+                />
+
 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
                   <button
