@@ -611,9 +611,7 @@ const PetForm = () => {
                           })}
                           className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200 appearance-none cursor-pointer"
                         >
-                          <option value="">Select a species</option>
                           <option value="dog">Dog</option>
-                          <option value="cat">Cat</option>
                           <option value="other">Other</option>
                         </select>
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -717,11 +715,13 @@ const PetForm = () => {
                         <input
                           type="date"
                           id={`dob_${petIndex}`}
+                          max={new Date().toISOString().split("T")[0]}
                           {...register(`pets[${petIndex}].dob`, {
                             required: true,
                           })}
                           className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200"
                         />
+
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
                       </div>
                     </div>

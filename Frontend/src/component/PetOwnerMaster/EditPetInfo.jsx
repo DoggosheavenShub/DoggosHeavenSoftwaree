@@ -448,6 +448,7 @@ const EditPetInfo = ({ pet }) => {
               <input
                 type="date"
                 id="dob"
+                max={new Date().toISOString().split("T")[0]}
                 {...register("dob", { required: true })}
                 className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200"
               />
