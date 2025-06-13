@@ -320,7 +320,7 @@ const Attendance = () => {
                             {item?.purpose}
                           </span>
                         </td>
-                        <td className="px-8 py-6 text-center">
+                        {/* <td className="px-8 py-6 text-center">
                           <div className="flex items-center justify-center">
                             <div className="relative">
                               <input
@@ -335,6 +335,23 @@ const Attendance = () => {
                                 </div>
                               )}
                             </div>
+                          </div>
+                        </td> */}
+                        <td className="px-8 py-6 text-center">
+                          <div className="flex items-center justify-center">
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={item?.present || false}
+                                onChange={() => handleCheckboxChange(item?._id)}
+                                className="appearance-none w-6 h-6 text-[#3E7B27] bg-white border-2 border-[#85A947]/50 rounded-md focus:ring-4 focus:ring-[#85A947]/20 checked:bg-[#3E7B27] checked:border-[#3E7B27] transition-all duration-200 relative"
+                              />
+                              {item?.present && (
+                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center pointer-events-none">
+                                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                              )}
+                            </label>
                           </div>
                         </td>
                       </tr>

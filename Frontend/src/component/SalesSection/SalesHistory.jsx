@@ -186,6 +186,7 @@ const SalesHistory = () => {
             <input
               type="date"
               value={date}
+              max={new Date().toISOString().split("T")[0]}
               onChange={(e) => setdate(e.target.value)}
               className="p-3 border-2 border-[#85A947] rounded-xl shadow-sm focus:ring-2 focus:ring-[#3E7B27] focus:border-[#3E7B27] focus:outline-none transition-all duration-200 bg-white text-[#123524] font-medium"
             />
