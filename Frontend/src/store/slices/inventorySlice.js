@@ -3,6 +3,7 @@ import { logout } from "./authSlice";
 
 const initialState = {
   getAllInventoryLoading: false,
+  loading:false,
   inventoryList: [],
   editInventoryLoading: false,
   addInventoryLoading: false,
@@ -187,7 +188,25 @@ const inventorySlice = createSlice({
       })
       .addCase(deleteInventoryItem.rejected, (state) => {
         state.deleteInventoryLoading = false;
-      });
+      }).addCase(getInventoryItemDetails.pending,(state)=>{
+        state.loading=true
+      }).addCase(getInventoryItemDetails.fulfilled,(state)=>{
+        state.loading=false
+      }).addCase(getInventoryItemDetails.rejected,(state)=>{
+        state.loading=false
+      }).addCase(addInventoryItem.pending,(state)=>{
+        state.addInventoryLoading=true
+      }).addCase(addInventoryItem.fulfilled,(state)=>{
+        state.addInventoryLoading=false
+      }).addCase(addInventoryItem.rejected,(state)=>{
+        state.addInventoryLoading=false
+      }).addCase(editInventoryItem.pending,(state)=>{
+        state.addInventoryLoading=true
+      }).addCase(editInventoryItem.fulfilled,(state)=>{
+        state.addInventoryLoading=false
+      }).addCase(editInventoryItem.rejected,(state)=>{
+        state.addInventoryLoading=false
+      });;
   },
 });
 

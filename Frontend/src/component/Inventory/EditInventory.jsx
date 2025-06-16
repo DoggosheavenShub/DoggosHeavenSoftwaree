@@ -10,9 +10,10 @@ const EditInventory = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { editInventoryLoading } = useSelector((state) => state.inventory);
+  const { addInventoryLoading,loading } = useSelector((state) => state.inventory);
 
   const { id } = location?.state || "";
+
   const [formData, setFormData] = useState({
     itemName: "",
     stock: 0,
@@ -27,6 +28,7 @@ const EditInventory = () => {
     dispatch(getInventoryItemDetails(id))
       .then((data) => {
         if (data?.payload?.success) setFormData(data?.payload?.item);
+        else alert("Error in getting details");
       })
       .catch((err) => {});
   };
@@ -48,8 +50,8 @@ const EditInventory = () => {
     dispatch(editInventoryItem(formData))
       .then((data) => {
         if (data?.payload?.success) {
-          navigate("/inventorylist");
           alert("Inventory item edited successfully!");
+          navigate("/inventoryList");
         } else alert(data?.payload?.message);
       })
       .catch((err) => {
@@ -58,7 +60,7 @@ const EditInventory = () => {
       });
   };
 
-  if (editInventoryLoading) {
+  if (addInventoryLoading ||loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10">
         <div className="text-center">
@@ -133,7 +135,7 @@ const EditInventory = () => {
                     <div className="relative">
                       <select
                         name="stockUnit"
-                        value={formData.stockUnit || "ml"} 
+                        value={formData.stockUnit || "ml"}
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200 appearance-none"
@@ -144,8 +146,19 @@ const EditInventory = () => {
                         <option value="mg">Mg</option>
                       </select>
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg className="w-4 h-4 text-[#85A947]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        <svg
+                          className="w-4 h-4 text-[#85A947]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
                         </svg>
                       </div>
                     </div>

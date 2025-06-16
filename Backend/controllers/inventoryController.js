@@ -1,4 +1,6 @@
 const Inventory = require("../models/inventory");
+
+
 exports.addinventory = async (req, res) => {
   try {
     const {
@@ -362,7 +364,7 @@ exports.getInventoryItemDetails = async (req, res) => {
 
 exports.getAlertListOfInventory = async (req, res) => {
   try {
-    const items = await Inventory.find({ totalVolume: { $lte: 100 } }).sort({
+    const items = await Inventory.find({ stock: { $lte: 50 } }).sort({
       itemName: 1,
     });
     return res.status(200).json({

@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { addInventoryItem } from "../../store/slices/inventorySlice";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const InventoryForm = () => {
   const { addInventoryLoading } = useSelector((state) => state.inventory);
 
+  const navigate=useNavigate();
+  
   const [formData, setFormData] = useState({
     itemName: "",
     stock: 0,
@@ -27,7 +30,7 @@ const InventoryForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+
     dispatch(addInventoryItem(formData))
       .then((data) => {
         if (data?.payload?.success) {
@@ -40,6 +43,7 @@ const InventoryForm = () => {
             unitMinRetailPriceNGO: 0,
             unitMaxRetailPriceCustomer: 0,
           });
+          navigate("/inventoryList")
         } else alert(data?.payload?.message);
       })
       .catch((err) => {
