@@ -7,7 +7,7 @@ export default function UserLoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "", // Add role to form data
+    role: "staff", // Add role to form data
   });
 
   const handleSubmit = (e) => {
@@ -33,7 +33,7 @@ export default function UserLoginPage() {
         setFormData({
           email: "",
           password: "",
-          role: "",
+          role: "staff",
         });
         
         // You might want to redirect based on role here
@@ -56,7 +56,7 @@ export default function UserLoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#EFE3C2] to-white">
       <div className="flex flex-col lg:flex-row min-h-screen">
-        {/* Left panel - Welcome section */}
+  
         <div className="hidden md:flex lg:w-2/5 xl:w-1/2 relative overflow-hidden">
           <div className="absolute inset-0 bg-[#123524] opacity-90 z-10"></div>
           <img
@@ -137,7 +137,7 @@ export default function UserLoginPage() {
               
               <div className="space-y-4 sm:space-y-5">
                 {/* Role Selection */}
-                <div>
+                {/* <div>
                   <label className="block text-xs sm:text-sm font-medium text-[#3E7B27] mb-2 sm:mb-3">
                     Login As
                   </label>
@@ -166,7 +166,7 @@ export default function UserLoginPage() {
                       </label>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Email Field */}
                 <div>
@@ -230,7 +230,7 @@ export default function UserLoginPage() {
                   }`}
                 >
                   <span>
-                    Login as {formData.role ? roleOptions.find(r => r.value === formData.role)?.label : 'User'}
+                    Login 
                   </span>
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -239,7 +239,7 @@ export default function UserLoginPage() {
               </div>
 
               {/* Sign up link */}
-              <div className="mt-4 sm:mt-6 text-center">
+              {/* <div className="mt-4 sm:mt-6 text-center">
                 <p className="text-xs sm:text-sm text-[#3E7B27]">
                   Don't have an account?{' '}
                   <a 
@@ -249,7 +249,7 @@ export default function UserLoginPage() {
                     Sign up as Customer
                   </a>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

@@ -21,7 +21,8 @@ const DogHistory = () => {
   const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenVacc, setIsOpenVacc] = useState(false);
+   const [isOpenSub, setIsOpenSub] = useState(false);
   const [editPet, seteditPet] = useState(false);
   const [editownerinfo, seteditownerinfo] = useState(false);
 
@@ -195,7 +196,7 @@ const DogHistory = () => {
                   petDetails?.vaccinations.length > 0 && (
                     <div
                       className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#EFE3C2]/50 hover:from-[#85A947]/30 hover:to-[#EFE3C2] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
-                      onClick={() => setIsOpen(true)}
+                      onClick={() => setIsOpenVacc(true)}
                     >
                       <p className="font-bold text-[#3E7B27] mb-1 group-hover:text-[#123524] transition-colors duration-200">
                         Vaccinations
@@ -206,11 +207,10 @@ const DogHistory = () => {
                     </div>
                   )}
 
-                    {petDetails?.vaccinations &&
-                  petDetails?.vaccinations.length > 0 && (
+               
                     <div
                       className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#EFE3C2]/50 hover:from-[#85A947]/30 hover:to-[#EFE3C2] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
-                      onClick={() => setIsOpen(true)}
+                      onClick={() => setIsOpenSub(true)}
                     >
                       <p className="font-bold text-[#3E7B27] mb-1 group-hover:text-[#123524] transition-colors duration-200">
                         Subscriptions
@@ -219,7 +219,7 @@ const DogHistory = () => {
                         Click to view details
                       </p>
                     </div>
-                  )}
+                  
 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
                   <p className="font-bold text-[#3E7B27] mb-1">Neutered</p>
@@ -239,14 +239,14 @@ const DogHistory = () => {
 
                 {/* Popup Component */}
                 <VaccinationPopup
-                  isOpen={isOpen}
-                  onClose={() => setIsOpen(false)}
+                  isOpen={isOpenVacc}
+                  onClose={() => setIsOpenVacc(false)}
                   vaccinations={petDetails.vaccinations || []}
                 />
 
                  <SubscriptionPopup
-                  isOpen={isOpen}
-                  onClose={() => setIsOpen(false)}
+                  isOpen={isOpenSub}
+                  onClose={() => setIsOpenSub(false)}
                   petId={petDetails?._id}
                 />
 

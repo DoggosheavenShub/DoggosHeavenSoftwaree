@@ -65,13 +65,13 @@ export default function InstagramReelsGrid() {
     },
   ]);
 
-  // Simulate loading thumbnails (in a real app, this would fetch actual thumbnails)
+  
   useEffect(() => {
     const loadThumbnails = async () => {
-      // Simulate network delay
+      
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Update reels to show they're loaded
+  
       setReels(prevReels => 
         prevReels.map(reel => ({
           ...reel,
@@ -85,11 +85,8 @@ export default function InstagramReelsGrid() {
 
   return (
     <div className="bg-[#EFE3C2] min-h-screen">
-      {/* Header */}
-      <header className="bg-white border-b border-[#85A947] p-4">
-      
-      </header>
-
+     
+     <br></br>
       {/* Main content */}
       <main className="p-4">
         {/* Profile summary */}

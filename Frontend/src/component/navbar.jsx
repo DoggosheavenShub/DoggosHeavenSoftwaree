@@ -121,12 +121,12 @@ const Navbar = () => {
                 >
                   Login
                 </Link>
-                  <Link
+                  {/* <Link
                   to="/signup"
                   className="text-[#EFE3C2] px-3 py-2 rounded-lg shadow-lg focus:border-b-[2px] focus:border-[#85A947] font-bold transition duration-300 ease-in-out"
                 >
                   Sign up
-                </Link>
+                </Link> */}
               </>
             )}
           </div>
