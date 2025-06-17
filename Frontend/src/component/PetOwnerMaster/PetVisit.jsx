@@ -44,7 +44,7 @@ export default function PetVisitsPopup({petId, isOpenVisit, setIsOpenVisit }) {
   };
 
   return (
-    <div className="p-8 min-h-screen" style={{backgroundColor: '#EFE3C2'}}>
+    <div className="p-8 min-h-screen">
       <div className="max-w-md mx-auto">
         {isOpenVisit && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

@@ -65,7 +65,7 @@ const DogHistory = () => {
   }
 
   return (
-    <div className="container w-screen mx-auto p-4 min-h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10">
+    <div className="container w-screen mx-auto p-4 min-h-screen bg-gradient-to-br from-[#FFFFFF] to-[#85A947]/10">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold text-[#123524] flex items-center gap-3">
           <div className="w-2 h-10 bg-gradient-to-b from-[#3E7B27] to-[#85A947] rounded-full"></div>
@@ -117,7 +117,7 @@ const DogHistory = () => {
                 <button
                   key={dog._id}
                   onClick={() => fetchDogDetails(dog._id)}
-                  className="w-full text-left p-5 hover:bg-[#EFE3C2]/50 rounded-xl transition-all duration-300 border-2 border-[#85A947]/10 hover:border-[#3E7B27]/40 hover:shadow-lg hover:-translate-y-0.5 group"
+                  className="w-full text-left p-5 hover:bg-[#FFFFFF]/50 rounded-xl transition-all duration-300 border-2 border-[#85A947]/10 hover:border-[#3E7B27]/40 hover:shadow-lg hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -155,7 +155,7 @@ const DogHistory = () => {
               {/* Pet Details Grid */}
               <div className="grid grid-cols-2 gap-6 mb-8">
                 {petDetails.species && (
-                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
+                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
                     <p className="font-bold text-[#3E7B27] mb-1">Species</p>
                     <p className="text-[#123524] font-medium">
                       {petDetails.species}
@@ -164,7 +164,7 @@ const DogHistory = () => {
                 )}
 
                 {petDetails.breed && (
-                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
+                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
                     <p className="font-bold text-[#3E7B27] mb-1">Breed</p>
                     <p className="text-[#123524] font-medium">
                       {petDetails.breed}
@@ -172,13 +172,13 @@ const DogHistory = () => {
                   </div>
                 )}
 
-                <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
+                <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
                   <p className="font-bold text-[#3E7B27] mb-1">Sex</p>
                   <p className="text-[#123524] font-medium">{petDetails.sex}</p>
                 </div>
 
                 {petDetails.color && (
-                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
+                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
                     <p className="font-bold text-[#3E7B27] mb-1">Color</p>
                     <p className="text-[#123524] font-medium">
                       {petDetails.color}
@@ -187,7 +187,7 @@ const DogHistory = () => {
                 )}
 
                 {petDetails.dob && (
-                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
+                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
                     <p className="font-bold text-[#3E7B27] mb-1">
                       Date of Birth
                     </p>
@@ -197,10 +197,17 @@ const DogHistory = () => {
                   </div>
                 )}
 
+                  <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
+                  <p className="font-bold text-[#3E7B27] mb-1">Neutered</p>
+                  <p className="text-[#123524] font-medium">
+                    {petDetails?.neutered ? "Yes" : "No"}
+                  </p>
+                </div>
+
                 {petDetails?.vaccinations &&
                   petDetails?.vaccinations.length > 0 && (
                     <div
-                      className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#EFE3C2]/50 hover:from-[#85A947]/30 hover:to-[#EFE3C2] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
+                      className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#FFFFFF]/50 hover:from-[#85A947]/30 hover:to-[#FFFFFF] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
                       onClick={() => setIsOpenVacc(true)}
                     >
                       <p className="font-bold text-[#3E7B27] mb-1 group-hover:text-[#123524] transition-colors duration-200">
@@ -213,7 +220,7 @@ const DogHistory = () => {
                   )}
 
                 <div
-                  className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#EFE3C2]/50 hover:from-[#85A947]/30 hover:to-[#EFE3C2] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
+                  className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#FFFFFF]/50 hover:from-[#85A947]/30 hover:to-[#FFFFFF] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
                   onClick={() => setIsOpenSub(true)}
                 >
                   <p className="font-bold text-[#3E7B27] mb-1 group-hover:text-[#123524] transition-colors duration-200">
@@ -224,14 +231,9 @@ const DogHistory = () => {
                   </p>
                 </div>
 
-                <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
-                  <p className="font-bold text-[#3E7B27] mb-1">Neutered</p>
-                  <p className="text-[#123524] font-medium">
-                    {petDetails?.neutered ? "Yes" : "No"}
-                  </p>
-                </div>
+              
 
-                <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
+                <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
                   <button
                     onClick={() => setIsOpenVisit(true)}
                     className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
@@ -240,7 +242,7 @@ const DogHistory = () => {
                   </button>
                 </div>
 
-                <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
+                <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
                   <button
                     onClick={() => navigateToVisit(petDetails?._id)}
                     className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
@@ -248,8 +250,17 @@ const DogHistory = () => {
                     View Vet History
                   </button>
                 </div>
+                
+                <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
+                  <button
+                    onClick={() => navigateToVisit(petDetails?._id)}
+                    className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
+                  >
+                    Add Prescription
+                  </button>
+                </div>
 
-                <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
+                <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
                   <button
                     onClick={() => navigateToVisit(petDetails?._id)}
                     className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
@@ -271,7 +282,7 @@ const DogHistory = () => {
                   petId={petDetails?._id}
                 />
 
-                <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
+                <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
                   <button
                     onClick={() => seteditPet(!editPet)}
                     className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
@@ -285,7 +296,7 @@ const DogHistory = () => {
 
               {/* Owner Details Section */}
               {petDetails.owner && (
-                <div className="mt-8 p-6 bg-gradient-to-br from-[#85A947]/10 to-[#EFE3C2]/50 rounded-2xl border-2 border-[#85A947]/30">
+                <div className="mt-8 p-6 bg-gradient-to-br from-[#85A947]/10 to-[#FFFFFF]/50 rounded-2xl border-2 border-[#85A947]/30">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-4 h-4 bg-gradient-to-r from-[#3E7B27] to-[#85A947] rounded-full"></div>
                     <h3 className="font-bold text-xl text-[#123524]">
@@ -343,7 +354,7 @@ const DogHistory = () => {
           ) : (
             <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-12 text-center border border-[#85A947]/20">
               <div className="flex flex-col items-center gap-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/30 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#FFFFFF] to-[#85A947]/30 rounded-full flex items-center justify-center">
                   <div className="w-10 h-10 bg-[#85A947] rounded-full opacity-60"></div>
                 </div>
                 <p className="text-[#3E7B27] text-xl font-semibold">
