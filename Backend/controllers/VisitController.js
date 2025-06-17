@@ -1733,4 +1733,26 @@ exports.addShoppingVisit = async (req, res) => {
   }
 };
 
+exports.getParticularPetVisit = async (req, res) => {
+  try {
+    
+    const {petId } = req.query;
+
+    const List = await Visit.find({pet:petId}).populate([{path:"pet"},{path:"visitType"}]);
+
+    return res.json({
+      success: true,
+      List,
+      message: "List fetched successfullly",
+    });
+  } catch (error) {
+    console.log("error in get perticular visit list controller", error);
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 

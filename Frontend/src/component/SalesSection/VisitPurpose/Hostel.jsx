@@ -14,6 +14,7 @@ import { PaymentService } from "./PaymentComponents/PaymentService";
 import { usePaymentFlow } from "./PaymentComponents/PaymentHooks";
 
 const Hostel = ({ _id, visitPurposeDetails }) => {
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const backendURL = import.meta.env.VITE_BACKEND_URL;

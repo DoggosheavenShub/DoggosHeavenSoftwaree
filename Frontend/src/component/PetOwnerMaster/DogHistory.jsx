@@ -13,6 +13,7 @@ import {
 import "../../App.css";
 import EditPetInfo from "./EditPetInfo";
 import EditOwnerInfo from "./EditOwnerDetails";
+import PetVisitsPopup from "./PetVisit";
 
 const DogHistory = () => {
   const { petList, getPetListLoading, petDetails, petDetailsLoading } =
@@ -22,7 +23,9 @@ const DogHistory = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [isOpenVacc, setIsOpenVacc] = useState(false);
-   const [isOpenSub, setIsOpenSub] = useState(false);
+  const [isOpenSub, setIsOpenSub] = useState(false);
+  const [isOpenVisit, setIsOpenVisit] = useState(false);
+
   const [editPet, seteditPet] = useState(false);
   const [editownerinfo, seteditownerinfo] = useState(false);
 
@@ -57,11 +60,13 @@ const DogHistory = () => {
 
   if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
+  if (isOpenVisit) {
+    return <PetVisitsPopup petId={petDetails?._id} isOpenVisit={isOpenVisit} setIsOpenVisit={setIsOpenVisit}/>;
+  }
+
   return (
     <div className="container w-screen mx-auto p-4 min-h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10">
       <div className="flex justify-between items-center mb-8">
-        
-
         <h1 className="text-4xl font-bold text-[#123524] flex items-center gap-3">
           <div className="w-2 h-10 bg-gradient-to-b from-[#3E7B27] to-[#85A947] rounded-full"></div>
           Pet Records
@@ -207,25 +212,41 @@ const DogHistory = () => {
                     </div>
                   )}
 
-               
-                    <div
-                      className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#EFE3C2]/50 hover:from-[#85A947]/30 hover:to-[#EFE3C2] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
-                      onClick={() => setIsOpenSub(true)}
-                    >
-                      <p className="font-bold text-[#3E7B27] mb-1 group-hover:text-[#123524] transition-colors duration-200">
-                        Subscriptions
-                      </p>
-                      <p className="text-[#123524]/70 text-sm font-medium">
-                        Click to view details
-                      </p>
-                    </div>
-                  
+                <div
+                  className="p-5 rounded-xl bg-gradient-to-br from-[#85A947]/20 to-[#EFE3C2]/50 hover:from-[#85A947]/30 hover:to-[#EFE3C2] transition-all duration-300 border border-[#85A947]/30 hover:border-[#3E7B27]/60 hover:shadow-lg cursor-pointer group"
+                  onClick={() => setIsOpenSub(true)}
+                >
+                  <p className="font-bold text-[#3E7B27] mb-1 group-hover:text-[#123524] transition-colors duration-200">
+                    Subscriptions
+                  </p>
+                  <p className="text-[#123524]/70 text-sm font-medium">
+                    Click to view details
+                  </p>
+                </div>
 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg">
                   <p className="font-bold text-[#3E7B27] mb-1">Neutered</p>
                   <p className="text-[#123524] font-medium">
                     {petDetails?.neutered ? "Yes" : "No"}
                   </p>
+                </div>
+
+                <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
+                  <button
+                    onClick={() => setIsOpenVisit(true)}
+                    className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
+                  >
+                    View Visits
+                  </button>
+                </div>
+
+                <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
+                  <button
+                    onClick={() => navigateToVisit(petDetails?._id)}
+                    className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
+                  >
+                    View Vet History
+                  </button>
                 </div>
 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
@@ -244,12 +265,11 @@ const DogHistory = () => {
                   vaccinations={petDetails.vaccinations || []}
                 />
 
-                 <SubscriptionPopup
+                <SubscriptionPopup
                   isOpen={isOpenSub}
                   onClose={() => setIsOpenSub(false)}
                   petId={petDetails?._id}
                 />
-
 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-[#EFE3C2]/50 to-white hover:from-[#EFE3C2] hover:to-[#EFE3C2]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
                   <button
