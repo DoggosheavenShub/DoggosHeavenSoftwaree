@@ -44,6 +44,7 @@ export default function PetVisitsPopup({petId, isOpenVisit, setIsOpenVisit }) {
   };
 
   return (
+
     <div className="p-8 min-h-screen">
       <div className="max-w-md mx-auto">
         {isOpenVisit && (
@@ -115,5 +116,6 @@ export default function PetVisitsPopup({petId, isOpenVisit, setIsOpenVisit }) {
         )}
       </div>
     </div>
+    
   );
 }

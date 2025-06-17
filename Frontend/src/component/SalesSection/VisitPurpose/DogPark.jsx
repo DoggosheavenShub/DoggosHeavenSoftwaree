@@ -13,6 +13,7 @@ import { PaymentService } from "./PaymentComponents/PaymentService";
 import { usePaymentFlow } from "./PaymentComponents/PaymentHooks";
 
 const DogPark = ({ _id, visitPurposeDetails }) => {
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const backendURL = import.meta.env.VITE_BACKEND_URL;
@@ -378,6 +379,7 @@ const DogPark = ({ _id, visitPurposeDetails }) => {
   //     />
   //   </div>
   // );
+  
   return (
     <div
       className="hidescroller p-4"
@@ -566,6 +568,7 @@ const DogPark = ({ _id, visitPurposeDetails }) => {
                 : "linear-gradient(135deg, #3E7B27 0%, #123524 100%)",
               boxShadow: "0 4px 15px rgba(18, 53, 36, 0.3)",
             }}
+           
             onMouseEnter={(e) => {
               if (!isLoading) {
                 e.target.style.background =
@@ -573,6 +576,7 @@ const DogPark = ({ _id, visitPurposeDetails }) => {
                 e.target.style.boxShadow = "0 6px 20px rgba(18, 53, 36, 0.4)";
               }
             }}
+           
             onMouseLeave={(e) => {
               if (!isLoading) {
                 e.target.style.background =

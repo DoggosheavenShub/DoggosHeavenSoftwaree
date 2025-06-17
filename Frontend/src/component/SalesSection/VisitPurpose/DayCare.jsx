@@ -406,7 +406,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       </div>
     );
 
-  // return (
+  
   //   <div className="hidescroller">
   //     <div className="max-w-full flex justify-center">
   //       <form

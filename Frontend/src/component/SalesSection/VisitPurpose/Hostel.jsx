@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import { useForm } from "react-hook-form";
 import "../../../App.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -178,7 +179,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
     } else if (paymentType === "partial") {
       paymentAmount = advanceAmt;
       remainingPaymentAmount = remainingAmt;
-      paymentDescription = `Partial Payment (₹${paymentAmount} now, ₹${remainingPaymentAmount} later)`;
+      paymentDescription = `Partial Payment (₹${paymentAmount} now, ₹ ${remainingPaymentAmount} later)`;
     } else {
       paymentAmount = 0;
       remainingPaymentAmount = getTotalPrice();
