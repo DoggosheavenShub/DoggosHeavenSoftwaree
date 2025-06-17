@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import SubscriptionPopup from "./SubscriptionPopup";
 
 import VaccinationPopup from "./VaccinationPopup";
+import PrescriptionPopup from "./PrescriptionPopup";
 
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -25,6 +26,7 @@ const DogHistory = () => {
   const [isOpenVacc, setIsOpenVacc] = useState(false);
   const [isOpenSub, setIsOpenSub] = useState(false);
   const [isOpenVisit, setIsOpenVisit] = useState(false);
+  const [isOpenPrescription, setIsOpenPrescription] = useState(false);
 
   const [editPet, seteditPet] = useState(false);
   const [editownerinfo, seteditownerinfo] = useState(false);
@@ -46,6 +48,10 @@ const DogHistory = () => {
   const navigateToVisit = (_id) => {
     navigate(`/nvisit2`, { state: { _id } });
   };
+
+  const navigateToPrescription=(_id)=>{
+     navigate(`/prescription`, { state: { _id } });
+  }
 
   const fetchDogDetails = async (id) => {
     dispatch(getPetDetails(id)).then((data) => {});
@@ -244,7 +250,7 @@ const DogHistory = () => {
 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
                   <button
-                    onClick={() => navigateToVisit(petDetails?._id)}
+                    onClick={() => setIsOpenPrescription(true)}
                     className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
                   >
                     View Vet History
@@ -253,7 +259,7 @@ const DogHistory = () => {
                 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF]/50 to-white hover:from-[#FFFFFF] hover:to-[#FFFFFF]/30 transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-lg flex items-center justify-center">
                   <button
-                    onClick={() => navigateToVisit(petDetails?._id)}
+                    onClick={() => navigateToPrescription(petDetails?._id)}
                     className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-3 rounded-xl text-white font-semibold hover:from-[#3E7B27] hover:to-[#85A947] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#85A947]/30"
                   >
                     Add Prescription
@@ -279,6 +285,12 @@ const DogHistory = () => {
                 <SubscriptionPopup
                   isOpen={isOpenSub}
                   onClose={() => setIsOpenSub(false)}
+                  petId={petDetails?._id}
+                />
+
+                <PrescriptionPopup
+                   isOpen={isOpenPrescription}
+                  onClose={() => setIsOpenPrescription(false)}
                   petId={petDetails?._id}
                 />
 

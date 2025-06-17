@@ -88,6 +88,36 @@ const verifyPayment = async (req, res) => {
   }
 };
 
+const verifyPayment2 = async (req, res) => {
+  try {
+    const { razorpay_payment_id } = req.body;
+
+    
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
+    if (payment.status === "captured") {
+      return res.status(200).json({
+        success: true,
+        message: "Payment verified successfully",
+        paymentDetails: payment,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Payment not captured",
+      });
+    }
+  } catch (error) {
+    console.error("Error in verifyPayment2:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error verifying payment",
+      error: error.message,
+    });
+  }
+};
+
+
 const verifyPendingPayment = async (req, res) => {
   try {
    
@@ -132,6 +162,7 @@ const verifyPendingPayment = async (req, res) => {
 module.exports = {
   createOrder,
   verifyPayment,
+  verifyPayment2,
   verifyPendingPayment
 };
 

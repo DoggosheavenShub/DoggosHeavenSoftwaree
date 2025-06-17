@@ -6,14 +6,14 @@ const { DateTime } = require("luxon");
 const Boarding = require("../models/boarding");
 
 exports.addPet = async (req, res) => {
-  // Start a MongoDB session for transaction
+  
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
     const { pets, ownerName, phone, email, address, segment } = req.body;
 
-    // First, create or find the owner
+    
     let owner = await Owner.findOne({ email });
 
     if (!owner) {
@@ -30,10 +30,10 @@ exports.addPet = async (req, res) => {
         ],
         { session }
       );
-      owner = owner[0]; // Because create returns an array
+      owner = owner[0]; 
     }
 
-    // Create pet documents with owner reference
+
     const petDocuments = pets.map((pet) => ({
       name: pet.name,
       species: pet.species,
@@ -48,10 +48,10 @@ exports.addPet = async (req, res) => {
     }));
 
     console.log(petDocuments);
-    // Save all pets
+    
     const savedPets = await Pet.create(petDocuments, { session });
 
-    // Add pet references to owner
+    
     owner.pets.push(...savedPets.map((pet) => pet._id));
     await owner.save({ session });
 

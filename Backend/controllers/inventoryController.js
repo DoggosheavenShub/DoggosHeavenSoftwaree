@@ -61,7 +61,7 @@ exports.addinventory = async (req, res) => {
       });
     }
 
-    // Validate pricing logic (optional business rule)
+    
     if (unitMinRetailPriceNGO > unitMaxRetailPriceCustomer) {
       return res.status(400).json({
         success: false,
@@ -69,7 +69,7 @@ exports.addinventory = async (req, res) => {
       });
     }
 
-    // Create new inventory item
+  
     const newItem = new Inventory({
       itemName,
       stock: Number(stock),
@@ -90,7 +90,7 @@ exports.addinventory = async (req, res) => {
   } catch (error) {
     console.log("Error in add inventory controller:", error);
 
-    // Handle mongoose validation errors
+    
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
@@ -102,7 +102,7 @@ exports.addinventory = async (req, res) => {
       });
     }
 
-    // Handle duplicate key errors (if you have unique constraints)
+  
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,

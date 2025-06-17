@@ -36,7 +36,7 @@ const DogPark = ({ _id, visitPurposeDetails }) => {
       : 0;
   };
 
-  // Use payment hook
+  
   const {
     isLoading,
     setIsLoading,

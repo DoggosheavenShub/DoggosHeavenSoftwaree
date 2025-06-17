@@ -43,6 +43,7 @@ import BuySubcriptionCustomer from './CustomerComponent/subscription/BuySubscrip
 import CustomerPetForm from './CustomerComponent/CustomerPetRegistration'
 import CustomerSubcription from './CustomerComponent/subscription/SubcriptionsAvailable'
 import ShippingPolicy from "./pages/Shippinganddelivery";
+import PrescriptionForm from './component/PetOwnerMaster/PrescriptionForm'
 
 
 function App() {
@@ -76,6 +77,7 @@ function App() {
             <Route path="/buysubscription" element={<BuySubscription/>}/>
             <Route path="/deboard" element={<Deboard />} />
             <Route path="/nvisit2" element={<NewVisitForm2/>}/>
+              <Route path="/prescription" element={<PrescriptionForm/>}/>
             <Route path="/onlinecustomerappointment" element={<StaffAppointmentsPage/>} />
             
             <Route path="/customerdaashboard" element={<CustomerDashboard />} />
