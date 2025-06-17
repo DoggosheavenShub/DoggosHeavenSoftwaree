@@ -602,32 +602,11 @@ exports.addDogParkVisit = async (req, res) => {
 
     await visit.save({ session });
 
-    const boardingDetails = await Boarding.findOne({
-      petId,
-      isBoarded: true,
-    }).populate({ path: "boardingType", select: "purpose" });
-
-    if (boardingDetails) {
-      return res.json({
-        success: false,
-        message: `Pet has already been boarded in ${boardingDetails?.boardingType?.purpose}`,
-      });
-    }
-
-    const boarding = new Boarding({
-      boardingType: visitType,
-      visitId: visit?._id,
-      petId,
-      entryTime: new Date(),
-    });
-
-    await boarding.save({ session });
-
     await session.commitTransaction();
 
     return res.json({
       success: true,
-      message: `Pet has been boarded in ${visitDetails?.purpose} successfully`,
+      message: `Pet has been added in visits successfully`,
     });
   } catch (error) {
     console.log("error in addDogParkVisit controller", error);
