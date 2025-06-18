@@ -125,13 +125,12 @@ const Inquiry = ({ _id, visitPurposeDetails }) => {
   //     </button>
   //   </form>
   // );
+  
   if (isLoading)
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{
-          background: "linear-gradient(135deg, #EFE3C2 0%, #85A947 100%)",
-        }}
+       
       >
         <div className="text-center space-y-4">
           <div
@@ -157,7 +156,7 @@ const Inquiry = ({ _id, visitPurposeDetails }) => {
     <div
       className="p-4"
       style={{
-        background: "linear-gradient(135deg, #EFE3C2 0%, #85A947 100%)",
+       
         minHeight: "100vh",
       }}
     >
@@ -165,8 +164,7 @@ const Inquiry = ({ _id, visitPurposeDetails }) => {
         onSubmit={handleSubmit(onSubmit)}
         className="mt-4 space-y-6 max-w-2xl mx-auto p-8 rounded-2xl shadow-2xl backdrop-blur-sm"
         style={{
-          background:
-            "linear-gradient(145deg, #EFE3C2 0%, rgba(239, 227, 194, 0.95) 100%)",
+         
           border: "1px solid rgba(133, 169, 71, 0.3)",
         }}
       >

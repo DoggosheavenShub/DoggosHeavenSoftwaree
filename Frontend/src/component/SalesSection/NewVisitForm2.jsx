@@ -72,7 +72,7 @@ const NewVisitForm2 = () => {
         return <div>Invalid Selection</div>;
     }
   };
-  // return (
+  
   //   <div className="w-full flex justify-center">
   //     <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
   //       {/* Header */}
@@ -104,7 +104,7 @@ const NewVisitForm2 = () => {
   //   </div>
   // );
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-[#EFE3C2] to-[#f5f0e8] flex justify-center items-center p-4">
+    <div className="w-full min-h-screen  flex justify-center items-center p-4">
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-[#85A947]/30 p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8 pb-6 border-b-2 border-[#85A947]/20">
@@ -126,7 +126,7 @@ const NewVisitForm2 = () => {
         {/* Form */}
         <div className="space-y-6">
           {/* Purpose Selection */}
-          <div className="bg-gradient-to-r from-[#EFE3C2]/30 to-white p-6 rounded-xl border border-[#85A947]/30">
+          <div className="p-6 rounded-xl border border-[#85A947]/30">
             <label className="block text-lg font-semibold text-[#123524] mb-4">
               🎯 Purpose of Visit
             </label>
@@ -165,7 +165,7 @@ const NewVisitForm2 = () => {
           </div>
 
           {/* Dynamic Form Section */}
-          <div className="bg-gradient-to-br from-white to-[#EFE3C2]/20 rounded-xl border border-[#85A947]/20 shadow-lg overflow-hidden">
+          <div className="rounded-xl border border-[#85A947]/20 shadow-lg overflow-hidden">
             <div className="bg-gradient-to-r from-[#123524] to-[#3E7B27] px-6 py-4">
               <h3 className="text-lg font-semibold text-white">
                 📝 Visit Details
