@@ -95,6 +95,10 @@ const verifyPayment2 = async (req, res) => {
     
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
 
+    console.log(payment);
+
+    
+
     if (payment.status === "captured") {
       return res.status(200).json({
         success: true,
@@ -116,7 +120,6 @@ const verifyPayment2 = async (req, res) => {
     });
   }
 };
-
 
 const verifyPendingPayment = async (req, res) => {
   try {
