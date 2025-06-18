@@ -882,16 +882,14 @@ exports.addDaySchoolVisit = async (req, res) => {
   try {
     const {
       petId,
-      discount = 0,
       isSubscriptionAvailed,
       planId,
       visitType,
-      details: details_new,
+     
     } = req.body;
 
-    const {payment}=details_new;
+   
 
-    let price = 0;
 
     if (!petId) {
       return res.json({
@@ -917,25 +915,17 @@ exports.addDaySchoolVisit = async (req, res) => {
           message: "No subscription exist for given pet",
         });
       }
-      price = 0;
-    } else {
-      if (discount >= visitDetails?.price) {
-        return res.json({
-          success: false,
-          message: "Discount must be less than original price",
-        });
-      }
-      price = visitDetails?.price - discount;
-    }
-
-    details = {};
-    details.price = price;
-    details.payment=payment;
+     
+    } 
+  details={};
+  details["issubscriptionavailed"]=isSubscriptionAvailed;
+  details["planId"]=planId;
+ 
 
     const visit = new Visit({
       pet: petId,
       visitType,
-      details,
+      details
     });
 
     await visit.save({ session });
@@ -975,18 +965,14 @@ exports.addPlaySchoolVisit = async (req, res) => {
   try {
     const {
       petId,
-      discount = 0,
       isSubscriptionAvailed,
       planId,
       visitType,
-      details: details_new,
+      
     } = req.body;
 
-    const {payment}=details_new;
 
-    console.log(planId)
 
-    let price = 0;
 
     if (!petId) {
       return res.json({
@@ -1012,22 +998,13 @@ exports.addPlaySchoolVisit = async (req, res) => {
           message: "No subscription exist for given pet",
         });
       }
-      price = 0;
-    } else {
-      if (discount >= visitDetails?.price) {
-        return res.json({
-          success: false,
-          message: "Discount must be less than original price",
-        });
-      }
-      price = visitDetails?.price - discount;
+    
     }
 
     details = {};
-    details.price = price;
-     details.payment=payment;
+    details["issubscriptionAvailed"] = isSubscriptionAvailed;
+     details["planId"]=planId;
 
-     console.log("hi");
 
     const visit = new Visit({
       pet: petId,

@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import "../../../App.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getSubscriptionDetails } from "../../../store/slices/subscriptionSlice";
 import { addGroomingVisit } from "../../../store/slices/visitSlice";
 
-import {
-  PaymentOptionModal,
-  PartialPaymentModal,
-} from "./PaymentComponents/PaymentModals";
 import { PaymentService } from "./PaymentComponents/PaymentService";
 import { usePaymentFlow } from "./PaymentComponents/PaymentHooks";
 
@@ -20,8 +17,16 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
 
   const [formData, setFormData] = useState(null);
   const [planId, setPlanId] = useState("");
-  const [discount, setDiscount] = useState(0);
-  const [isSubscriptionAvailed, setIsSubscriptionAvailed] = useState(false);
+
+  const { register, handleSubmit, setValue, watch, reset } = useForm({
+    defaultValues: {
+      isSubscriptionAvailed: false,
+      discount: 0,
+    },
+  });
+
+  const isSubscriptionAvailed = watch("isSubscriptionAvailed");
+  const discount = watch("discount");
 
   const { subscriptionDetails } = useSelector((state) => state.subscription);
 
@@ -36,20 +41,10 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
   };
 
   // Use payment hook
-  const {
-    isLoading,
-    setIsLoading,
-    showPaymentModal,
-    setShowPaymentModal,
-    showPartialPaymentModal,
-    setShowPartialPaymentModal,
-    paymentOption,
-    advanceAmount,
-    remainingAmount,
-    handlePartialPaymentConfirm,
-    handlePaymentOptionSelect,
-    processPaymentFlow,
-  } = usePaymentFlow(paymentService, getTotalPrice);
+  const { isLoading, setIsLoading, processPaymentFlow } = usePaymentFlow(
+    paymentService,
+    getTotalPrice
+  );
 
   useEffect(() => {
     if (!_id || _id.trim() === "") {
@@ -79,19 +74,10 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
 
   const handleAvail = (id) => {
     setPlanId(id);
-    setIsSubscriptionAvailed(!isSubscriptionAvailed);
+    setValue("isSubscriptionAvailed", !isSubscriptionAvailed);
   };
 
-  const handleDiscountChange = (e) => {
-    const value = parseInt(e.target.value) || 0;
-    if (value >= 0 && value <= visitPurposeDetails.price) {
-      setDiscount(value);
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
+  const onSubmit = (formData) => {
     console.log("Submitting form with pet ID:", _id);
     console.log("Visit purpose details ID:", visitPurposeDetails._id);
 
@@ -118,8 +104,8 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
       visitType: visitPurposeDetails._id,
       details: {
         planId: planId || null,
-        isSubscriptionAvailed,
-        discount,
+        isSubscriptionAvailed: formData.isSubscriptionAvailed,
+        discount: formData.discount,
         fullPrice: visitPurposeDetails.price,
         finalPrice: getTotalPrice(),
       },
@@ -128,89 +114,51 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
     console.log("Form data prepared:", data);
     setFormData(data);
 
-    if (isSubscriptionAvailed || getTotalPrice() === 0) {
-      processVisitSave(data, "after");
+    if (getTotalPrice() === 0) {
+      processGroomingVisitSave(data);
     } else {
-      setShowPaymentModal(true);
+      initializeRazorpay(data);
     }
   };
 
-  const initializeRazorpay = (
-    paymentType,
-    advanceAmt = null,
-    remainingAmt = null
-  ) => {
-    let amount;
-
-    if (advanceAmt !== null) {
-      amount = advanceAmt;
-    } else {
-      amount =
-        paymentType === "advance"
-          ? getTotalPrice()
-          : Math.round(getTotalPrice() * 0.5);
-    }
+  const initializeRazorpay = (data) => {
+    const amount = getTotalPrice();
 
     const orderData = {
-      receipt: `pet_grooming_${_id}`,
+      receipt: `grooming_${_id.slice(-15)}`,
       notes: {
         petId: _id,
         visitType: visitPurposeDetails._id,
-        paymentType: paymentType,
+        paymentType: "advance",
       },
     };
 
-    let paymentDescription;
-    let paymentAmount;
-    let remainingPaymentAmount;
-
-    if (paymentType === "advance") {
-      paymentDescription = "Full Payment";
-      paymentAmount = getTotalPrice();
-      remainingPaymentAmount = 0;
-    } else if (paymentType === "partial") {
-      paymentAmount = advanceAmt;
-      remainingPaymentAmount = remainingAmt;
-      paymentDescription = `Partial Payment (₹${paymentAmount} now, ₹${remainingPaymentAmount} later)`;
-    } else {
-      paymentAmount = 0;
-      remainingPaymentAmount = getTotalPrice();
-      paymentDescription = "Payment After Service";
-    }
-
-    console.log("Payment setup:", {
-      paymentType,
-      paymentAmount,
-      remainingPaymentAmount,
-      totalPrice: getTotalPrice(),
-    });
-
     const customData = {
       businessName: "Pet Grooming Service",
-      description: paymentDescription,
+      description: "Full Payment for Grooming",
       themeColor: "#3399cc",
       prefill: {
-        name: subscriptionDetails?.petId?.owner?.name || "",
-        email: subscriptionDetails?.petId?.owner?.email || "",
-        contact: subscriptionDetails?.petId?.owner?.phone || "",
+        name: "",
+        email: "",
+        contact: "",
       },
     };
 
     const onPaymentSuccess = (response) => {
       const updatedData = {
-        ...formData,
+        ...data,
         details: {
-          ...formData.details,
+          ...data.details,
           payment: {
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_order_id: response.razorpay_order_id,
             razorpay_signature: response.razorpay_signature,
-            paymentType: paymentType,
-            amount: paymentAmount,
+            paymentType: "advance",
+            amount: amount,
             paidAt: new Date().toISOString(),
-            isPaid: paymentAmount > 0,
-            remainingAmount: remainingPaymentAmount,
-            isRemainingPaid: remainingPaymentAmount === 0,
+            isPaid: true,
+            remainingAmount: 0,
+            isRemainingPaid: true,
           },
         },
       };
@@ -223,7 +171,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
     };
 
     processPaymentFlow(
-      paymentType,
+      "advance",
       amount,
       orderData,
       customData,
@@ -233,14 +181,6 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
   };
 
   const handlePaymentSuccess = (updatedData, response) => {
-    setIsLoading(true);
-
-    console.log("Sending payment data to backend:", {
-      paymentType: updatedData.details.payment.paymentType,
-      amount: updatedData.details.payment.amount,
-      remainingAmount: updatedData.details.payment.remainingAmount,
-    });
-
     const paymentData = {
       razorpay_payment_id: response.razorpay_payment_id,
       razorpay_order_id: response.razorpay_order_id,
@@ -250,11 +190,33 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
 
     const onVerifySuccess = (data) => {
       console.log(data);
-      // console.log("Successfully saved visit with payment:", data.data);
-      dispatch(addGroomingVisit(updatedData));
-      alert("Payment successful and visit saved!");
-      navigate("/dashboard");
-      setIsLoading(false);
+      // Format data for grooming visit dispatch
+      const groomingData = {
+        petId: updatedData.petId,
+        visitType: updatedData.visitType,
+        discount: updatedData.details.discount || 0,
+        isSubscriptionAvailed: updatedData.details.isSubscriptionAvailed || false,
+        planId: updatedData.details.planId || null,
+        details: updatedData.details,
+      };
+
+      dispatch(addGroomingVisit(groomingData))
+        .then((result) => {
+          console.log("Save result:", result);
+          if (result?.payload?.success) {
+            alert("Payment successful and visit saved!");
+            navigate("/dashboard");
+            reset();
+          } else {
+            alert(result?.payload?.message || "Failed to save grooming visit");
+          }
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error saving grooming visit:", error);
+          alert("An error occurred: " + error.message);
+          setIsLoading(false);
+        });
     };
 
     const onVerifyError = (error) => {
@@ -265,85 +227,46 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
     paymentService.verifyPayment(paymentData, onVerifySuccess, onVerifyError);
   };
 
-  const onPaymentOptionSelect = (option) => {
-    handlePaymentOptionSelect(
-      option,
-      formData,
-      processVisitSave, // onAfterPayment
-      () => {}, // onPartialPayment
-      initializeRazorpay // onAdvancePayment
-    );
-  };
-
-  const onPartialPaymentConfirm = (advance, remaining) => {
-    handlePartialPaymentConfirm(advance, remaining, (adv, rem) => {
-      console.log("rem", rem);
-      initializeRazorpay("partial", adv, rem);
-    });
-  };
-
-  const processVisitSave = (data, paymentType) => {
+  const processGroomingVisitSave = (data) => {
     setIsLoading(true);
 
-    console.log("Processing visit save with data:", data);
-    console.log("Pet ID:", data.petId);
-    console.log("Visit Type ID:", data.visitType);
+    console.log("Processing grooming visit save with data:", data);
 
-    if (
-      !data.petId ||
-      typeof data.petId !== "string" ||
-      data.petId.trim() === ""
-    ) {
-      console.error("Invalid pet ID:", data.petId);
-      alert("Invalid pet ID. Please select a pet before proceeding.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (
-      !data.visitType ||
-      typeof data.visitType !== "string" ||
-      data.visitType.trim() === ""
-    ) {
-      console.error("Invalid visit type ID:", data.visitType);
-      alert("Invalid visit type. Please try again.");
-      setIsLoading(false);
-      return;
-    }
-
-    const requestBody = {
-      petId: data.petId.trim(),
-      visitType: data.visitType.trim(),
+    const groomingData = {
+      petId: data.petId,
+      visitType: data.visitType,
       discount: data.details.discount || 0,
       isSubscriptionAvailed: data.details.isSubscriptionAvailed || false,
       planId: data.details.planId || null,
       details: {
+        ...data.details,
         payment: {
-          paymentType: paymentType,
+          paymentType: "subscription",
           isPaid: false,
           amount: 0,
           paidAt: null,
           remainingAmount: getTotalPrice(),
-          isRemainingPaid: false,
+          isRemainingPaid: true,
         },
       },
     };
 
-    console.log("Saving visit with data:", requestBody);
+    console.log("Saving visit with data:", groomingData);
 
-    dispatch(addGroomingVisit(requestBody))
+    dispatch(addGroomingVisit(groomingData))
       .then((result) => {
         console.log("Save result:", result);
         if (result?.payload?.success) {
-          alert("Visit saved successfully");
+          alert("Visit saved successfully!");
           navigate("/dashboard");
+          reset();
         } else {
-          alert(result?.payload?.message || "Failed to save visit");
+          alert(result?.payload?.message || "Failed to save grooming visit");
         }
         setIsLoading(false);
       })
       .catch((error) => {
-        console.error("Error saving visit:", error);
+        console.error("Error saving grooming visit:", error);
         alert("An error occurred: " + error.message);
         setIsLoading(false);
       });
@@ -352,114 +275,31 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+        <div className="text-center space-y-4">
+          <div
+            className="animate-spin h-12 w-12 rounded-full mx-auto"
+            style={{
+              border: "4px solid rgba(133, 169, 71, 0.3)",
+              borderTop: "4px solid #3E7B27",
+            }}
+          />
+          <div className="space-y-2">
+            <p className="text-lg font-medium" style={{ color: "#123524" }}>
+              Loading Grooming Details
+            </p>
+            <p className="text-sm" style={{ color: "#85A947" }}>
+              Please wait while we fetch your information...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
-
-  //   <div className="hidescroller">
-  //     {subscriptionDetails ? (
-  //       <div className="mt-3 max-w-full mx-auto p-6 rounded-2xl">
-  //         <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
-  //           Subscription Details
-  //         </h2>
-
-  //         <div className="space-y-3">
-  //           <div className="flex justify-between text-gray-600">
-  //             <span className="font-medium">Pet Name:</span>
-  //             <span>{subscriptionDetails?.petId?.name}</span>
-  //           </div>
-
-  //           <div className="flex justify-between text-gray-600">
-  //             <span className="font-medium">Owner Name:</span>
-  //             <span>{subscriptionDetails?.petId?.owner?.name}</span>
-  //           </div>
-
-  //           <div className="flex justify-between text-gray-600">
-  //             <span className="font-medium">Number of Groomings left:</span>
-  //             <span>{subscriptionDetails?.numberOfGroomings}</span>
-  //           </div>
-  //         </div>
-
-  //         <div className="mt-6 flex justify-between gap-4">
-  //           <button
-  //             onClick={() => handleAvail(subscriptionDetails?.planId?._id)}
-  //             className="w-1/2 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-  //           >
-  //             {isSubscriptionAvailed ? "Not Avail" : "Avail"}
-  //           </button>
-  //         </div>
-  //       </div>
-  //     ) : (
-  //       <div className="mt-3 max-w-full mx-auto p-6 rounded-2xl">
-  //         <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
-  //           The pet has no active subscription for Grooming
-  //         </h2>
-  //       </div>
-  //     )}
-  //     <div className="max-w-full flex justify-center">
-  //       <form
-  //         onSubmit={handleSubmit}
-  //         className="bg-white p-6 rounded-lg shadow-md w-full space-y-4"
-  //       >
-  //         {!isSubscriptionAvailed ? (
-  //           <div className="flex w-full items-center justify-between px-5">
-  //             <div>
-  //               <label className="block text-gray-600 mb-1">Price</label>
-  //               <div>{visitPurposeDetails?.price}</div>
-  //             </div>
-  //             <div>
-  //               <label className="block text-gray-600 mb-1">Discount</label>
-  //               <input
-  //                 type="number"
-  //                 max={visitPurposeDetails?.price}
-  //                 min={0}
-  //                 value={discount}
-  //                 onChange={handleDiscountChange}
-  //                 className="w-full p-2 border rounded-lg"
-  //                 placeholder="Enter discount"
-  //               />
-  //             </div>
-  //           </div>
-  //         ) : null}
-  //         <div className="flex mt-3 items-center space-x-4">
-  //           <label className="text-gray-600">Total Price:</label>
-  //           <div className="text-lg font-semibold">
-  //             ₹{getTotalPrice()}
-  //           </div>
-  //         </div>
-  //         <button
-  //           type="submit"
-  //           disabled={isLoading}
-  //           className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition"
-  //         >
-  //           {getTotalPrice() === 0 ? "Submit" : "Proceed to Payment"}
-  //         </button>
-  //       </form>
-  //     </div>
-
-  //     {/* Payment Modals using modular components */}
-  //     <PaymentOptionModal
-  //       isOpen={showPaymentModal}
-  //       onClose={() => setShowPaymentModal(false)}
-  //       onSelectOption={onPaymentOptionSelect}
-  //       totalPrice={getTotalPrice()}
-  //     />
-
-  //     <PartialPaymentModal
-  //       isOpen={showPartialPaymentModal}
-  //       onClose={() => setShowPartialPaymentModal(false)}
-  //       onConfirm={onPartialPaymentConfirm}
-  //       totalPrice={getTotalPrice()}
-  //     />
-  //   </div>
-  // );
   return (
     <div
       className="hidescroller p-4"
       style={{
-        
         minHeight: "100vh",
       }}
     >
@@ -467,7 +307,6 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
         <div
           className="mt-3 max-w-full mx-auto p-8 rounded-2xl shadow-xl mb-6"
           style={{
-            
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}
@@ -659,7 +498,6 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
         <div
           className="mt-3 max-w-full mx-auto p-8 rounded-2xl shadow-xl mb-6 text-center"
           style={{
-          
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}
@@ -690,10 +528,9 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
       {/* Grooming Form */}
       <div className="max-w-full flex justify-center">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           className="p-8 rounded-2xl shadow-2xl w-full space-y-6 backdrop-blur-sm"
           style={{
-            
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}
@@ -772,8 +609,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
                     type="number"
                     max={visitPurposeDetails?.price}
                     min={0}
-                    value={discount}
-                    onChange={handleDiscountChange}
+                    {...register("discount", { min: 0, valueAsNumber: true })}
                     className="w-full pl-8 pr-4 py-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-0"
                     style={{
                       backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -801,7 +637,8 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
             <div
               className="p-6 rounded-xl text-center"
               style={{
-                
+                background:
+                  "linear-gradient(135deg, rgba(62, 123, 39, 0.1) 0%, rgba(133, 169, 71, 0.1) 100%)",
                 border: "2px solid rgba(133, 169, 71, 0.3)",
               }}
             >
@@ -979,21 +816,6 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
           </button>
         </form>
       </div>
-
-      {/* Payment Modals using modular components */}
-      <PaymentOptionModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        onSelectOption={onPaymentOptionSelect}
-        totalPrice={getTotalPrice()}
-      />
-
-      <PartialPaymentModal
-        isOpen={showPartialPaymentModal}
-        onClose={() => setShowPartialPaymentModal(false)}
-        onConfirm={onPartialPaymentConfirm}
-        totalPrice={getTotalPrice()}
-      />
     </div>
   );
 };

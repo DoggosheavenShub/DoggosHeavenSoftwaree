@@ -3,29 +3,7 @@ import React from "react";
 const VaccinationPopup = ({ isOpen, onClose, vaccinations }) => {
   if (!isOpen) return null;
 
-  // return (
-  //   <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-  //     <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
-  //       <h2 className="text-lg font-semibold text-gray-800">Vaccination Details</h2>
 
-  //       <ul className="mt-4 list-disc pl-5 text-gray-600">
-  //         {vaccinations?.map((vaccine, index) => (
-  //           <li key={index}>
-  //             <span className="font-medium">{vaccine.name}</span> -
-  //             {vaccine.numberOfDose} dose
-  //           </li>
-  //         ))}
-  //       </ul>
-
-  //       <button
-  //         className="mt-4 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-  //         onClick={onClose}
-  //       >
-  //         Close
-  //       </button>
-  //     </div>
-  //   </div>
-  // );
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-[#123524]/60 backdrop-blur-sm z-50">
       <div className="bg-white/95 backdrop-blur-lg p-8 rounded-2xl shadow-2xl max-w-lg w-full mx-4 relative border border-[#85A947]/20">

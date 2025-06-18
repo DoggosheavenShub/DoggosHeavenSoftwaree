@@ -81,7 +81,6 @@ const DogPark = ({ _id, visitPurposeDetails }) => {
         const result = await verifyRes.json();
 
         if (result.success) {
-          // Payment successful, now save visit
           saveVisitAfterPayment(visitData);
         } else {
           alert("❌ Payment Failed!");

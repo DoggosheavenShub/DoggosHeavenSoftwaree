@@ -278,39 +278,3 @@ const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
 
 export default PrescriptionPopup;
 
-// Usage Example:
-/*
-import React, { useState } from 'react';
-import SubscriptionPopup from './SubscriptionPopup';
-
-const ParentComponent = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedPetId, setSelectedPetId] = useState(null);
-
-  const handleOpenPopup = (petId) => {
-    setSelectedPetId(petId);
-    setIsPopupOpen(true);
-  };
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
-    setSelectedPetId(null);
-  };
-
-  return (
-    <div>
-      <button onClick={() => handleOpenPopup('pet123')}>
-        View Pet Subscriptions
-      </button>
-      
-      <SubscriptionPopup
-        isOpen={isPopupOpen}
-        onClose={handleClosePopup}
-        petId={selectedPetId}
-      />
-    </div>
-  );
-};
-
-export default ParentComponent;
-*/
