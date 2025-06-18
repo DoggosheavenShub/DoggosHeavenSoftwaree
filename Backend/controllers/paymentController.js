@@ -124,7 +124,7 @@ const verifyPayment2 = async (req, res) => {
 const verifyPendingPayment = async (req, res) => {
   try {
    
-    const { razorpay_payment_id, visitId } = req.body;
+    const { razorpay_payment_id, visitId  } = req.body;
 
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
 

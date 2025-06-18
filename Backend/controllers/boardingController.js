@@ -253,6 +253,8 @@ exports.getBoardingDetails = async (req, res) => {
       });
     }
 
+
+
     const diffInMs = Math.abs(
       new Date().setHours(0, 0, 0, 0) -
         new Date(boardingDetails.entryTime).setHours(0, 0, 0, 0)
@@ -260,7 +262,7 @@ exports.getBoardingDetails = async (req, res) => {
 
     const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
     const actualnumberOfDays = diffInDays + 1;
-
+    
     return res.json({
       boardingDetails,
       actualnumberOfDays,
@@ -278,8 +280,9 @@ exports.getBoardingDetails = async (req, res) => {
 
 exports.updateHostelVisit = async (req, res) => {
   try {
-    const { visitId, days, discount } = req.body;
-
+    const { visitId,extraDaysPrice,days} = req.body;
+    console.log(req.body)
+    
     const visitDetails = await Visit.findOne({
       _id: visitId,
     }).populate({
@@ -287,26 +290,12 @@ exports.updateHostelVisit = async (req, res) => {
       select: "price",
     });
 
-    if (discount < 0)
-      return res.json({
-        success: false,
-        message: "Discount cannot be negative",
-      });
-
-    if (discount >= visitDetails?.visitType?.price) {
-      return res.json({
-        success: false,
-        message: "Discount must be less than original price",
-      });
-    }
-
-    const extradaysPrice = days * (visitDetails?.visitType?.price - discount);
-
     const details = visitDetails.details;
 
+    details.extradaysprice = extraDaysPrice;
     details.extradays = days;
-    details.extradaysprice = extradaysPrice;
-
+    details.extradayspricepaid = true
+    
     visitDetails.details = details;
 
     visitDetails.markModified("details");
@@ -317,6 +306,7 @@ exports.updateHostelVisit = async (req, res) => {
       success: true,
       message: "Visit Details updated successfully",
     });
+
   } catch (error) {
     console.log("Error in visit details update controlller", error);
     return res.status(500).json({

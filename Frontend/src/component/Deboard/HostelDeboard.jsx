@@ -2,38 +2,26 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getBoardingDetails,
-  updateHostelVisit,
   hostelDeboarding,
+  updateHostelVisit,
 } from "../../store/slices/deboardSlice";
 import { useNavigate } from "react-router-dom";
 import { loadRazorpayScript } from "../../utils/loadRazorpayScript";
+import { getSubscriptionDetails } from "../../store/slices/subscriptionSlice";
 
 const HostelDeboard = ({ _id, setboardingid }) => {
   const dispatch = useDispatch();
   const { boardingDetails } = useSelector((state) => state.deboard);
+  const { subscriptionDetails } = useSelector((state) => state.subscription);
+
+  const [discount, setDiscount] = useState(0);
+
   const [loading, setLoading] = useState(false);
 
   const [actualnumberofdays, setactualnumberofdays] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
 
   const navigate = useNavigate();
-
-  const handleVisitUpdate = () => {
-    const data = {};
-    data.visitId = boardingDetails?.visitId;
-    data.days = Math.abs(actualnumberofdays - boardingDetails?.numberOfDays);
-    setLoading(true);
-
-    dispatch(updateHostelVisit(data))
-      .then((data) => {
-        if (data?.payload?.success) {
-          alert("Visit Updated now you can deboard");
-        } else alert(data?.payload?.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
 
   const handleDeboard = () => {
     setLoading(true);
@@ -51,21 +39,65 @@ const HostelDeboard = ({ _id, setboardingid }) => {
       });
   };
 
+  const handleVisitUpdate = () => {
+    const data = {};
+    data.visitId = boardingDetails?.visitId;
+    data.days = Math.abs(actualnumberofdays - subscriptionDetails?.daysLeft);
+    data.extraDaysPrice = getDiscountedPrice(discount);
+
+    setLoading(true);
+
+    dispatch(updateHostelVisit(data))
+      .then((data) => {
+        if (data?.payload?.success) {
+          alert("Visit Updated now you can deboard");
+          navigate(0);
+        } else alert(data?.payload?.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
     dispatch(getBoardingDetails(_id)).then((data) => {
       if (data?.payload?.success) {
         setactualnumberofdays(data?.payload?.actualnumberOfDays);
+      } else {
+        alert(data?.payload?.message);
       }
     });
   }, []);
 
   useEffect(() => {
+    if (boardingDetails?.visitId?.details?.isSubscriptionAvailed) {
+      const params = new URLSearchParams();
+      params.append("petId", boardingDetails?.petId.trim());
+      params.append("visitType", boardingDetails?.boardingType?._id);
+      const queryString = params.toString();
+      dispatch(getSubscriptionDetails(queryString)).then((data) => {
+        console.log(data);
+      });
+    }
+  }, [boardingDetails]);
+
+  const getDiscountedPrice = (discount) => {
+    console.log(discount);
+    const amount =
+      (actualnumberofdays - subscriptionDetails?.daysLeft) *
+      (boardingDetails?.boardingType?.price - discount);
+
+    return amount;
+  };
+
+  useEffect(() => {
     setTotalAmount(
       (boardingDetails?.visitId?.details?.price /
         boardingDetails?.numberOfDays) *
-        (actualnumberofdays - boardingDetails?.numberOfDays) +  boardingDetails?.visitId?.details?.payment?.remainingAmount
+        (actualnumberofdays - boardingDetails?.numberOfDays) +
+        boardingDetails?.visitId?.details?.payment?.remainingAmount
     );
-  }, [boardingDetails,actualnumberofdays]);
+  }, [boardingDetails, actualnumberofdays]);
 
   const startPayment = async (amount) => {
     const razorpayLoaded = await loadRazorpayScript(
@@ -77,7 +109,6 @@ const HostelDeboard = ({ _id, setboardingid }) => {
       return;
     }
 
-    // 1. Create order on backend
     const res = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/v1/payments/create-order`,
       {
@@ -128,7 +159,7 @@ const HostelDeboard = ({ _id, setboardingid }) => {
         const result = await verifyRes.json();
 
         if (result.success) {
-          alert("Payment Successfull");
+          handleVisitUpdate();
         } else {
           alert("❌ Payment Failed!");
         }
@@ -140,127 +171,6 @@ const HostelDeboard = ({ _id, setboardingid }) => {
     rzp.open();
   };
 
-  // return (
-  //   <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-1/2 max-w-lg   flex flex-col p-6">
-  //     {/* Header */}
-  //     <div className="flex justify-between items-center mb-4">
-  //       <h2 className="text-xl font-semibold text-gray-800">
-  //         Boarding Details
-  //       </h2>
-  //       <button
-  //         onClick={() => setboardingid("")}
-  //         className="text-gray-500 hover:text-gray-700 focus:outline-none"
-  //       >
-  //         <svg
-  //           className="w-6 h-6"
-  //           fill="none"
-  //           stroke="currentColor"
-  //           viewBox="0 0 24 24"
-  //         >
-  //           <path
-  //             strokeLinecap="round"
-  //             strokeLinejoin="round"
-  //             strokeWidth="2"
-  //             d="M6 18L18 6M6 6l12 12"
-  //           />
-  //         </svg>
-  //       </button>
-  //     </div>
-
-  //     {/* Content */}
-  //     <div className="flex-1 flex flex-col justify-center space-y-4">
-  //       <div className="flex justify-between items-center p-3 bg-gray-100 rounded-md">
-  //         <span className="text-gray-600 font-medium">
-  //           Initial Number of Days:
-  //         </span>
-  //         <span className="text-gray-800">{boardingDetails?.numberOfDays}</span>
-  //       </div>
-  //       <div className="flex justify-between items-center p-3 bg-gray-100 rounded-md">
-  //         <span className="text-gray-600 font-medium">
-  //           Actual Number of Days:
-  //         </span>
-  //         <span className="text-gray-800">{actualnumberofdays}</span>
-  //       </div>
-  //       <div className="flex justify-between items-center p-3 bg-gray-100 rounded-md">
-  //         <span className="text-gray-600 font-medium">Entry Date:</span>
-  //         <span className="text-gray-800">
-  //           {boardingDetails?.entryTime.substring(0, 10)}
-  //         </span>
-  //       </div>
-  //       {actualnumberofdays <= boardingDetails?.numberOfDays ? (
-  //         <div className="flex justify-between items-center p-3 bg-gray-100 rounded-md">
-  //           <button
-  //             disabled={loading}
-  //             onClick={handleDeboard}
-  //             className={`ml-4 px-4 py-1.5 text-sm ${
-  //               loading
-  //                 ? "bg-gray-400 cursor-not-allowed"
-  //                 : "bg-red-500 hover:bg-red-600"
-  //             } text-white rounded-md transition`}
-  //           >
-  //             {loading ? "Processing..." : "Deboard"}
-  //           </button>
-  //         </div>
-  //       ) : boardingDetails?.visitId?.details?.extradaysprice ? (
-  //         <div className="flex justify-between items-center p-3 bg-gray-100 rounded-md">
-  //           <button
-  //             onClick={handleDeboard}
-  //             disabled={loading}
-  //             className={`ml-4 px-4 py-1.5 text-sm ${
-  //               loading
-  //                 ? "bg-gray-400 cursor-not-allowed"
-  //                 : "bg-red-500 hover:bg-red-600"
-  //             } text-white rounded-md transition`}
-  //           >
-  //             {loading ? "Processing..." : "Deboard"}
-  //           </button>
-  //         </div>
-  //       ) : (
-  //         <div>
-  //           {" "}
-  //           <div className="flex w-full items-center justify-between px-5">
-  //             <div>
-  //               <label className="block text-gray-600 mb-1">Price</label>
-  //               <div>{boardingDetails?.boardingType.price}</div>
-  //             </div>
-  //             <div>
-  //               <label className="block text-gray-600 mb-1">Discount</label>
-  //               <input
-  //                 type="number"
-  //                 value={discount}
-  //                 onChange={(e) => setdiscount(e.target.value)}
-  //                 className="w-full p-2 border rounded-lg"
-  //                 placeholder="Enter discount"
-  //               />
-  //             </div>
-  //           </div>
-  //           <div className="flex mt-3 items-center space-x-4">
-  //             <label className="text-gray-600">Total Price:</label>
-  //             <div className="text-lg font-semibold">
-  //               {boardingDetails?.boardingType?.price - discount
-  //                 ? (boardingDetails?.boardingType?.price - discount) *
-  //                   Math.abs(actualnumberofdays - boardingDetails?.numberOfDays)
-  //                 : 0}
-  //             </div>
-  //           </div>
-  //           <div className="flex justify-between items-center p-3 bg-gray-100 rounded-md">
-  //             <button
-  //               disabled={loading}
-  //               onClick={handleVisitUpdate}
-  //               className={`ml-4 px-4 py-1.5 text-sm ${
-  //                 loading
-  //                   ? "bg-gray-400 cursor-not-allowed"
-  //                   : "bg-red-500 hover:bg-red-600"
-  //               } text-white rounded-md transition`}
-  //             >
-  //               {loading ? "Processing..." : "Pay Overdue Amount"}
-  //             </button>
-  //           </div>
-  //         </div>
-  //       )}
-  //     </div>
-  //   </div>
-  // );
   return (
     <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl w-11/12 sm:w-1/2 max-w-lg flex flex-col p-8 border border-[#85A947]/20">
       {/* Header */}
@@ -292,142 +202,287 @@ const HostelDeboard = ({ _id, setboardingid }) => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col justify-center space-y-6">
-        <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#EFE3C2]/40 to-[#85A947]/10 rounded-xl border border-[#85A947]/20">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-[#3E7B27] rounded-full"></div>
-            <span className="text-[#3E7B27] font-bold text-sm">
-              Initial Number of Days:
-            </span>
-          </div>
-          <span className="text-[#123524] font-semibold text-lg">
-            {boardingDetails?.numberOfDays}
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-            <span className="text-[#3E7B27] font-bold text-sm">
-              Actual Number of Days:
-            </span>
-          </div>
-          <span className="text-[#123524] font-semibold text-lg">
-            {actualnumberofdays}
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#EFE3C2]/40 to-[#85A947]/10 rounded-xl border border-[#85A947]/20">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-[#3E7B27] rounded-full"></div>
-            <span className="text-[#3E7B27] font-bold text-sm">
-              Entry Date:
-            </span>
-          </div>
-          <span className="text-[#123524] font-semibold text-lg">
-            {boardingDetails?.entryTime.substring(0, 10)}
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#EFE3C2]/40 to-[#85A947]/10 rounded-xl border border-[#85A947]/20">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-[#3E7B27] rounded-full"></div>
-            <span className="text-[#3E7B27] font-bold text-sm">
-              Extra Days Price
-            </span>
-          </div>
-          <span className="text-[#123524] font-semibold text-lg">
-             {!boardingDetails?.visitId?.details?.payment?.isRemainingPaid ? (boardingDetails?.visitId?.details?.price /
-              boardingDetails?.numberOfDays) *
-              (actualnumberofdays - boardingDetails?.numberOfDays):0}
-          </span>
-        </div>
-        <div className="p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-          <div className="flex items-center justify-between">
+      {boardingDetails?.visitId?.details?.isSubscriptionAvailed ? (
+        <div>
+          <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-              <span className="text-[#3E7B27] font-bold text-lg">
-                Previous Remaining Amount:
+              <span className="text-[#3E7B27] font-bold text-sm">
+                Subscription Used
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-[#123524] font-semibold">
-                {boardingDetails?.visitId?.details?.payment?.remainingAmount ||
-                  0}
-              </span>
-            </div>
+            <span className="text-[#123524] font-semibold text-lg">Yes</span>
           </div>
+
+          {!boardingDetails?.visitId?.details?.extradayspricepaid ? (
+            <>
+              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                  <span className="text-[#3E7B27] font-bold text-sm">
+                    Number of Days:
+                  </span>
+                </div>
+                <span className="text-[#123524] font-semibold text-lg">
+                  {actualnumberofdays}
+                </span>
+              </div>
+              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                  <span className="text-[#3E7B27] font-bold text-sm">
+                    Days Left of Subscription
+                  </span>
+                </div>
+                <span className="text-[#123524] font-semibold text-lg">
+                  {subscriptionDetails?.daysLeft}
+                </span>
+              </div>
+              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                  <span className="text-[#3E7B27] font-bold text-sm">
+                    Hostel Price / day
+                  </span>
+                </div>
+                <span className="text-[#123524] font-semibold text-lg">
+                  {boardingDetails?.boardingType?.price}
+                </span>
+              </div>
+
+              <div className="space-y-2 mt-2">
+                <label
+                  className="block text-sm font-medium"
+                  style={{ color: "#3E7B27" }}
+                >
+                  Apply Discount
+                </label>
+                <div className="relative bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+                  <span
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lg font-medium"
+                    style={{ color: "#85A947" }}
+                  >
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    max={boardingDetails?.boardingType?.price}
+                    onChange={(e) => setDiscount(Number(e.target.value))}
+                    value={discount}
+                    min={0}
+                    className="w-full pl-8 pr-4 py-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-0"
+                  />
+                </div>
+              </div>
+
+              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                  <span className="text-[#3E7B27] font-bold text-sm">
+                    Amount To Pay
+                  </span>
+                </div>
+                <span className="text-[#123524] font-semibold text-lg">
+                  {getDiscountedPrice(discount)}
+                </span>
+              </div>
+              <div className="flex justify-center pt-4">
+                <button
+                  disabled={loading}
+                  onClick={() => startPayment(getDiscountedPrice(discount))}
+                  className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
+                    loading
+                      ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                      : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                  }`}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Processing...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <span>Pay Remaining Amount</span>
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="flex justify-center pt-4">
+              <button
+                disabled={loading}
+                onClick={handleDeboard}
+                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
+                  loading
+                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                    <span>Deboard Pet</span>
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                )}
+              </button>
+            </div>
+          )}
         </div>
-        <div className="p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-          <div className="flex items-center justify-between">
+      ) : (
+        <div className="flex-1 flex flex-col justify-center space-y-6">
+          <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#EFE3C2]/40 to-[#85A947]/10 rounded-xl border border-[#85A947]/20">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-[#3E7B27] rounded-full"></div>
+              <span className="text-[#3E7B27] font-bold text-sm">
+                Initial Number of Days:
+              </span>
+            </div>
+            <span className="text-[#123524] font-semibold text-lg">
+              {boardingDetails?.numberOfDays}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-              <span className="text-[#3E7B27] font-bold text-lg">
-                Total Amount To Pay
+              <span className="text-[#3E7B27] font-bold text-sm">
+                Actual Number of Days:
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-[#123524] font-semibold">
-                {!boardingDetails?.visitId?.details?.payment?.isRemainingPaid ? totalAmount:0}
+            <span className="text-[#123524] font-semibold text-lg">
+              {actualnumberofdays}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#EFE3C2]/40 to-[#85A947]/10 rounded-xl border border-[#85A947]/20">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-[#3E7B27] rounded-full"></div>
+              <span className="text-[#3E7B27] font-bold text-sm">
+                Entry Date:
               </span>
+            </div>
+            <span className="text-[#123524] font-semibold text-lg">
+              {boardingDetails?.entryTime.substring(0, 10)}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center p-5 bg-gradient-to-r from-[#EFE3C2]/40 to-[#85A947]/10 rounded-xl border border-[#85A947]/20">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-[#3E7B27] rounded-full"></div>
+              <span className="text-[#3E7B27] font-bold text-sm">
+                Extra Days Price
+              </span>
+            </div>
+            <span className="text-[#123524] font-semibold text-lg">
+              {actualnumberofdays - boardingDetails?.numberOfDays > 0
+                ? (boardingDetails?.visitId?.details?.price /
+                    boardingDetails?.numberOfDays) *
+                  (actualnumberofdays - boardingDetails?.numberOfDays)
+                : 0}
+            </span>
+          </div>
+
+          <div className="p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                <span className="text-[#3E7B27] font-bold text-lg">
+                  Previous Remaining Amount:
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-[#123524] font-semibold">
+                  {boardingDetails?.visitId?.details?.payment
+                    ?.remainingAmount || 0}
+                </span>
+              </div>
             </div>
           </div>
+
+          <div className="p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                <span className="text-[#3E7B27] font-bold text-lg">
+                  Total Amount To Pay
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-[#123524] font-semibold">
+                  {!boardingDetails?.visitId?.details?.payment?.isRemainingPaid
+                    ? totalAmount
+                    : 0}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {!boardingDetails?.visitId?.details?.payment?.isRemainingPaid ||
+          boardingDetails?.visitId?.details?.payment?.remainingAmount !== 0 ? (
+            <div className="flex justify-center pt-4">
+              <button
+                disabled={loading}
+                onClick={() => startPayment(totalAmount)}
+                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
+                  loading
+                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                    <span>Pay Remaining Amount</span>
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-center pt-4">
+              <button
+                disabled={loading}
+                onClick={handleDeboard}
+                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
+                  loading
+                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                    <span>Deboard Pet</span>
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                )}
+              </button>
+            </div>
+          )}
         </div>
-        {!boardingDetails?.visitId?.details?.payment?.isRemainingPaid ||
-        boardingDetails?.visitId?.details?.payment?.remainingAmount !== 0 ? (
-          <div className="flex justify-center pt-4">
-            <button
-              disabled={loading}
-              onClick={() => startPayment(totalAmount)}
-              className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
-                loading
-                  ? "bg-[#123524]/50 text-white cursor-not-allowed"
-                  : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
-              }`}
-            >
-              {loading ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Processing...</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                  <span>Pay Remaining Amount</span>
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-              )}
-            </button>
-          </div>
-        ) : (
-          <div className="flex justify-center pt-4">
-            <button
-              disabled={loading}
-              onClick={handleDeboard}
-              className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
-                loading
-                  ? "bg-[#123524]/50 text-white cursor-not-allowed"
-                  : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
-              }`}
-            >
-              {loading ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Processing...</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                  <span>Deboard Pet</span>
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-              )}
-            </button>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

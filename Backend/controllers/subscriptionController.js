@@ -195,7 +195,7 @@ exports.buySubscription = async (req, res) => {
 exports.getSubscriptionDetails = async (req, res) => {
   try {
     const { petId, visitType } = req.query;
-
+    
     if (!petId) {
       return res.status(400).json({
         success: false,
@@ -218,6 +218,8 @@ exports.getSubscriptionDetails = async (req, res) => {
         },
       },
     ])
+
+  
     
     subscriptions=subscriptions.filter((sub)=>sub.planId?.subscriptionType?.toString() === visitType.toString());
 

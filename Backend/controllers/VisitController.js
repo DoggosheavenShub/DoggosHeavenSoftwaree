@@ -696,7 +696,7 @@ exports.addHostelVisit = async (req, res) => {
       planId,
       price,
       visitType,
-       details: details_new,
+      details: details_new,
     } = req.body;
 
 
@@ -740,15 +740,7 @@ exports.addHostelVisit = async (req, res) => {
 
       pricee = (Hostel?.price - discount) * numberOfDays;
     }
-    //  else {
-    //   console.log("hii")
-    //   return res.json({
-    //     success: false,
-    //     message: "Either avail subscription or buy for some days",
-    //   });
-    // }
      
-
     const details = {};
 
     details["isSubscriptionAvailed"] = isSubscriptionAvailed;
