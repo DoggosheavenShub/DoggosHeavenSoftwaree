@@ -335,12 +335,7 @@ const DogHistory = () => {
                         {petDetails.owner.email}
                       </p>
                     </div>
-                    <div className="p-4 rounded-xl bg-white/80 hover:bg-white transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-md">
-                      <p className="font-bold text-[#3E7B27] mb-1">Segment</p>
-                      <p className="text-[#123524] font-medium">
-                        {petDetails.owner.segment}
-                      </p>
-                    </div>
+                  
                     {petDetails.owner.address && (
                       <div className="p-4 rounded-xl bg-white/80 hover:bg-white transition-all duration-300 border border-[#85A947]/20 hover:border-[#3E7B27]/40 hover:shadow-md col-span-2">
                         <p className="font-bold text-[#3E7B27] mb-1">Address</p>

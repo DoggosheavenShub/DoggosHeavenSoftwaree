@@ -9,7 +9,6 @@ const EditOwnerInfo = ({ owner }) => {
       name: "",
       phone: "",
       email: "",
-      segment: "",
       address: "",
     },
   });
@@ -23,7 +22,6 @@ const EditOwnerInfo = ({ owner }) => {
         name: owner.name || "",
         phone: owner.phone || "",
         email: owner.email || "",
-        segment: owner.segment || "",
         address: owner.address || "",
       });
     }
@@ -48,103 +46,7 @@ const EditOwnerInfo = ({ owner }) => {
       });
   };
 
-  // return (
-  //   <div className="w-[95%] mt-8 mx-auto">
-  //     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-  //       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  //         <div>
-  //           <label
-  //             htmlFor="ownerName"
-  //             className="block text-sm font-medium text-gray-700"
-  //           >
-  //             Owner Name
-  //           </label>
-  //           <input
-  //             type="text"
-  //             id="name"
-  //             {...register("name", { required: true })}
-  //             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-  //           />
-  //         </div>
 
-  //         <div>
-  //           <label
-  //             htmlFor="phone"
-  //             className="block text-sm font-medium text-gray-700"
-  //           >
-  //             Phone
-  //           </label>
-  //           <input
-  //             type="tel"
-  //             id="phone"
-  //             {...register("phone", {
-  //               required: true,
-  //               pattern: /^[0-9]{10}$/,
-  //             })}
-  //             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-  //           />
-  //         </div>
-
-  //         <div>
-  //           <label
-  //             htmlFor="email"
-  //             className="block text-sm font-medium text-gray-700"
-  //           >
-  //             Email
-  //           </label>
-  //           <input
-  //             type="email"
-  //             id="email"
-  //             {...register("email")}
-  //             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-  //           />
-  //         </div>
-
-  //         <div>
-  //           <label
-  //             htmlFor="segment"
-  //             className="block text-sm font-medium text-gray-700"
-  //           >
-  //             Segment
-  //           </label>
-  //           <select
-  //             id="segment"
-  //             {...register("segment", { required: true })}
-  //             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-  //           >
-  //             <option value="Day Care">Day Care</option>
-  //             <option value="Veterinary">Veterinary</option>
-  //           </select>
-  //         </div>
-  //       </div>
-
-  //       <div>
-  //         <label
-  //           htmlFor="address"
-  //           className="block text-sm font-medium text-gray-700"
-  //         >
-  //           Address
-  //         </label>
-  //         <textarea
-  //           id="address"
-  //           {...register("address", { required: true })}
-  //           rows={3}
-  //           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-  //         />
-  //       </div>
-
-  //       <div className="mt-6">
-  //         <button
-  //           disabled={isLoading}
-  //           type="submit"
-  //           className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-  //         >
-  //           Save Changes
-  //         </button>
-  //       </div>
-  //     </form>
-  //   </div>
-  // );
   return (
     <div className="w-[95%] mt-8 mx-auto">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -217,27 +119,6 @@ const EditOwnerInfo = ({ owner }) => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label
-                htmlFor="segment"
-                className="block text-sm font-bold text-[#3E7B27] mb-2"
-              >
-                Service Segment
-              </label>
-              <div className="relative">
-                <select
-                  id="segment"
-                  {...register("segment", { required: true })}
-                  className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200 appearance-none cursor-pointer"
-                >
-                  <option value="Day Care">Day Care</option>
-                  <option value="Veterinary">Veterinary</option>
-                </select>
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#3E7B27]"></div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="mt-8 space-y-2">

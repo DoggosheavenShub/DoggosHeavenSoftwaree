@@ -2,14 +2,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { addPet } from "../../store/slices/petSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const PetForm = () => {
   const { addPetLoading } = useSelector((state) => state.pets);
-  const { register, handleSubmit, reset, formState: { errors },
-} = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
   const [pets, setPets] = useState([{ vaccinations: [] }]);
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const onSubmit = async (data) => {
     dispatch(addPet(data))
       .then((data) => {
@@ -17,7 +22,8 @@ const PetForm = () => {
           alert("Data saved successfully");
           reset();
           setPets([{}]);
-        } else alert("Error saving data");
+          navigate("/history");
+        } else alert(data?.payload?.message);
       })
       .catch((err) => {
         alert("Error saving data");
@@ -102,7 +108,6 @@ const PetForm = () => {
     setPets(newPets);
   };
 
-
   if (addPetLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10">
@@ -155,39 +160,39 @@ const PetForm = () => {
                   </div>
                 </div>
 
-   <div className="space-y-2">
-  <label
-    htmlFor="phone"
-    className="block text-sm font-bold text-[#3E7B27] mb-2"
-  >
-    Phone Number
-  </label>
-  <div className="relative">
-    <input
-      type="tel"
-      id="phone"
-      maxLength={10}
-      {...register("phone", {
-        required: "Phone number is required",
-        pattern: {
-          value: /^[0-9]{10}$/,
-          message: "Enter a valid 10-digit phone number",
-        },
-      })}
-      className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
-      placeholder="Phone number"
-    />
-    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
-  </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-bold text-[#3E7B27] mb-2"
+                  >
+                    Phone Number
+                  </label>
+                  
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      id="phone"
+                      maxLength={10}
+                      {...register("phone", {
+                        required: "Phone number is required",
+                        pattern: {
+                          value: /^[0-9]{10}$/,
+                          message: "Enter a valid 10-digit phone number",
+                        },
+                      })}
+                      className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+                      placeholder="Phone number"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
+                  </div>
 
-  {/* ✅ Inline error display */}
-  {errors.phone && (
-    <p className="text-red-600 text-sm font-medium mt-1">
-      {errors.phone.message}
-    </p>
-  )}
-</div>
-
+                  {/* ✅ Inline error display */}
+                  {errors.phone && (
+                    <p className="text-red-600 text-sm font-medium mt-1">
+                      {errors.phone.message}
+                    </p>
+                  )}
+                </div>
 
                 <div className="space-y-2">
                   <label
@@ -205,28 +210,6 @@ const PetForm = () => {
                       placeholder="Enter email address"
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="segment"
-                    className="block text-sm font-bold text-[#3E7B27] mb-2"
-                  >
-                    Service Segment
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="segment"
-                      {...register("segment", { required: true })}
-                      className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200 appearance-none cursor-pointer"
-                    >
-                      <option value="Day Care">Day Care</option>
-                      <option value="Veterinary">Veterinary</option>
-                    </select>
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#3E7B27]"></div>
-                    </div>
                   </div>
                 </div>
               </div>

@@ -11,7 +11,7 @@ exports.addPet = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { pets, ownerName, phone, email, address, segment } = req.body;
+    const { pets, ownerName, phone, email, address } = req.body;
 
     
     let owner = await Owner.findOne({ email });
@@ -24,7 +24,6 @@ exports.addPet = async (req, res) => {
             phone,
             email,
             address,
-            segment,
             pets: [],
           },
         ],
@@ -445,7 +444,6 @@ exports.editOwnerDetails = async (req, res) => {
       phone,
       email,
       address,
-      segment,
       id
     } = req.body;
 
@@ -453,8 +451,7 @@ exports.editOwnerDetails = async (req, res) => {
       !name ||
       !phone ||
       !email ||
-      !address ||
-      !segment 
+      !address 
     ) {
       return res.json({
         success: false,
@@ -467,8 +464,7 @@ exports.editOwnerDetails = async (req, res) => {
       name,
       phone,
       email,
-      address,
-      segment
+      address
     },{ new: true, runValidators: true });
 
 
