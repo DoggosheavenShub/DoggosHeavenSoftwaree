@@ -59,7 +59,7 @@ const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-[#123524]/60 backdrop-blur-sm z-50">
-      <div className="bg-white/95 backdrop-blur-lg p-8 rounded-2xl shadow-2xl max-w-lg w-full mx-4 relative border border-[#85A947]/20">
+      <div className="bg-white/95 backdrop-blur-lg max-h-[80%] overflow-scroll p-8 rounded-2xl shadow-2xl max-w-lg w-full mx-4 relative border border-[#85A947]/20">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
