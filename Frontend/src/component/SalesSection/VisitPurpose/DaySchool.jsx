@@ -368,7 +368,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
     );
   }
 
-  // return (
+  
   //   <div className="hidescroller">
   //     {subscriptionDetails ? (
   //       <div className="mt-3 max-w-full mx-auto p-6 rounded-2xl">
@@ -475,7 +475,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
     <div
       className="hidescroller p-4"
       style={{
-        background: "linear-gradient(135deg, #EFE3C2 0%, #85A947 100%)",
+    
         minHeight: "100vh",
       }}
     >
@@ -483,8 +483,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
         <div
           className="mt-3 max-w-full mx-auto p-8 rounded-2xl shadow-xl mb-6"
           style={{
-            background:
-              "linear-gradient(145deg, #EFE3C2 0%, rgba(239, 227, 194, 0.95) 100%)",
+       
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}
@@ -676,8 +675,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
         <div
           className="mt-3 max-w-full mx-auto p-8 rounded-2xl shadow-xl mb-6 text-center"
           style={{
-            background:
-              "linear-gradient(145deg, #EFE3C2 0%, rgba(239, 227, 194, 0.95) 100%)",
+            
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}
@@ -712,8 +710,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
           onSubmit={handleSubmit(onSubmit)}
           className="p-8 rounded-2xl shadow-2xl w-full space-y-6 backdrop-blur-sm"
           style={{
-            background:
-              "linear-gradient(145deg, #EFE3C2 0%, rgba(239, 227, 194, 0.95) 100%)",
+   
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}

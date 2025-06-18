@@ -360,121 +360,12 @@ const PlaySchool = ({ _id, visitPurposeDetails }) => {
       });
   };
 
-  // if (isLoading)
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
-  //     </div>
-  //   );
-
-  // return (
-  //   <div className="hidescroller">
-  //     {subscriptionDetails ? (
-  //       <div className="mt-3 max-w-full mx-auto p-6  rounded-2xl">
-  //         <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
-  //           Subscription Details
-  //         </h2>
-
-  //         <div className="space-y-3">
-  //           <div className="flex justify-between text-gray-600">
-  //             <span className="font-medium">Pet Name:</span>
-  //             <span>{subscriptionDetails?.petId?.name}</span>
-  //           </div>
-
-  //           <div className="flex justify-between text-gray-600">
-  //             <span className="font-medium">Owner Name:</span>
-  //             <span>{subscriptionDetails?.petId?.owner?.name}</span>
-  //           </div>
-
-  //           <div className="flex justify-between text-gray-600">
-  //             <span className="font-medium">Days Left:</span>
-  //             <span>{subscriptionDetails?.daysLeft}</span>
-  //           </div>
-  //         </div>
-
-  //         <div className="mt-6 flex justify-between gap-4">
-  //           <button
-  //             onClick={() => handleAvail(subscriptionDetails?.planId?._id)}
-  //             className="w-1/2 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-  //           >
-  //             {isSubscriptionAvailed ? "Not Avail" : "Avail"}
-  //           </button>
-  //         </div>
-  //       </div>
-  //     ) : (
-  //       <div className="mt-3 max-w-full mx-auto p-6  rounded-2xl">
-  //         <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
-  //           The pet has no active subscription for play school
-  //         </h2>
-  //       </div>
-  //     )}
-  //     <div className="max-w-full flex justify-center">
-  //       <form
-  //         onSubmit={handleSubmit(onSubmit)}
-  //         className="bg-white p-6 rounded-lg shadow-md  w-full space-y-4"
-  //       >
-  //         <h2 className="text-xl font-semibold text-gray-700">Boarding Form</h2>
-  //         {/* Discount */}
-  //         {!isSubscriptionAvailed ? (
-  //           <div className="flex w-full items-center justify-between px-5">
-  //             <div>
-  //               <label className="block text-gray-600 mb-1">Price</label>
-  //               <div>{visitPurposeDetails?.price}</div>
-  //             </div>
-  //             <div>
-  //               <label className="block text-gray-600 mb-1">Discount</label>
-  //               <input
-  //                 type="number"
-  //                 max={visitPurposeDetails?.price}
-  //                 min={0}
-  //                 {...register("discount", { min: 0, valueAsNumber: true })}
-  //                 className="w-full p-2 border rounded-lg"
-  //                 placeholder="Enter discount"
-  //               />
-  //             </div>
-  //           </div>
-  //         ) : (
-  //           ""
-  //         )}
-  //         <div className="flex mt-3 items-center space-x-4">
-  //           <label className="text-gray-600">Total Price:</label>
-  //           <div className="text-lg font-semibold">
-  //             ₹{getTotalPrice()}
-  //           </div>
-  //         </div>
-  //         <button
-  //           type="submit"
-  //           disabled={isLoading}
-  //           className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition"
-  //         >
-  //           {getTotalPrice() === 0 ? "Submit" : "Proceed to Payment"}
-  //         </button>
-  //       </form>
-  //     </div>
-
-  //     {/* Payment Modals using modular components */}
-  //     <PaymentOptionModal
-  //       isOpen={showPaymentModal}
-  //       onClose={() => setShowPaymentModal(false)}
-  //       onSelectOption={onPaymentOptionSelect}
-  //       totalPrice={getTotalPrice()}
-  //     />
-
-  //     <PartialPaymentModal
-  //       isOpen={showPartialPaymentModal}
-  //       onClose={() => setShowPartialPaymentModal(false)}
-  //       onConfirm={onPartialPaymentConfirm}
-  //       totalPrice={getTotalPrice()}
-  //     />
-  //   </div>
-  // );
+ 
   if (isLoading)
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{
-          background: "linear-gradient(135deg, #EFE3C2 0%, #85A947 100%)",
-        }}
+       
       >
         <div className="text-center space-y-4">
           <div
@@ -500,7 +391,7 @@ const PlaySchool = ({ _id, visitPurposeDetails }) => {
     <div
       className="hidescroller p-4"
       style={{
-        background: "linear-gradient(135deg, #EFE3C2 0%, #85A947 100%)",
+        
         minHeight: "100vh",
       }}
     >
@@ -508,8 +399,7 @@ const PlaySchool = ({ _id, visitPurposeDetails }) => {
         <div
           className="mt-3 max-w-full mx-auto p-8 rounded-2xl shadow-xl mb-6"
           style={{
-            background:
-              "linear-gradient(145deg, #EFE3C2 0%, rgba(239, 227, 194, 0.95) 100%)",
+           
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}
@@ -701,8 +591,7 @@ const PlaySchool = ({ _id, visitPurposeDetails }) => {
         <div
           className="mt-3 max-w-full mx-auto p-8 rounded-2xl shadow-xl mb-6 text-center"
           style={{
-            background:
-              "linear-gradient(145deg, #EFE3C2 0%, rgba(239, 227, 194, 0.95) 100%)",
+            
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}
@@ -737,8 +626,7 @@ const PlaySchool = ({ _id, visitPurposeDetails }) => {
           onSubmit={handleSubmit(onSubmit)}
           className="p-8 rounded-2xl shadow-2xl w-full space-y-6 backdrop-blur-sm"
           style={{
-            background:
-              "linear-gradient(145deg, #EFE3C2 0%, rgba(239, 227, 194, 0.95) 100%)",
+            
             border: "1px solid rgba(133, 169, 71, 0.3)",
             maxWidth: "600px",
           }}
