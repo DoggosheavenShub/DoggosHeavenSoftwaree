@@ -241,7 +241,7 @@ const SalesHistory = () => {
                         🐾 Pet Name
                       </th>
                       <th className="px-6 py-4 text-center font-semibold tracking-wide">
-                        🦄 Species
+                          Date
                       </th>
                       <th className="px-6 py-4 text-center font-semibold tracking-wide">
                         👤 Owner Name
@@ -272,7 +272,7 @@ const SalesHistory = () => {
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className="bg-[#85A947]/20 text-[#123524] px-3 py-1 rounded-full text-sm font-medium">
-                              {item?.pet?.species}
+                              {item?.createdAt.substr(0,10)}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-center font-medium text-[#3E7B27]">
