@@ -555,10 +555,9 @@ exports.addDogParkVisit = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { petId, discount = 0, visitType, details: details_new,
-    } = req.body;
+    const { petId, discount = 0, visitType, details: details_new } = req.body;
 
-    const {payment}=details_new;
+    const { payment } = details_new;
 
     if (!petId) {
       return res.json({
@@ -592,7 +591,7 @@ exports.addDogParkVisit = async (req, res) => {
     // Create a new visit record
     const details = {};
     details.price = visitDetails.price - discount;
-    details.payment=payment;
+    details.payment = payment;
 
     const visit = new Visit({
       pet: petId,
@@ -625,13 +624,8 @@ exports.addVeterinaryVisit = async (req, res) => {
   session.startTransaction();
 
   try {
-    const {
-      petId,
-      visitType,
-      customerType,
-      payment
-    } = req.body;
-    
+    const { petId, visitType, customerType, payment } = req.body;
+
     if (!petId) {
       return res.json({
         success: false,
@@ -656,8 +650,7 @@ exports.addVeterinaryVisit = async (req, res) => {
     // Create a new visit record
     const details = {};
     details.customerType = customerType;
-    details.payment=payment
-    
+    details.payment = payment;
 
     const visit = new Visit({
       pet: petId,
@@ -699,8 +692,7 @@ exports.addHostelVisit = async (req, res) => {
       details: details_new,
     } = req.body;
 
-
-    const {payment}=details_new;
+    const { payment } = details_new;
 
     let pricee = price;
 
@@ -710,7 +702,6 @@ exports.addHostelVisit = async (req, res) => {
         message: "A pet must be selected to save a visit",
       });
     }
-       
 
     if (!visitType) {
       return res.json({
@@ -740,7 +731,7 @@ exports.addHostelVisit = async (req, res) => {
 
       pricee = (Hostel?.price - discount) * numberOfDays;
     }
-     
+
     const details = {};
 
     details["isSubscriptionAvailed"] = isSubscriptionAvailed;
@@ -748,8 +739,7 @@ exports.addHostelVisit = async (req, res) => {
     details["numberOfDays"] = numberOfDays;
     details["discount"] = discount;
 
-    details.payment=payment;
-
+    details.payment = payment;
 
     const visit = new Visit({
       pet: petId,
@@ -797,7 +787,7 @@ exports.addDayCareVisit = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { petId, discount = 0, visitType, details} = req.body;
+    const { petId, discount = 0, visitType, details } = req.body;
 
     if (!petId) {
       return res.json({
@@ -828,9 +818,7 @@ exports.addDayCareVisit = async (req, res) => {
       });
     }
 
-  
     details.price = visitDetails?.price - discount;
-   
 
     const visit = new Visit({
       pet: petId,
@@ -872,16 +860,7 @@ exports.addDaySchoolVisit = async (req, res) => {
   session.startTransaction();
 
   try {
-    const {
-      petId,
-      isSubscriptionAvailed,
-      planId,
-      visitType,
-     
-    } = req.body;
-
-   
-
+    const { petId, isSubscriptionAvailed, planId, visitType } = req.body;
 
     if (!petId) {
       return res.json({
@@ -897,6 +876,15 @@ exports.addDaySchoolVisit = async (req, res) => {
       });
     }
 
+    const boardingDetails = await Boarding.findOne({ petId, isBoarded: true }).populate({path:"boardingType",select:"purpose"});
+
+    if (boardingDetails) {
+      return res.status(400).json({
+        success: false,
+        message: `Pet is already boarded in ${boardingDetails?.boardingType?.purpose}`,
+      });
+    }
+
     const visitDetails = await VisitType.findOne({ _id: visitType });
 
     if (isSubscriptionAvailed) {
@@ -907,17 +895,16 @@ exports.addDaySchoolVisit = async (req, res) => {
           message: "No subscription exist for given pet",
         });
       }
-     
-    } 
-  details={};
-  details["issubscriptionavailed"]=isSubscriptionAvailed;
-  details["planId"]=planId;
- 
+    }
+    
+    details = {};
+    details["issubscriptionavailed"] = isSubscriptionAvailed;
+    details["planId"] = planId;
 
     const visit = new Visit({
       pet: petId,
       visitType,
-      details
+      details,
     });
 
     await visit.save({ session });
@@ -955,16 +942,7 @@ exports.addPlaySchoolVisit = async (req, res) => {
   session.startTransaction();
 
   try {
-    const {
-      petId,
-      isSubscriptionAvailed,
-      planId,
-      visitType,
-      
-    } = req.body;
-
-
-
+    const { petId, isSubscriptionAvailed, planId, visitType } = req.body;
 
     if (!petId) {
       return res.json({
@@ -990,13 +968,20 @@ exports.addPlaySchoolVisit = async (req, res) => {
           message: "No subscription exist for given pet",
         });
       }
-    
+    }
+
+    const boardingDetails = await Boarding.findOne({ petId, isBoarded: true }).populate({path:"boardingType",select:"purpose"});
+
+    if (boardingDetails) {
+      return res.status(400).json({
+        success: false,
+        message: `Pet is already boarded in ${boardingDetails?.boardingType?.purpose}`,
+      });
     }
 
     details = {};
     details["issubscriptionAvailed"] = isSubscriptionAvailed;
-     details["planId"]=planId;
-
+    details["planId"] = planId;
 
     const visit = new Visit({
       pet: petId,
@@ -1197,7 +1182,6 @@ exports.getScheduledVisit = async (req, res) => {
 exports.addGroomingVisit = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
- 
 
   try {
     const {
@@ -1206,11 +1190,11 @@ exports.addGroomingVisit = async (req, res) => {
       isSubscriptionAvailed,
       planId,
       visitType,
-     details : details_new, 
+      details: details_new,
     } = req.body;
 
-    const {payment}=details_new;
-    console.log("payment",payment);
+    const { payment } = details_new;
+    console.log("payment", payment);
 
     let price = 0;
 
@@ -1228,7 +1212,7 @@ exports.addGroomingVisit = async (req, res) => {
       });
     }
 
-     console.log("hi2");
+    console.log("hi2");
 
     const visitDetails = await VisitType.findOne({ _id: visitType });
     details = {};
@@ -1261,13 +1245,13 @@ exports.addGroomingVisit = async (req, res) => {
       price = visitDetails?.price - discount;
     }
 
-     console.log("hi3");
+    console.log("hi3");
 
     details.price = price;
-    details.payment=payment;
+    details.payment = payment;
 
-     console.log("hi4");
-     
+    console.log("hi4");
+
     console.log(details);
     const visit = new Visit({
       pet: petId,
@@ -1334,8 +1318,8 @@ exports.getBoardingCategoryList = async (req, res) => {
 
 exports.addShoppingVisit = async (req, res) => {
   try {
-    const { items, petId, visitType, details:details_new } = req.body;
-    const {payment} =details_new
+    const { items, petId, visitType, details: details_new } = req.body;
+    const { payment } = details_new;
 
     if (!petId) {
       return res.json({
@@ -1374,7 +1358,7 @@ exports.addShoppingVisit = async (req, res) => {
     details = {};
     details.price = price;
     details.items = items;
-    details.payment=payment
+    details.payment = payment;
 
     const newVisit = new Visit({
       visitType,
@@ -1400,10 +1384,12 @@ exports.addShoppingVisit = async (req, res) => {
 
 exports.getParticularPetVisit = async (req, res) => {
   try {
-    
-    const {petId } = req.query;
+    const { petId } = req.query;
 
-    const List = await Visit.find({pet:petId}).populate([{path:"pet"},{path:"visitType"}]);
+    const List = await Visit.find({ pet: petId }).populate([
+      { path: "pet" },
+      { path: "visitType" },
+    ]);
 
     return res.json({
       success: true,
@@ -1419,5 +1405,3 @@ exports.getParticularPetVisit = async (req, res) => {
     });
   }
 };
-
-

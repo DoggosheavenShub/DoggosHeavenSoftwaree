@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import "../../../App.css";
 import { addDayCareVisit } from "../../../store/slices/visitSlice";
@@ -18,6 +18,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
   const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY;
 
   const [formData, setFormData] = useState(null);
+  const [boardingDetails, setBoadringDetails] = useState(null);
 
   // Initialize payment service
   const paymentService = new PaymentService(backendURL, razorpayKeyId);
@@ -399,6 +400,37 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       });
   };
 
+  const checkBoarding = async () => {
+    const token = localStorage.getItem("authtoken") || "";
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/boarding/checkboarding`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ _id }),
+      }
+    );
+
+    const data = await response.json();
+    console.log(data);
+
+    if (data?.success) {
+      setBoadringDetails(data?.boardingDetails);
+    } else {
+      alert("Error in fetching boarding details");
+      navigate("/history");
+    }
+  };
+
+  useEffect(() => {
+    if (_id) {
+      checkBoarding();
+    }
+  }, [_id]);
+
   if (isLoading)
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -406,9 +438,29 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       </div>
     );
 
+  if (boardingDetails)
+    return (
+      <div className="flex flex-col items-center space-y-4">
+        <svg
+          className="w-16 h-16"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          style={{ color: "#85A947" }}
+        >
+          <path
+            fillRule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clipRule="evenodd"
+          />
+        </svg>
+
+        <p className="text-sm" style={{ color: "#85A947" }}>
+          The pet is already boarded in {boardingDetails?.boardingType?.purpose}
+        </p>
+      </div>
+    );
+ 
   
-  //   <div className="hidescroller">
-  //     <div className="max-w-full flex justify-center">
   //       <form
   //         onSubmit={handleSubmit(onSubmit)}
   //         className="bg-white p-6 rounded-lg shadow-md w-full space-y-4"
