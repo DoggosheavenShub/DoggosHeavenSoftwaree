@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Prescription = require("./../models/Prescription");
 const Inventory = require("./../models/inventory");
 const Pet = require("./../models/pet");
+const scheduledVisit = require("../models/scheduledVisit");
 
 exports.addPrescription = async (req, res) => {
       const session = await mongoose.startSession();
@@ -19,11 +20,9 @@ exports.addPrescription = async (req, res) => {
       ml,
       mg,
       tablets,
-    
     } = req.body;
 
-    
-
+  
     if(!petId || !customerType){
         return res.json({
             success:false,
@@ -45,15 +44,26 @@ exports.addPrescription = async (req, res) => {
     }
      
 
-    if (!nextFollowUp && !followUpPurpose && !followUpTime) {
-
-    } else {
-      return res.status(400).json({
-        succes: false,
-        message: "Please fill all followup details",
-      });
-    }
-
+    if (nextFollowUp && followUpPurpose && followUpTime) {
+         const newscheduledVisit = new scheduledVisit({
+           date: new Date(nextFollowUp),
+           time: followUpTime,
+           petId,
+           purpose: followUpPurpose,
+         });
+   
+         await newscheduledVisit.save({ session });
+       }
+       // ... your code here ...}
+       else if (!nextFollowUp && !followUpPurpose && !followUpTime) {
+         // All three variables have falsy values.
+         // ... your code here ...
+       } else {
+         return res.json({
+           succes: false,
+           message: "Please fill all followup details",
+         });
+       }
     
  const calculateTotalPriceAndUpdateStock = async () => {
       const itemIds = items.map((it) => it.id);
