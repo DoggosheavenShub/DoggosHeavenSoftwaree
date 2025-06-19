@@ -300,242 +300,101 @@ const BuySubscription = ({ _id, visitPurposeDetails }) => {
   //     </form>
   //   </div>
   // );
-  return (
-    <div
-      className="flex items-center justify-center p-4 min-h-screen"
-      style={{
-        background: "linear-gradient(135deg, #EFE3C2 0%, #85A947 100%)",
-      }}
-    >
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="p-8 rounded-2xl shadow-2xl w-full max-w-md space-y-6 backdrop-blur-sm"
-        style={{
-          background:
-            "linear-gradient(145deg, #EFE3C2 0%, rgba(239, 227, 194, 0.95) 100%)",
-          border: "1px solid rgba(133, 169, 71, 0.3)",
-        }}
-      >
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold mb-2" style={{ color: "#123524" }}>
-            Choose Your Plan
-          </h2>
-          <div
-            className="w-16 h-1 mx-auto rounded-full"
-            style={{ backgroundColor: "#85A947" }}
-          ></div>
-        </div>
+return (
+ <div className="flex items-center justify-center p-4 min-h-screen bg-gray-50">
+   <form
+     onSubmit={handleSubmit(onSubmit)}
+     className="p-6 rounded-lg shadow-lg w-full max-w-md space-y-5 bg-white"
+   >
+     {/* Header */}
+     <div className="text-center mb-5">
+       <h2 className="text-xl font-semibold text-gray-800 mb-2">
+         Choose Your Plan
+       </h2>
+       <div className="w-12 h-1 mx-auto rounded bg-green-500"></div>
+     </div>
 
-        {/* Plan Selection */}
-        <div className="space-y-2">
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: "#3E7B27" }}
-          >
-            Select Subscription Plan
-          </label>
-          <div className="relative">
-            <select
-              {...register("planId", {
-                required: "Please select a plan",
-              })}
-              className="w-full p-4 rounded-xl transition-all duration-300 appearance-none cursor-pointer focus:outline-none focus:ring-0"
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                border: "2px solid #85A947",
-                color: "#123524",
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23123524' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: "right 1rem center",
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "1.5em 1.5em",
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = "#3E7B27";
-                e.target.style.boxShadow = "0 0 0 3px rgba(62, 123, 39, 0.1)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#85A947";
-                e.target.style.boxShadow = "none";
-              }}
-            >
-              <option value="" disabled style={{ color: "#85A947" }}>
-                Select your preferred plan
-              </option>
-              {subscriptions?.map((item, idx) => {
-                return item?.duration ? (
-                  <option
-                    key={idx}
-                    value={item?._id}
-                    style={{ color: "#123524" }}
-                  >{`${item.subscriptionType?.purpose} - ${item.duration} days`}</option>
-                ) : (
-                  <option
-                    key={idx}
-                    value={item?._id}
-                    style={{ color: "#123524" }}
-                  >{`${item.subscriptionType?.purpose} - ${item.numberOfGroomings} groomings`}</option>
-                );
-              })}
-            </select>
-          </div>
-          {errors.planId && (
-            <div className="flex items-center space-x-2 mt-2">
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                style={{ color: "#dc2626" }}
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="text-red-600 text-sm font-medium">
-                {errors.planId.message}
-              </p>
-            </div>
-          )}
-        </div>
+     {/* Plan Selection */}
+     <div className="space-y-2">
+       <label className="block text-sm font-medium text-gray-700 mb-2">
+         Select Subscription Plan
+       </label>
+       <div className="relative">
+         <select
+           {...register("planId", {
+             required: "Please select a plan",
+           })}
+           className="w-full p-3 rounded-lg border-2 border-gray-300 focus:border-green-500 focus:outline-none bg-white text-gray-800"
+         >
+           <option value="" disabled className="text-gray-400">
+             Select your preferred plan
+           </option>
+           {subscriptions?.map((item, idx) => {
+             return item?.duration ? (
+               <option key={idx} value={item?._id} className="text-gray-800">
+                 {`${item.subscriptionType?.purpose} - ${item.duration} days`}
+               </option>
+             ) : (
+               <option key={idx} value={item?._id} className="text-gray-800">
+                 {`${item.subscriptionType?.purpose} - ${item.numberOfGroomings} groomings`}
+               </option>
+             );
+           })}
+         </select>
+       </div>
+       {errors.planId && (
+         <p className="text-red-500 text-sm mt-1">
+           {errors.planId.message}
+         </p>
+       )}
+     </div>
 
-        {/* Price Details */}
-        <div
-          className="p-4 rounded-xl"
-          style={{
-            backgroundColor: "rgba(18, 53, 36, 0.05)",
-            border: "1px solid rgba(133, 169, 71, 0.3)",
-          }}
-        >
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium" style={{ color: "#3E7B27" }}>
-              Total Amount:
-            </span>
-            <div className="flex items-center space-x-1">
-              <span className="text-2xl font-bold" style={{ color: "#123524" }}>
-                ₹{totalPrice(planId)}
-              </span>
-            </div>
-          </div>
-          {totalPrice(planId) > 0 && (
-            <div className="mt-2 text-xs" style={{ color: "#85A947" }}>
-              * Secure payment processing
-            </div>
-          )}
-        </div>
+     {/* Price Details */}
+     <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+       <div className="flex justify-between items-center">
+         <span className="text-sm font-medium text-gray-600">
+           Total Amount:
+         </span>
+         <span className="text-xl font-bold text-gray-800">
+           ₹{totalPrice(planId)}
+         </span>
+       </div>
+       {totalPrice(planId) > 0 && (
+         <div className="mt-2 text-xs text-gray-500">
+           * Secure payment processing
+         </div>
+       )}
+     </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full p-4 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          style={{
-            background: isLoading
-              ? "linear-gradient(135deg, #85A947 0%, #3E7B27 100%)"
-              : "linear-gradient(135deg, #3E7B27 0%, #123524 100%)",
-            boxShadow: "0 4px 15px rgba(18, 53, 36, 0.3)",
-          }}
-          onMouseEnter={(e) => {
-            if (!isLoading) {
-              e.target.style.background =
-                "linear-gradient(135deg, #123524 0%, #3E7B27 100%)";
-              e.target.style.boxShadow = "0 6px 20px rgba(18, 53, 36, 0.4)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isLoading) {
-              e.target.style.background =
-                "linear-gradient(135deg, #3E7B27 0%, #123524 100%)";
-              e.target.style.boxShadow = "0 4px 15px rgba(18, 53, 36, 0.3)";
-            }
-          }}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center space-x-2">
-              <svg
-                className="animate-spin w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <span>Processing...</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center space-x-2">
-              {totalPrice(planId) === 0 ? (
-                <>
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  <span>Get Subscription</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                  <span>Proceed to Payment</span>
-                </>
-              )}
-            </div>
-          )}
-        </button>
+     {/* Submit Button */}
+     <button
+       type="submit"
+       disabled={isLoading}
+       className="w-full p-3 rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
+     >
+       {isLoading ? (
+         <span>Processing...</span>
+       ) : totalPrice(planId) === 0 ? (
+         <span>Get Subscription</span>
+       ) : (
+         <span>Proceed to Payment</span>
+       )}
+     </button>
 
-        {/* Security Badge */}
-        <div className="flex items-center justify-center space-x-2 pt-2">
-          <svg
-            className="w-4 h-4"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            style={{ color: "#85A947" }}
-          >
-            <path
-              fillRule="evenodd"
-              d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span className="text-xs" style={{ color: "#85A947" }}>
-            Secure & Encrypted
-          </span>
-        </div>
-      </form>
-    </div>
-  );
+     {/* Security Badge */}
+     <div className="flex items-center justify-center space-x-2 pt-2">
+       <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+         <path
+           fillRule="evenodd"
+           d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+           clipRule="evenodd"
+         />
+       </svg>
+       <span className="text-xs text-gray-500">Secure & Encrypted</span>
+     </div>
+   </form>
+ </div>
+);
 };
 
 export default BuySubscription;
