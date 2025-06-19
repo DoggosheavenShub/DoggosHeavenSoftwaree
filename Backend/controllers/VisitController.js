@@ -876,7 +876,10 @@ exports.addDaySchoolVisit = async (req, res) => {
       });
     }
 
-    const boardingDetails = await Boarding.findOne({ petId, isBoarded: true }).populate({path:"boardingType",select:"purpose"});
+    const boardingDetails = await Boarding.findOne({
+      petId,
+      isBoarded: true,
+    }).populate({ path: "boardingType", select: "purpose" });
 
     if (boardingDetails) {
       return res.status(400).json({
@@ -896,7 +899,7 @@ exports.addDaySchoolVisit = async (req, res) => {
         });
       }
     }
-    
+
     details = {};
     details["issubscriptionavailed"] = isSubscriptionAvailed;
     details["planId"] = planId;
@@ -970,7 +973,10 @@ exports.addPlaySchoolVisit = async (req, res) => {
       }
     }
 
-    const boardingDetails = await Boarding.findOne({ petId, isBoarded: true }).populate({path:"boardingType",select:"purpose"});
+    const boardingDetails = await Boarding.findOne({
+      petId,
+      isBoarded: true,
+    }).populate({ path: "boardingType", select: "purpose" });
 
     if (boardingDetails) {
       return res.status(400).json({
@@ -1121,6 +1127,9 @@ exports.getVisitList = async (req, res) => {
             : {}),
           ...(name ? { "pet.name": { $regex: name, $options: "i" } } : {}),
         },
+      },
+      {
+        $sort: { createdAt: -1 }, // descending order
       },
     ];
 

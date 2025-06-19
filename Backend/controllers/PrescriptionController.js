@@ -30,7 +30,6 @@ exports.addPrescription = async (req, res) => {
         })
     }
 
-
     if (
       items?.length === 0 &&
       tablets?.length === 0 &&
@@ -65,7 +64,7 @@ exports.addPrescription = async (req, res) => {
          });
        }
     
- const calculateTotalPriceAndUpdateStock = async () => {
+      const calculateTotalPriceAndUpdateStock = async () => {
       const itemIds = items.map((it) => it.id);
       const TabIds = tablets.map((tb) => tb.id);
       const MlIds = ml.map((m) => m.id);
@@ -272,12 +271,10 @@ exports.addPrescription = async (req, res) => {
 
       // Return total price
       return itemTotal + tabletsTotal + MlTotal + mgTotal;
-    };
+      };
 
     const totalPrice = await calculateTotalPriceAndUpdateStock();
 
-
-console.log("hi3")
     const prescription = new Prescription({
       petId,
       customerType,
