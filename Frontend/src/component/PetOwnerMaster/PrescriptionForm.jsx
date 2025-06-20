@@ -16,6 +16,7 @@ const VeterinaryForm = () => {
   const [nextFollowUp, setNextFollowUp] = useState("");
   const [followUpTime, setFollowUpTime] = useState("");
   const [followUpPurpose, setFollowUpPurpose] = useState("");
+  const [diagnosis, setDiagnosis] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [formData, setFormData] = useState(null);
 
@@ -397,6 +398,7 @@ const VeterinaryForm = () => {
       nextFollowUp,
       followUpTime,
       followUpPurpose,
+      diagnosis,
       totalPrice
     };
 
@@ -413,6 +415,7 @@ const VeterinaryForm = () => {
     setNextFollowUp("");
     setFollowUpTime("");
     setFollowUpPurpose("");
+    setDiagnosis("");
     setTotalPrice(0);
     setFormData(null);
   };
@@ -675,6 +678,15 @@ const VeterinaryForm = () => {
                 onChange={(e) => setFollowUpPurpose(e.target.value)}
                 value={followUpPurpose}
                 placeholder="Enter follow-up purpose"
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block font-medium mb-1">Diagnosis</label>
+              <input
+                onChange={(e) => setDiagnosis(e.target.value)}
+                value={diagnosis}
+                placeholder="Enter diagnosis"
                 className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
               />
             </div>

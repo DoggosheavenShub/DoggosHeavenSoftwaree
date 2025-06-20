@@ -84,6 +84,10 @@ const prescriptionSchema = new mongoose.Schema({
     type: String
   },
 
+  diagnosis: {
+    type: String
+  },
+
   price: {
     type: Number,
     required:true,

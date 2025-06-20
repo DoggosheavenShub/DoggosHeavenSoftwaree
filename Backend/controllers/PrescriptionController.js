@@ -16,6 +16,7 @@ exports.addPrescription = async (req, res) => {
       nextFollowUp,
       followUpTime,
       customerType,
+      diagnosis,
       items,
       ml,
       mg,
@@ -57,12 +58,16 @@ exports.addPrescription = async (req, res) => {
        else if (!nextFollowUp && !followUpPurpose && !followUpTime) {
          // All three variables have falsy values.
          // ... your code here ...
-       } else {
+       }else if(nextFollowUp && followUpPurpose && followUpTime){
+
+    }
+     else {
          return res.json({
            succes: false,
            message: "Please fill all followup details",
          });
        }
+
     
       const calculateTotalPriceAndUpdateStock = async () => {
       const itemIds = items.map((it) => it.id);
@@ -285,6 +290,7 @@ exports.addPrescription = async (req, res) => {
       followUpPurpose,
       nextFollowUp,
       followUpTime,
+      diagnosis,
       price:totalPrice
     });
 

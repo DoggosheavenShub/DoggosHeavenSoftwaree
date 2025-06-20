@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
 
   useEffect(() => {
     if (isOpen && petId) {
@@ -15,16 +14,20 @@ const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
   const fetchPrescriptions = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
-        
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/prescription/getprescription/${petId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        //   'Authorization': `Bearer ${localStorage.getItem('authtoken')}`
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/v1/prescription/getprescription/${petId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            //   'Authorization': `Bearer ${localStorage.getItem('authtoken')}`
+          },
         }
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -33,21 +36,20 @@ const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
       const result = await response.json();
 
       console.log(result.data);
-      
+
       if (result.success) {
-        setPrescriptions(result.data); 
+        setPrescriptions(result.data);
       } else {
-        setError(result.message || 'Failed to fetch subscriptions');
+        setError(result.message || "Failed to fetch subscriptions");
       }
     } catch (err) {
-      console.error('Error fetching subscriptions:', err);
-      setError('Failed to load subscription details');
+      console.error("Error fetching subscriptions:", err);
+      setError("Failed to load subscription details");
     } finally {
       setLoading(false);
     }
   };
 
-  
   const handleClose = () => {
     setPrescriptions([]);
     setError(null);
@@ -104,9 +106,7 @@ const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
             <p className="text-red-600 font-medium text-lg mb-2">
               Error Loading Prescription
             </p>
-            <p className="text-[#123524]/60 text-sm mb-4">
-              {error}
-            </p>
+            <p className="text-[#123524]/60 text-sm mb-4">{error}</p>
             <button
               onClick={fetchPrescriptions}
               className="px-4 py-2 bg-[#85A947] text-white rounded-lg hover:bg-[#3E7B27] transition-colors"
@@ -124,14 +124,15 @@ const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
                 className="p-4 bg-gradient-to-r from-[#EFE3C2]/30 to-[#85A947]/10 rounded-xl border border-[#85A947]/20 hover:border-[#3E7B27]/40 transition-all duration-200"
               >
                 <div className="flex items-center justify-between mb-3">
-                  
                   <div className="flex items-center gap-2">
-                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      prescription.customerType === 'NGO' 
-                        ? 'bg-blue-100 text-blue-600'
-                        : 'bg-[#85A947]/20 text-[#3E7B27]'
-                    }`}>
-                      {prescription.customerType === 'NGO' ? 'NGO' : 'Pvt Ltd'}
+                    <div
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        prescription.customerType === "NGO"
+                          ? "bg-blue-100 text-blue-600"
+                          : "bg-[#85A947]/20 text-[#3E7B27]"
+                      }`}
+                    >
+                      {prescription.customerType === "NGO" ? "NGO" : "Pvt Ltd"}
                     </div>
                     <div className="px-2 py-1 bg-[#EFE3C2] text-[#123524] text-xs rounded-md font-medium">
                       ₹{prescription?.price || 0}
@@ -142,101 +143,120 @@ const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
                 {/* Prescription Details */}
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <span className="text-[#123524]/60 font-medium">Created Date:</span>
+                    <span className="text-[#123524]/60 font-medium">
+                      Created Date:
+                    </span>
                     <p className="text-[#123524] font-semibold">
-                      {prescription.createdAt 
+                      {prescription.createdAt
                         ? new Date(prescription.createdAt).toLocaleDateString()
-                        : 'N/A'
-                      }
+                        : "N/A"}
                     </p>
                   </div>
-                 
+
                   <div>
-                    <span className="text-[#123524]/60 font-medium">Total Items:</span>
+                    <span className="text-[#123524]/60 font-medium">
+                      Total Items:
+                    </span>
                     <p className="text-[#123524] font-semibold">
-                      {(prescription.items?.length || 0) + 
-                       (prescription.tablets?.length || 0) + 
-                       (prescription.mg?.length || 0) + 
-                       (prescription.ml?.length || 0)} items
+                      {(prescription.items?.length || 0) +
+                        (prescription.tablets?.length || 0) +
+                        (prescription.mg?.length || 0) +
+                        (prescription.ml?.length || 0)}{" "}
+                      items
                     </p>
                   </div>
                 </div>
 
                 {/* Medication Breakdown */}
                 <div className="mt-3 pt-3 border-t border-[#85A947]/20">
-                  <span className="text-[#123524]/60 font-medium text-sm">Medication Breakdown:</span>
+                  <span className="text-[#123524]/60 font-medium text-sm">
+                    Medication Breakdown:
+                  </span>
                   <div className="flex flex-wrap gap-2 mt-1">
-                   {prescription.items && prescription.items.length > 0 && (
-                        prescription?.items.map((itemObj, index) => (
-                          
-                            <span
-                            key={index}
-                            className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded mr-2"
-                            >
-                            {itemObj?.id?.itemName} - {itemObj?.quantity}
-                            </span>
-                           
-                            
-                        ))
-                     )}
+                    {prescription.items &&
+                      prescription.items.length > 0 &&
+                      prescription?.items.map((itemObj, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded mr-2"
+                        >
+                          {itemObj?.id?.itemName} - {itemObj?.quantity}
+                        </span>
+                      ))}
 
-                  {prescription.tablets && prescription.tablets.length > 0 && (
-                        prescription.tablets.map((itemObj, index) => (
-                            <span
-                            key={`tablet-${index}`}
-                            className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded mr-2"
-                            >
-                            {itemObj?.id?.itemName} - {itemObj?.quantity}
-                            </span>
-                        ))
-                        )}
+                    {prescription.tablets &&
+                      prescription.tablets.length > 0 &&
+                      prescription.tablets.map((itemObj, index) => (
+                        <span
+                          key={`tablet-${index}`}
+                          className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded mr-2"
+                        >
+                          {itemObj?.id?.itemName} - {itemObj?.quantity}
+                        </span>
+                      ))}
 
-                        {prescription.mg && prescription.mg.length > 0 && (
-                        prescription.mg.map((itemObj, index) => (
-                            <span
-                            key={`mg-${index}`}
-                            className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded mr-2"
-                            >
-                            {itemObj?.id?.itemName} - {itemObj?.quantity}
-                            </span>
-                        ))
-                        )}
+                    {prescription.mg &&
+                      prescription.mg.length > 0 &&
+                      prescription.mg.map((itemObj, index) => (
+                        <span
+                          key={`mg-${index}`}
+                          className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded mr-2"
+                        >
+                          {itemObj?.id?.itemName} - {itemObj?.quantity}
+                        </span>
+                      ))}
 
-                        {prescription.ml && prescription.ml.length > 0 && (
-                        prescription.ml.map((itemObj, index) => (
-                            <span
-                            key={`ml-${index}`}
-                            className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded mr-2"
-                            >
-                            {itemObj?.id?.itemName} - {itemObj?.quantity}
-                            </span>
-                        ))
-                        )}
-
+                    {prescription.ml &&
+                      prescription.ml.length > 0 &&
+                      prescription.ml.map((itemObj, index) => (
+                        <span
+                          key={`ml-${index}`}
+                          className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded mr-2"
+                        >
+                          {itemObj?.id?.itemName} - {itemObj?.quantity}
+                        </span>
+                      ))}
                   </div>
                 </div>
 
-            
-                {(prescription.nextFollowUp || prescription.followUpTime || prescription.followUpPurpose) && (
+                {(prescription.nextFollowUp ||
+                  prescription.followUpTime ||
+                  prescription.followUpPurpose) && (
                   <div className="mt-3 pt-3 border-t border-[#85A947]/20">
-                    <span className="text-[#123524]/60 font-medium text-sm">Follow-up Details:</span>
+                    <span className="text-[#123524]/60 font-medium text-sm">
+                      Follow-up Details:
+                    </span>
                     <div className="mt-1 space-y-1">
                       {prescription.nextFollowUp && (
                         <p className="text-[#3E7B27] text-xs">
-                          <span className="font-medium">Next Visit:</span> {new Date(prescription.nextFollowUp).toLocaleDateString()}
+                          <span className="font-medium">Next Visit:</span>{" "}
+                          {new Date(
+                            prescription.nextFollowUp
+                          ).toLocaleDateString()}
                         </p>
                       )}
                       {prescription.followUpTime && (
                         <p className="text-[#3E7B27] text-xs">
-                          <span className="font-medium">Time:</span> {prescription.followUpTime}
+                          <span className="font-medium">Time:</span>{" "}
+                          {prescription.followUpTime}
                         </p>
                       )}
                       {prescription.followUpPurpose && (
                         <p className="text-[#3E7B27] text-xs">
-                          <span className="font-medium">Purpose:</span> {prescription.followUpPurpose}
+                          <span className="font-medium">Purpose:</span>{" "}
+                          {prescription.followUpPurpose}
                         </p>
                       )}
                     </div>
+                  </div>
+                )}
+
+                {prescription?.diagnosis && (
+                  <div className="mt-3 pt-3 border-t border-[#85A947]/20">
+                    <p className="text-[#3E7B27] text-xs">
+                      <span className="font-medium">Diagnosis: </span>{" "}
+                      {prescription.diagnosis}
+                    </p>
                   </div>
                 )}
               </div>
@@ -277,4 +297,3 @@ const PrescriptionPopup = ({ isOpen, onClose, petId }) => {
 };
 
 export default PrescriptionPopup;
-
