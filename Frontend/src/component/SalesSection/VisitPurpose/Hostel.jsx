@@ -110,6 +110,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
       processVisitSave(formattedData, "after");
     } else {
       setShowPaymentModal(true);
+      
     }
   };
 

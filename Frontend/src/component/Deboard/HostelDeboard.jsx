@@ -82,21 +82,26 @@ const HostelDeboard = ({ _id, setboardingid }) => {
   }, [boardingDetails]);
 
   const getDiscountedPrice = (discount) => {
-    console.log(discount);
-    const amount =
+     let amount= 0;
+    if(actualnumberofdays>subscriptionDetails?.daysLeft) {
+    amount =
       (actualnumberofdays - subscriptionDetails?.daysLeft) *
       (boardingDetails?.boardingType?.price - discount);
-
+    }
     return amount;
   };
 
   useEffect(() => {
-    setTotalAmount(
-      (boardingDetails?.visitId?.details?.price /
-        boardingDetails?.numberOfDays) *
-        (actualnumberofdays - boardingDetails?.numberOfDays) +
-        boardingDetails?.visitId?.details?.payment?.remainingAmount
-    );
+    let amt = 0;
+    if (actualnumberofdays > boardingDetails?.numberOfDays) {
+      amt +=
+        (boardingDetails?.visitId?.details?.price /
+          boardingDetails?.numberOfDays) *
+        (actualnumberofdays - boardingDetails?.numberOfDays);
+    }
+    amt += boardingDetails?.visitId?.details?.payment?.remainingAmount;
+
+    setTotalAmount(amt);
   }, [boardingDetails, actualnumberofdays]);
 
   const startPayment = async (amount) => {
@@ -214,8 +219,56 @@ const HostelDeboard = ({ _id, setboardingid }) => {
             <span className="text-[#123524] font-semibold text-lg">Yes</span>
           </div>
 
-          {!boardingDetails?.visitId?.details?.extradayspricepaid ? (
-            <>
+          { actualnumberofdays <= subscriptionDetails?.daysLeft||boardingDetails?.visitId?.details?.extradayspricepaid ? (
+            <> <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                  <span className="text-[#3E7B27] font-bold text-sm">
+                    Number of Days:
+                  </span>
+                </div>
+                <span className="text-[#123524] font-semibold text-lg">
+                  {actualnumberofdays}
+                </span>
+              </div>
+              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                  <span className="text-[#3E7B27] font-bold text-sm">
+                    Days Left of Subscription
+                  </span>
+                </div>
+                <span className="text-[#123524] font-semibold text-lg">
+                  {subscriptionDetails?.daysLeft}
+                </span>
+              </div>
+               <div className="flex justify-center pt-4">
+              <button
+                disabled={loading}
+                onClick={handleDeboard}
+                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
+                  loading
+                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                    <span>Deboard Pet</span>
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                )}
+              </button>
+            </div>
+              </>
+           
+          ): ( <>
               <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
@@ -310,33 +363,7 @@ const HostelDeboard = ({ _id, setboardingid }) => {
                   )}
                 </button>
               </div>
-            </>
-          ) : (
-            <div className="flex justify-center pt-4">
-              <button
-                disabled={loading}
-                onClick={handleDeboard}
-                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
-                  loading
-                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
-                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
-                }`}
-              >
-                {loading ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Processing...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                    <span>Deboard Pet</span>
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  </div>
-                )}
-              </button>
-            </div>
-          )}
+            </>) }       
         </div>
       ) : (
         <div className="flex-1 flex flex-col justify-center space-y-6">

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   daySchoolDeboarding,
   getBoardingDetails,
+  playSchoolDeboarding,
 } from "../../store/slices/deboardSlice";
 
 const PlaySchoolDebaord = ({ _id, setboardingid }) => {
@@ -14,7 +15,7 @@ const PlaySchoolDebaord = ({ _id, setboardingid }) => {
 
   const handleDeboard = () => {
     setLoading(true);
-    dispatch(daySchoolDeboarding(boardingDetails?._id))
+    dispatch(playSchoolDeboarding(boardingDetails?._id))
       .then((data) => {
         if (data?.payload?.success) {
           alert("Pet deboarded successfully");

@@ -127,7 +127,7 @@ export const playSchoolDeboarding = createAsyncThunk(
     const token = localStorage.getItem("authtoken") || "";
 
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/v1/boarding/playchooldeboarding`,
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/boarding/playschooldeboarding`,
       {
         method: "POST",
         headers: {
