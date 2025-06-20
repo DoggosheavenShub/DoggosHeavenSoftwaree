@@ -23,7 +23,7 @@ const createOrder = async (req, res) => {
       notes,
       payment_capture: 1,
     });
-
+    console.log("hehehe1")
     return res.status(200).json({
       success: true,
       order,
@@ -56,12 +56,16 @@ const verifyPayment = async (req, res) => {
     //   remainingAmount: visitData.details.payment.remainingAmount
     // });
 
+        console.log("hehehe2")
+
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_SECRET)
       .update(body)
       .digest("hex");
+
+         console.log("hehehe3")
 
     const isSignatureValid = expectedSignature === razorpay_signature;
 
@@ -72,6 +76,7 @@ const verifyPayment = async (req, res) => {
       });
     }
 
+       console.log("hehehe4")
     const { paymentType, amount, remainingAmount } = visitData.details.payment;
 
     return res.status(200).json({
