@@ -108,6 +108,12 @@ const PetForm = () => {
     setPets(newPets);
   };
 
+  const handleRemovePet = (petIndex) => {
+  const updatedPets = pets.filter((_, index) => index !== petIndex);
+  setPets(updatedPets);
+  
+};
+
   if (addPetLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10">
@@ -235,7 +241,7 @@ const PetForm = () => {
             </div>
 
             {/* Pet Information Section */}
-            <div className="bg-white/90 rounded-2xl p-8 border border-[#85A947]/20">
+      <div className="bg-white/90 rounded-2xl p-8 border border-[#85A947]/20">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-4 h-4 bg-gradient-to-r from-[#3E7B27] to-[#85A947] rounded-full"></div>
                 <h2 className="text-2xl font-bold text-[#123524]">
@@ -248,11 +254,26 @@ const PetForm = () => {
                   key={petIndex}
                   className="mb-10 p-6 bg-[#EFE3C2]/20 rounded-xl border border-[#85A947]/20"
                 >
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-                    <h4 className="text-lg font-bold text-[#123524]">
-                      Pet #{petIndex + 1}
-                    </h4>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                      <h4 className="text-lg font-bold text-[#123524]">
+                        Pet #{petIndex + 1}
+                      </h4>
+                    </div>
+                    {/* Remove Pet Button - Only show if there's more than one pet AND it's not the first pet */}
+                    {pets.length > 1 && petIndex > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePet(petIndex)}
+                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-300 flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Remove Pet
+                      </button>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -535,7 +556,6 @@ const PetForm = () => {
                 </button>
               </div>
             </div>
-
             {/* Submit Button */}
             <div className="flex justify-center pt-8 border-t border-[#85A947]/20">
               <button
