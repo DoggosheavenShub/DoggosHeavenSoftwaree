@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "../store/slices/authSlice";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function UserLoginPage() {
   const dispatch = useDispatch();
+    const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -204,8 +207,9 @@ export default function UserLoginPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
                     </div>
-                    <input
-                      type="password"
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
                       className="w-full pl-10 sm:pl-12 pr-3 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#85A947] bg-[#EFE3C2] bg-opacity-30 text-sm sm:text-base border-gray-300 transition-all"
                       placeholder="Enter your password"
                       name="password"
@@ -215,6 +219,14 @@ export default function UserLoginPage() {
                         setFormData({ ...formData, password: e.target.value })
                       }
                     />
+                     <span
+                        className="absolute inset-y-0 right-2 flex items-center cursor-pointer"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </span>
+                    </div>
+                   
                   </div>
                 </div>
                 
