@@ -16,8 +16,12 @@ const customerServicesRoutes=require("./routes/CustomerServiceRoutes")
 const customerAppointment = require("./routes/CustomerAppointmentroutes")
 const onlineCustomer = require("./routes/OnlineCustomerRoutes");
 const prescription=require("./routes/Prescription")
+const customerPaymentRoutes=require("./routes/customerRoutes/checkoutRoutes")
+const customerWebhookRoutes=require("./routes/customerRoutes/customerWebhookRoutes")
 
 const app = express();
+
+app.use('/api/v1/customer-webhook', express.raw({ type: 'application/json' }), customerWebhookRoutes);
 
 
 app.use(express.json());
@@ -54,7 +58,7 @@ app.use("/api/v1/customerservices",customerServicesRoutes);
 app.use("/api/v1/customerappointment",customerAppointment);
 app.use("/api/v1/appointment",onlineCustomer);
 app.use("/api/v1/prescription",prescription);
-
+app.use("/api/v1/customer/payment",customerPaymentRoutes)
 
 // Start Server
 const PORT = process.env.PORT || 5000;

@@ -122,9 +122,9 @@ exports.getCustomerSubscriptions = async (req, res) => {
 exports.buySubscription = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+  
   try {
     const { petId, visitType,planId, details:details_new } = req.body;
-
 
     const { payment}=details_new;
     
