@@ -22,7 +22,7 @@ export const login = createAsyncThunk("/auth/login", async (formData, { rejectWi
     );
 
     const data = await response.json();
-    console.log(data.user);
+    console.log(data);
     if (!response.ok) {
       return rejectWithValue(data.message || 'Login failed');
     }

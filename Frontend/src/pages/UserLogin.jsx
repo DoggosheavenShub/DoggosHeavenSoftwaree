@@ -10,7 +10,7 @@ export default function UserLoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "staff", // Add role to form data
+    role: "", 
   });
 
   const handleSubmit = (e) => {
@@ -36,15 +36,15 @@ export default function UserLoginPage() {
         setFormData({
           email: "",
           password: "",
-          role: "staff",
+          role: "",
         });
         
         // You might want to redirect based on role here
-        // if (data?.payload?.user?.role === 'staff') {
-        //   window.location.href = '/staff-dashboard';
-        // } else if (data?.payload?.user?.role === 'customer') {
-        //   window.location.href = '/customer-dashboard';
-        // }
+        if (data?.payload?.user?.role === 'staff') {
+          window.location.href = '/dashboard';
+        } else if (data?.payload?.user?.role === 'customer') {
+          window.location.href = '/customerdaashboard';
+        }
       } else {
         alert(data?.payload?.message);
       }
@@ -140,7 +140,7 @@ export default function UserLoginPage() {
               
               <div className="space-y-4 sm:space-y-5">
                 {/* Role Selection */}
-                {/* <div>
+                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-[#3E7B27] mb-2 sm:mb-3">
                     Login As
                   </label>
@@ -169,7 +169,7 @@ export default function UserLoginPage() {
                       </label>
                     ))}
                   </div>
-                </div> */}
+                </div> 
 
                 {/* Email Field */}
                 <div>
