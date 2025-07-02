@@ -6,35 +6,18 @@ import {
   getAllSubscription,
 } from "../../store/slices/subscriptionSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllVisitType } from "../../store/slices/visitSlice";
+import { loadRazorpayScript } from "../../utils/loadRazorpayScript";
 
 const BuySubscription = () => {
   const { subscriptions } = useSelector((state) => state.subscription);
-  const [userPets, setUserPets] = useState([]); 
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
+  const [userPets, setUserPets] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [visitTypes, setvisitTypes] = useState([]);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
 
-  useEffect(() => {
-    dispatch(getAllVisitType()).then((data) => {
-      if (data?.payload?.success) {
-        setvisitTypes(data.payload.visitTypes);
-        // Set default visitType to the first one or find "Buy Subscription"
-        const defaultVisitType = data.payload.visitTypes.find(type => 
-          type.purpose === "Buy Subscription" || type.purpose === "Subscription"
-        ) || data.payload.visitTypes[0];
-        
-        if (defaultVisitType) {
-          setValue("visitType", defaultVisitType._id);
-        }
-      }
-    });
-  }, []);
-  
-  const token = localStorage?.getItem("authtoken") || "";
-  
   const {
     register,
     handleSubmit,
@@ -44,18 +27,16 @@ const BuySubscription = () => {
   } = useForm({
     defaultValues: {
       planId: "",
-      petId: "",
-      visitType: "", // Will be set when visitTypes are loaded
+      petId: ""
     },
   });
 
   const planId = watch("planId");
   const petId = watch("petId");
-  const visitType = watch("visitType");
 
+  // Fetch user's pets
   const fetchUserPets = async () => {
     try {
-      // Check if user email exists
       if (!user?.email) {
         console.error('User email not found');
         return;
@@ -64,15 +45,18 @@ const BuySubscription = () => {
       const encodedEmail = encodeURIComponent(user.email);
       const token = localStorage?.getItem("authtoken") || "";
       
-      console.log('Fetching pets for email:', user.email); // Debug log
+      console.log('Fetching pets for email:', user.email); 
       
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/customerappointment/getcustomerpets?email=${encodedEmail}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token, 
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/customerappointment/getcustomerpets?email=${encodedEmail}`, 
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token, 
+          }
         }
-      });
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -85,77 +69,218 @@ const BuySubscription = () => {
 
       if (data.success) {
         setUserPets(data.pets || []);
-        console.log('Pets set:', data.pets); // Debug log
+        console.log('Pets set:', data.pets);
       } else {
         console.error('API returned error:', data.message);
-        setUserPets([]); // Set empty array on error
+        setUserPets([]);
       }
     } catch (error) {
       console.error('Error fetching user pets:', error);
-      setUserPets([]); // Set empty array on error
+      setUserPets([]);
       alert('Error loading pets. Please check console for details.');
     }
   };
 
-  const onSubmit = (data) => {
-    setIsLoading(true);
-    
-    // Prepare data for backend
-    const subscriptionData = {
-      petId: data.petId,
-      planId: data.planId,
-      visitType: data.visitType // This will now be the ObjectId
-    };
-    
-    console.log('Submitting subscription data:', subscriptionData); // Debug log
-    
-    dispatch(buySubscription(subscriptionData))
-      .then((response) => {
-        if (response?.payload?.success) {
-          alert("Subscription purchased successfully");
-          navigate("/dashboard");
-        } else {
-          alert(response?.payload?.message || "Failed to purchase subscription");
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error in subscription purchase:', error);
-        alert("Error purchasing subscription");
-        setIsLoading(false);
-      });
-  };
-
-  const totalPrice = (id) => {
-    if (id) {
-      const plan = subscriptions.find((item) => item._id === id);
+   const getTotalPrice = (planId) => {
+    if (planId) {
+      const plan = subscriptions.find((item) => item._id === planId);
       return plan?.price || 0;
     }
     return 0;
   };
 
-  useEffect(() => {
-    // Check if user is logged in
-    if (!user?.id) {
-      alert("Please login to continue");
-      navigate("/login");
-      return;
-    }
-
-    // Fetch user's pets using fetch API
-    fetchUserPets();
+  
+  const startPayment = async (formData) => {
+    if (isPaymentProcessing) return;
     
-    // Fetch all subscriptions using Redux
-    dispatch(getAllSubscription()).then((data) => {
-      if (data?.payload?.success && data?.payload?.data?.length > 0) {
-        setValue("planId", data.payload.data[0]._id);
+    setIsPaymentProcessing(true);
+    
+    try {
+      
+      if (!formData.petId) {
+        alert("Please select a pet");
+        return;
       }
-    });
-  }, [dispatch, user, navigate]);
+      
+      if (!formData.planId) {
+        alert("Please select a plan");
+        return;
+      }
 
-  // Debug log to check states
+      const amount = getTotalPrice(formData.planId);
+      if (amount <= 0) {
+        alert("Invalid plan selected");
+        return;
+      }
+
+      // Load Razorpay script
+      const razorpayLoaded = await loadRazorpayScript(
+        "https://checkout.razorpay.com/v1/checkout.js"
+      );
+
+      if (!razorpayLoaded) {
+        alert("Razorpay SDK failed to load. Please check your internet connection.");
+        return;
+      }
+
+         const token = localStorage?.getItem("authtoken") || "";
+
+      // Create order on backend
+     const res = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/v1/customer/payment/create-order`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+             'Authorization': token,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      console.log(res);
+
+      if (!res.ok) {
+        throw new Error('Failed to create payment order');
+      }
+
+         const order = await res.json();
+
+      const razorpayOptions = {
+        key: import.meta.env.VITE_RAZORPAY_KEY,
+        amount: order.amount,
+        currency: "INR",
+        name: "Doggos Heaven",
+        description: "Pet Subscription Purchase",
+        order_id: order.id,
+       handler: function () {
+
+          window.location.href = order.success_url;
+
+        },
+        prefill: {
+          email: user.email,
+          name: user.name || user.firstName || '',
+        },
+        theme: { 
+          color: "#528FF0" 
+        },
+       modal: {
+          ondismiss: () => {
+            window.location.href = order.cancel_url;
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(razorpayOptions);
+      rzp.open();
+
+    } catch (error) {
+      console.error('Error in payment process:', error);
+      alert('Error initiating payment. Please try again.');
+      setIsPaymentProcessing(false);
+    }
+  };
+
+  // Handle successful payment
+  // const handlePaymentSuccess = async (paymentResponse, formData, amount) => {
+  //   try {
+  //     // Verify payment on backend
+  //     const verifyResponse = await fetch(
+  //       `${import.meta.env.VITE_BACKEND_URL}/api/v1/payments/verify-payment2`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: localStorage.getItem("authtoken") || "",
+  //         },
+  //         body: JSON.stringify({
+  //           razorpay_payment_id: paymentResponse.razorpay_payment_id,
+  //         }),
+  //       }
+  //     );
+
+  //     const verifyResult = await verifyResponse.json();
+
+  //     if (verifyResult.success) {
+  //       // Prepare subscription data
+  //       const subscriptionData = {
+  //         email: user.email,
+  //         petId: formData.petId,
+  //         planId: formData.planId,
+  //         payment: {
+  //           razorpay_payment_id: paymentResponse.razorpay_payment_id,
+  //           paidAt: new Date().toISOString(),
+  //           isPaid: true,
+  //           amount: amount,
+  //           remainingAmount: 0,
+  //           isRemainingPaid: true,
+  //         }
+  //       };
+
+  //       // Purchase subscription
+  //       const subscriptionResult = await dispatch(buySubscription(subscriptionData));
+        
+  //       if (subscriptionResult?.payload?.success) {
+  //         alert("✅ Subscription purchased successfully!");
+  //         navigate("/dashboard");
+  //       } else {
+  //         alert(subscriptionResult?.payload?.message || "Failed to purchase subscription");
+  //       }
+  //     } else {
+  //       alert("❌ Payment verification failed!");
+  //     }
+  //   } catch (error) {
+  //     console.error('Error in payment verification:', error);
+  //     alert("Error processing payment. Please contact support.");
+  //   } finally {
+  //     setIsPaymentProcessing(false);
+  //   }
+  // };
+
+  // Form submission handler
+  const onSubmit = (data) => {
+    startPayment(data);
+  };
+
+  // Initialize component
+  useEffect(() => {
+    const initializeComponent = async () => {
+      // Check if user is logged in
+      if (!user?.id) {
+        alert("Please login to continue");
+        navigate("/login");
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        // Fetch user's pets
+        await fetchUserPets();
+        
+        // Fetch all subscriptions
+        const subscriptionResult = await dispatch(getAllSubscription());
+        if (subscriptionResult?.payload?.success && subscriptionResult?.payload?.data?.length > 0) {
+          setValue("planId", subscriptionResult.payload.data[0]._id);
+        }
+      } catch (error) {
+        console.error('Error initializing component:', error);
+        alert('Error loading data. Please refresh the page.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeComponent();
+  }, [dispatch, user, navigate, setValue]);
+
+  // Debug logs
   console.log('Current userPets state:', userPets);
-  console.log('Current visitTypes state:', visitTypes);
+  console.log('Selected petId:', petId);
+  console.log('Selected planId:', planId);
 
   if (isLoading) {
     return (
@@ -175,51 +300,16 @@ const BuySubscription = () => {
           Buy Subscription
         </h2>
 
-        {/* Visit Type Selection - Now using fetched visit types */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Visit Type
-          </label>
-          <select
-            {...register("visitType", {
-              required: "Please select a visit type",
-            })}
-            className="w-full p-2 border rounded-lg"
-          >
-            <option value="" disabled>
-              Select Visit Type
-            </option>
-            {visitTypes && visitTypes.length > 0 ? (
-              visitTypes.map((type) => (
-                <option key={type._id} value={type._id}>
-                  {type.purpose || type.name}
-                </option>
-              ))
-            ) : (
-              // Fallback options if visitTypes not loaded
-              <>
-                <option value="subscription">Subscription</option>
-                <option value="grooming">Grooming</option>
-                <option value="daycare">Day Care</option>
-                <option value="veterinary">Veterinary</option>
-              </>
-            )}
-          </select>
-          {errors.visitType && (
-            <p className="text-red-500 text-sm mt-1">{errors.visitType.message}</p>
-          )}
-        </div>
-
         {/* Pet Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Select Pet
+            Select Pet *
           </label>
           <select
             {...register("petId", {
               required: "Please select a pet",
             })}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="" disabled>
               Select Pet
@@ -242,13 +332,13 @@ const BuySubscription = () => {
         {/* Plan Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Select Plan
+            Select Plan *
           </label>
           <select
             {...register("planId", {
               required: "Please select a plan",
             })}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="" disabled>
               Select Plan
@@ -267,20 +357,28 @@ const BuySubscription = () => {
         </div>
 
         {/* Price Details */}
-        <div className="flex mt-3 items-center justify-between">
-          <label className="text-gray-600">Total Price:</label>
-          <div className="text-lg font-semibold text-green-600">
-            ${totalPrice(planId)}
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="flex items-center justify-between">
+            <label className="text-gray-600 font-medium">Total Price:</label>
+            <div className="text-lg font-semibold text-green-600">
+              ₹{getTotalPrice(planId)}
+            </div>
           </div>
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          disabled={!petId || !planId || !visitType || isLoading}
-          className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={!petId || !planId || isPaymentProcessing}
+          className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
         >
-          {isLoading ? "Processing..." : "Purchase Subscription"}
+          {isPaymentProcessing ? "Processing Payment..." : "Proceed to Payment"}
         </button>
+
+        {/* Additional Info */}
+        <div className="text-center text-sm text-gray-500 mt-4">
+          <p>Secure payment powered by Razorpay</p>
+        </div>
       </form>
     </div>
   );
