@@ -3,7 +3,17 @@ const SubscriptionPlan = require("../../models/subscriptionPlan");
 const Subscription = require("../../models/subscription");
 const mongoose = require("mongoose");
 
+const dotenv=require('dotenv');
+dotenv.config();
+
 const Pet = require('../../models/pet');
+
+const Razorpay = require("razorpay");
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY,
+  key_secret: process.env.RAZORPAY_SECRET,
+});
 
 
 exports.create_customer_checkout = async (req, res) => {
@@ -11,6 +21,8 @@ exports.create_customer_checkout = async (req, res) => {
   try {
     
     const {email,planId,petId} = req.body;
+
+    console.log(req.body)
 
     if (!email || !planId || !petId) {
       return res.status(400).json({
@@ -47,7 +59,7 @@ exports.create_customer_checkout = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error creating razor pay order", error.message);
+    console.error("Error creating razor pay order", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });

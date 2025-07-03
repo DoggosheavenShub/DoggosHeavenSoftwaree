@@ -96,6 +96,8 @@ const BuySubscription = () => {
     setIsPaymentProcessing(true);
     
     try {
+
+      formData.email=user?.email;
       
       if (!formData.petId) {
         alert("Please select a pet");
@@ -106,6 +108,8 @@ const BuySubscription = () => {
         alert("Please select a plan");
         return;
       }
+
+      
 
       const amount = getTotalPrice(formData.planId);
       if (amount <= 0) {

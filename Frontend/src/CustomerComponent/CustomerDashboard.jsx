@@ -275,6 +275,7 @@ const CustomerDashboard = () => {
             </div>
 
             {/* Recent Activities */}
+            
             <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-[#123524]">Recent Activities</h2>
@@ -290,6 +291,7 @@ const CustomerDashboard = () => {
                 ))}
               </div>
             </div>
+
           </div>
 
           {/* Right Column - Sidebar */}

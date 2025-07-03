@@ -1,4 +1,4 @@
-// Updated backend payment controller for handling all payment types correctly
+
 
 const Visit = require("../models/Visit");
 const crypto = require("crypto");
