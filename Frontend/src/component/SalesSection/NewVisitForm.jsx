@@ -80,6 +80,8 @@ const NewVisitForm = () => {
 
   useEffect(() => {}, []);
   return (
+    <>
+    <Navbar/>
     <div className="w-full flex justify-center">
       <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
@@ -109,6 +111,7 @@ const NewVisitForm = () => {
         <div>{showForm()}</div>
       </div>
     </div>
+    </>
   );
 };
 

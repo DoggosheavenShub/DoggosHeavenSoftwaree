@@ -18,8 +18,7 @@ const Reminders = () => {
 
     const token = localStorage.getItem("authtoken");
     const response = await fetch(
-      `${
-        import.meta.env.VITE_BACKEND_URL
+      `${import.meta.env.VITE_BACKEND_URL
       }/api/v1/visit/getvisits?${queryString}`,
       {
         method: "GET",
@@ -74,7 +73,7 @@ const Reminders = () => {
     if (section !== "birthday") getVisits(section);
   }, [section, dispatch]);
 
-  // return (
+
   //   <div className="w-screen">
   //     <div className="flex w-[95%]  justify-between items-center">
   //       <div className="w-[50%] mt-5 md:w-[40%] text-[12px] md:text-xl mx-auto">
@@ -110,70 +109,73 @@ const Reminders = () => {
   //   </div>
   // );
   return (
-    <div className="w-screen bg-gradient-to-br from-[#EFE3C2] to-[#f5f0e8] min-h-screen">
-      <div className="flex w-[95%] justify-between items-center pt-8 px-4">
-        <div className="w-[50%] mt-5 md:w-[40%] text-[12px] md:text-xl mx-auto">
-          <label
-            htmlFor="countries"
-            className="block text-center mb-4 text-2xl font-semibold text-[#123524] drop-shadow-sm"
-          >
-            Select an option
-          </label>
-          <div className="relative">
-            <select
-              id="countries"
-              value={section}
-              onChange={(e) => setsection(e.target.value)}
-              className="bg-white border-2 border-[#85A947] text-[#123524] text-sm rounded-xl focus:ring-2 focus:ring-[#3E7B27] focus:border-[#3E7B27] focus:outline-none block w-full p-3.5 shadow-lg transition-all duration-200 hover:shadow-xl hover:border-[#3E7B27] appearance-none cursor-pointer font-medium"
+    <>
+      <Navbar />
+      <div className="w-screen bg-gradient-to-br from-[#EFE3C2] to-[#f5f0e8] min-h-screen">
+        <div className="flex w-[95%] justify-between items-center pt-8 px-4">
+          <div className="w-[50%] mt-5 md:w-[40%] text-[12px] md:text-xl mx-auto">
+            <label
+              htmlFor="countries"
+              className="block text-center mb-4 text-2xl font-semibold text-[#123524] drop-shadow-sm"
             >
-              <option value="today" className="bg-white text-[#123524] py-2">
-                📅 Reminders Today
-              </option>
-              <option
-                value="next week"
-                className="bg-white text-[#123524] py-2"
+              Select an option
+            </label>
+            <div className="relative">
+              <select
+                id="countries"
+                value={section}
+                onChange={(e) => setsection(e.target.value)}
+                className="bg-white border-2 border-[#85A947] text-[#123524] text-sm rounded-xl focus:ring-2 focus:ring-[#3E7B27] focus:border-[#3E7B27] focus:outline-none block w-full p-3.5 shadow-lg transition-all duration-200 hover:shadow-xl hover:border-[#3E7B27] appearance-none cursor-pointer font-medium"
               >
-                📊 Reminders Next Week
-              </option>
-              <option value="birthday" className="bg-white text-[#123524] py-2">
-                🎂 Birthday Reminders
-              </option>
-            </select>
-            {/* Custom dropdown arrow */}
-            <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-              <svg
-                className="w-5 h-5 text-[#3E7B27]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
+                <option value="today" className="bg-white text-[#123524] py-2">
+                  📅 Reminders Today
+                </option>
+                <option
+                  value="next week"
+                  className="bg-white text-[#123524] py-2"
+                >
+                  📊 Reminders Next Week
+                </option>
+                <option value="birthday" className="bg-white text-[#123524] py-2">
+                  🎂 Birthday Reminders
+                </option>
+              </select>
+              {/* Custom dropdown arrow */}
+              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <svg
+                  className="w-5 h-5 text-[#3E7B27]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
+              </div>
             </div>
           </div>
+
+          <button
+            className="bg-gradient-to-r from-[#123524] to-[#3E7B27] hover:from-[#3E7B27] hover:to-[#123524] w-[150px] h-[50px] sm:w-[200px] sm:h-[50px] rounded-xl text-white mt-16 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 active:scale-95 border border-[#85A947]/20"
+            onClick={() => navigate("/attendance")}
+          >
+            👥 Attendance
+          </button>
         </div>
 
-        <button
-          className="bg-gradient-to-r from-[#123524] to-[#3E7B27] hover:from-[#3E7B27] hover:to-[#123524] w-[150px] h-[50px] sm:w-[200px] sm:h-[50px] rounded-xl text-white mt-16 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 active:scale-95 border border-[#85A947]/20"
-          onClick={() => navigate("/attendance")}
-        >
-          👥 Attendance
-        </button>
+        <div className="mt-8 px-4">
+          {section !== "birthday" ? (
+            <RemindersTable list={list} remindAll={remindAll} />
+          ) : (
+            <BirthdayTable />
+          )}
+        </div>
       </div>
-
-      <div className="mt-8 px-4">
-        {section !== "birthday" ? (
-          <RemindersTable list={list} remindAll={remindAll} />
-        ) : (
-          <BirthdayTable />
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 

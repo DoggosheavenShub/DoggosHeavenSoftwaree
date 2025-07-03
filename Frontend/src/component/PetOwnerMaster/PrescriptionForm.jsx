@@ -113,7 +113,7 @@ const VeterinaryForm = () => {
     const hasFollowUpDate = nextFollowUp && nextFollowUp.trim() !== "";
     const hasFollowUpTime = followUpTime && followUpTime.trim() !== "";
     const hasFollowUpPurpose = followUpPurpose && followUpPurpose.trim() !== "";
-    
+
     if (hasFollowUpDate || hasFollowUpTime || hasFollowUpPurpose) {
       if (!hasFollowUpDate) {
         alert("Follow-up date is required when scheduling follow-up");
@@ -306,7 +306,7 @@ const VeterinaryForm = () => {
     let itemTotal = items.reduce((acc, med) => {
       const item = itemOptions.find((m) => m.id === med.id);
       if (!item || !med.quantity) return acc;
-      
+
       const price =
         customerType === "NGO"
           ? item.unitMinRetailPriceNGO
@@ -339,7 +339,7 @@ const VeterinaryForm = () => {
     let tabletTotal = tablets.reduce((acc, med) => {
       const tablet = tabletOptions.find((m) => m.id === med.id);
       if (!tablet || !med.quantity) return acc;
-      
+
       const price =
         customerType === "NGO"
           ? tablet.unitMinRetailPriceNGO
@@ -434,292 +434,295 @@ const VeterinaryForm = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
-        Veterinary Prescription Form
-      </h1>
+    <>
+      <Navbar />
+      <div className="max-w-2xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+        <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
+          Veterinary Prescription Form
+        </h1>
 
-      <div className="space-y-6">
-        {/* Customer Type */}
-        <div>
-          <label className="block font-medium mb-1">Customer Type</label>
-          <select
-            value={customerType}
-            onChange={(e) => handleCustomerTypeChange(e.target.value)}
-            className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="pvtltd">Pvt Ltd</option>
-            <option value="NGO">NGO</option>
-          </select>
-        </div>
+        <div className="space-y-6">
+          {/* Customer Type */}
+          <div>
+            <label className="block font-medium mb-1">Customer Type</label>
+            <select
+              value={customerType}
+              onChange={(e) => handleCustomerTypeChange(e.target.value)}
+              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="pvtltd">Pvt Ltd</option>
+              <option value="NGO">NGO</option>
+            </select>
+          </div>
 
-        {/* Items Section */}
-        <div className="p-4 bg-gray-50 rounded-md">
-          <h2 className="text-lg font-semibold mb-3 text-gray-700">Items</h2>
-          {items.map((item, index) => (
-            <div key={index} className="flex items-center space-x-3 mb-3 p-3 bg-white rounded border">
-              <div className="flex-1">
-                <label className="block font-medium mb-1 text-sm">Item</label>
-                <select
-                  value={item.id}
-                  onChange={(e) => handleItemChange(index, "id", e.target.value)}
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+          {/* Items Section */}
+          <div className="p-4 bg-gray-50 rounded-md">
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">Items</h2>
+            {items.map((item, index) => (
+              <div key={index} className="flex items-center space-x-3 mb-3 p-3 bg-white rounded border">
+                <div className="flex-1">
+                  <label className="block font-medium mb-1 text-sm">Item</label>
+                  <select
+                    value={item.id}
+                    onChange={(e) => handleItemChange(index, "id", e.target.value)}
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Item</option>
+                    {itemOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name} (Stock: {option.stock})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1 text-sm">Quantity</label>
+                  <input
+                    type="number"
+                    value={item.quantity || ""}
+                    onChange={(e) => handleItemChange(index, "quantity", parseInt(e.target.value) || "")}
+                    min="1"
+                    placeholder="Qty"
+                    className="p-2 border rounded-md w-20 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setItems(items.filter((_, i) => i !== index))}
+                  className="text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded mt-6"
                 >
-                  <option value="">Select Item</option>
-                  {itemOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name} (Stock: {option.stock})
-                    </option>
-                  ))}
-                </select>
+                  Remove
+                </button>
               </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setItems([...items, { id: "", quantity: 1 }])}
+              className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
+            >
+              + Add Item
+            </button>
+          </div>
+
+          {/* Tablets Section */}
+          <div className="p-4 bg-gray-50 rounded-md">
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">Tablets</h2>
+            {tablets.map((tablet, index) => (
+              <div key={index} className="flex items-center space-x-3 mb-3 p-3 bg-white rounded border">
+                <div className="flex-1">
+                  <label className="block font-medium mb-1 text-sm">Tablet</label>
+                  <select
+                    value={tablet.id}
+                    onChange={(e) => handleTabletChange(index, "id", e.target.value)}
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Tablet</option>
+                    {tabletOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name} (Stock: {option.stock})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1 text-sm">Quantity</label>
+                  <input
+                    type="number"
+                    value={tablet.quantity || ""}
+                    onChange={(e) => handleTabletChange(index, "quantity", parseInt(e.target.value) || "")}
+                    min="1"
+                    placeholder="Qty"
+                    className="p-2 border rounded-md w-20 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTablets(tablets.filter((_, i) => i !== index))}
+                  className="text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded mt-6"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setTablets([...tablets, { id: "", quantity: 1 }])}
+              className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
+            >
+              + Add Tablet
+            </button>
+          </div>
+
+          {/* Mg Section */}
+          <div className="p-4 bg-gray-50 rounded-md">
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">Mg Items</h2>
+            {mg.map((mgItem, index) => (
+              <div key={index} className="flex items-center space-x-3 mb-3 p-3 bg-white rounded border">
+                <div className="flex-1">
+                  <label className="block font-medium mb-1 text-sm">Mg Item</label>
+                  <select
+                    value={mgItem.id}
+                    onChange={(e) => handleMgChange(index, "id", e.target.value)}
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Mg Item</option>
+                    {mgOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name} (Stock: {option.stock})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1 text-sm">Quantity</label>
+                  <input
+                    type="number"
+                    value={mgItem.quantity || ""}
+                    onChange={(e) => handleMgChange(index, "quantity", parseInt(e.target.value) || "")}
+                    min="1"
+                    placeholder="Qty"
+                    className="p-2 border rounded-md w-20 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMg(mg.filter((_, i) => i !== index))}
+                  className="text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded mt-6"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setMg([...mg, { id: "", quantity: 1 }])}
+              className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
+            >
+              + Add Mg Item
+            </button>
+          </div>
+
+          {/* Ml Section */}
+          <div className="p-4 bg-gray-50 rounded-md">
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">Ml Items</h2>
+            {ml.map((mlItem, index) => (
+              <div key={index} className="flex items-center space-x-3 mb-3 p-3 bg-white rounded border">
+                <div className="flex-1">
+                  <label className="block font-medium mb-1 text-sm">Ml Item</label>
+                  <select
+                    value={mlItem.id}
+                    onChange={(e) => handleMlChange(index, "id", e.target.value)}
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Ml Item</option>
+                    {mlOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name} (Stock: {option.stock})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1 text-sm">Quantity</label>
+                  <input
+                    type="number"
+                    value={mlItem.quantity || ""}
+                    onChange={(e) => handleMlChange(index, "quantity", parseInt(e.target.value) || "")}
+                    min="1"
+                    placeholder="Qty"
+                    className="p-2 border rounded-md w-20 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMl(ml.filter((_, i) => i !== index))}
+                  className="text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded mt-6"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setMl([...ml, { id: "", quantity: 1 }])}
+              className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
+            >
+              + Add Ml Item
+            </button>
+          </div>
+
+          {/* Follow-Up Details */}
+          <div className="p-4 bg-gray-50 rounded-md">
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">Follow-Up Details</h2>
+            <div className="space-y-3">
               <div>
-                <label className="block font-medium mb-1 text-sm">Quantity</label>
+                <label className="block font-medium mb-1">Follow-up Date</label>
                 <input
-                  type="number"
-                  value={item.quantity || ""}
-                  onChange={(e) => handleItemChange(index, "quantity", parseInt(e.target.value) || "")}
-                  min="1"
-                  placeholder="Qty"
-                  className="p-2 border rounded-md w-20 focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setNextFollowUp(e.target.value)}
+                  value={nextFollowUp}
+                  type="date"
+                  min={new Date(new Date().getTime() + 86400000).toISOString().split("T")[0]}
+                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => setItems(items.filter((_, i) => i !== index))}
-                className="text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded mt-6"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => setItems([...items, { id: "", quantity: 1 }])}
-            className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
-          >
-            + Add Item
-          </button>
-        </div>
-
-        {/* Tablets Section */}
-        <div className="p-4 bg-gray-50 rounded-md">
-          <h2 className="text-lg font-semibold mb-3 text-gray-700">Tablets</h2>
-          {tablets.map((tablet, index) => (
-            <div key={index} className="flex items-center space-x-3 mb-3 p-3 bg-white rounded border">
-              <div className="flex-1">
-                <label className="block font-medium mb-1 text-sm">Tablet</label>
-                <select
-                  value={tablet.id}
-                  onChange={(e) => handleTabletChange(index, "id", e.target.value)}
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Tablet</option>
-                  {tabletOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name} (Stock: {option.stock})
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div>
-                <label className="block font-medium mb-1 text-sm">Quantity</label>
+                <label className="block font-medium mb-1">Follow-up Time</label>
                 <input
-                  type="number"
-                  value={tablet.quantity || ""}
-                  onChange={(e) => handleTabletChange(index, "quantity", parseInt(e.target.value) || "")}
-                  min="1"
-                  placeholder="Qty"
-                  className="p-2 border rounded-md w-20 focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setFollowUpTime(e.target.value)}
+                  value={followUpTime}
+                  type="time"
+                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => setTablets(tablets.filter((_, i) => i !== index))}
-                className="text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded mt-6"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => setTablets([...tablets, { id: "", quantity: 1 }])}
-            className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
-          >
-            + Add Tablet
-          </button>
-        </div>
-
-        {/* Mg Section */}
-        <div className="p-4 bg-gray-50 rounded-md">
-          <h2 className="text-lg font-semibold mb-3 text-gray-700">Mg Items</h2>
-          {mg.map((mgItem, index) => (
-            <div key={index} className="flex items-center space-x-3 mb-3 p-3 bg-white rounded border">
-              <div className="flex-1">
-                <label className="block font-medium mb-1 text-sm">Mg Item</label>
-                <select
-                  value={mgItem.id}
-                  onChange={(e) => handleMgChange(index, "id", e.target.value)}
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Mg Item</option>
-                  {mgOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name} (Stock: {option.stock})
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div>
-                <label className="block font-medium mb-1 text-sm">Quantity</label>
+                <label className="block font-medium mb-1">Follow-up Purpose</label>
                 <input
-                  type="number"
-                  value={mgItem.quantity || ""}
-                  onChange={(e) => handleMgChange(index, "quantity", parseInt(e.target.value) || "")}
-                  min="1"
-                  placeholder="Qty"
-                  className="p-2 border rounded-md w-20 focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setFollowUpPurpose(e.target.value)}
+                  value={followUpPurpose}
+                  placeholder="Enter follow-up purpose"
+                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => setMg(mg.filter((_, i) => i !== index))}
-                className="text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded mt-6"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => setMg([...mg, { id: "", quantity: 1 }])}
-            className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
-          >
-            + Add Mg Item
-          </button>
-        </div>
-
-        {/* Ml Section */}
-        <div className="p-4 bg-gray-50 rounded-md">
-          <h2 className="text-lg font-semibold mb-3 text-gray-700">Ml Items</h2>
-          {ml.map((mlItem, index) => (
-            <div key={index} className="flex items-center space-x-3 mb-3 p-3 bg-white rounded border">
-              <div className="flex-1">
-                <label className="block font-medium mb-1 text-sm">Ml Item</label>
-                <select
-                  value={mlItem.id}
-                  onChange={(e) => handleMlChange(index, "id", e.target.value)}
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Ml Item</option>
-                  {mlOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name} (Stock: {option.stock})
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div>
-                <label className="block font-medium mb-1 text-sm">Quantity</label>
+                <label className="block font-medium mb-1">Diagnosis</label>
                 <input
-                  type="number"
-                  value={mlItem.quantity || ""}
-                  onChange={(e) => handleMlChange(index, "quantity", parseInt(e.target.value) || "")}
-                  min="1"
-                  placeholder="Qty"
-                  className="p-2 border rounded-md w-20 focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setDiagnosis(e.target.value)}
+                  value={diagnosis}
+                  placeholder="Enter diagnosis"
+                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => setMl(ml.filter((_, i) => i !== index))}
-                className="text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded mt-6"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => setMl([...ml, { id: "", quantity: 1 }])}
-            className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
-          >
-            + Add Ml Item
-          </button>
-        </div>
-
-        {/* Follow-Up Details */}
-        <div className="p-4 bg-gray-50 rounded-md">
-          <h2 className="text-lg font-semibold mb-3 text-gray-700">Follow-Up Details</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="block font-medium mb-1">Follow-up Date</label>
-              <input
-                onChange={(e) => setNextFollowUp(e.target.value)}
-                value={nextFollowUp}
-                type="date"
-                min={new Date(new Date().getTime() + 86400000).toISOString().split("T")[0]}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block font-medium mb-1">Follow-up Time</label>
-              <input
-                onChange={(e) => setFollowUpTime(e.target.value)}
-                value={followUpTime}
-                type="time"
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block font-medium mb-1">Follow-up Purpose</label>
-              <input
-                onChange={(e) => setFollowUpPurpose(e.target.value)}
-                value={followUpPurpose}
-                placeholder="Enter follow-up purpose"
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block font-medium mb-1">Diagnosis</label>
-              <input
-                onChange={(e) => setDiagnosis(e.target.value)}
-                value={diagnosis}
-                placeholder="Enter diagnosis"
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-              />
             </div>
           </div>
-        </div>
 
-        {/* Total Price Display */}
-        <div className="p-4 bg-blue-50 rounded-md border-2 border-blue-200">
-          <div className="text-xl font-bold text-blue-800">
-            Total Price: ₹{totalPrice.toFixed(2)}
+          {/* Total Price Display */}
+          <div className="p-4 bg-blue-50 rounded-md border-2 border-blue-200">
+            <div className="text-xl font-bold text-blue-800">
+              Total Price: ₹{totalPrice.toFixed(2)}
+            </div>
+            <div className="text-sm text-blue-600 mt-1">
+              Customer Type: {customerType === "NGO" ? "NGO Pricing" : "Standard Pricing"}
+            </div>
           </div>
-          <div className="text-sm text-blue-600 mt-1">
-            Customer Type: {customerType === "NGO" ? "NGO Pricing" : "Standard Pricing"}
-          </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex space-x-4">
-          <button
-            onClick={handleSubmit}
-            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 font-medium"
-          >
-            {totalPrice === 0 ? "Save Prescription" : "Proceed to Payment"}
-          </button>
-          <button
-            onClick={resetForm}
-            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition duration-200 font-medium"
-          >
-            Reset Form
-          </button>
+          {/* Action Buttons */}
+          <div className="flex space-x-4">
+            <button
+              onClick={handleSubmit}
+              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 font-medium"
+            >
+              {totalPrice === 0 ? "Save Prescription" : "Proceed to Payment"}
+            </button>
+            <button
+              onClick={resetForm}
+              className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition duration-200 font-medium"
+            >
+              Reset Form
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

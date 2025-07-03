@@ -8,6 +8,7 @@ import FAQSection from "../HomepageComponent/FaqSection"
 import Footer from "../HomepageComponent/Footer"
 import InstagramReelsGrid from "../HomepageComponent/instareel";
 import { useRef } from 'react';
+import Navbar from './navbar';
 
 
 
@@ -25,6 +26,8 @@ const home = () => {
   };
 
   return (
+    <>
+    <Navbar/>
     <div>
        <HeroSection />
         <PromiseSection />
@@ -36,6 +39,7 @@ const home = () => {
         <Footer onServiceClick={()=> scrollToSection(serviceRef)} 
                onBookingClick={()=> scrollToSection(bookingRef)} />
     </div>
+    </>
   )
 }
 

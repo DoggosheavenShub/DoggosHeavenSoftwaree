@@ -1,8 +1,8 @@
-import React from 'react';
 import Footer from '../HomepageComponent/Footer';
 
 const RefundPolicy = () => {
   return (
+    <>
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow relative p-6 md:p-8 max-w-6xl mx-auto bg-[#EFE3C2] bg-opacity-30">
         {/* Paw Print Decorations */}
@@ -81,6 +81,7 @@ const RefundPolicy = () => {
       </div>
       <Footer />
     </div>
+    </>
   );
 };
 

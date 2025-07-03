@@ -7,6 +7,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { logout } from "../../store/slices/authSlice";
+import Navbar from "../navbar";
 
 const InventoryList = () => {
   const [inventory, setInventory] = useState([]);
@@ -105,6 +106,8 @@ const InventoryList = () => {
   };
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gradient-to-br from-[#EFE3C2] to-[#85A947]/10 py-8">
       <div className="max-w-5xl mx-auto p-8">
         <div className="flex flex-col gap-y-6 items-center mb-10">
@@ -342,6 +345,7 @@ const InventoryList = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

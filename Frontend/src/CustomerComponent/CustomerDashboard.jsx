@@ -26,6 +26,7 @@ import {
   Activity
 } from 'lucide-react';
 import { Link} from "react-router-dom";
+import CustomerNavbar from '../component/CustomerNavbar';
 
 const CustomerDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -169,6 +170,8 @@ const CustomerDashboard = () => {
   );
 
   return (
+    <>
+    <CustomerNavbar/>
     <div className="min-h-screen bg-gradient-to-br from-[#EFE3C2] to-white">
       {/* Header */}
       <header className="bg-[#123524] text-white shadow-lg">
@@ -384,6 +387,7 @@ const CustomerDashboard = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

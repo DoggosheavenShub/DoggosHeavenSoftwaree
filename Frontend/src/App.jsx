@@ -53,7 +53,6 @@ function App() {
   return (
     <div className="w-screen overflow-x-hidden">
       <BrowserRouter>
-        <Navbar />
         <Routes>
           <Route element={<CheckAuth isAuthenticated={isAuthenticated} />}>
             <Route path="/history" element={<DogHistory />} />
@@ -72,12 +71,12 @@ function App() {
             {/* <Route path="/new" element={<NewReminders />} /> */}
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/petByDate" element={<PetByDate />} />
-            <Route path="/fill" element={<Hostel />} />
+
             <Route path="/nvisit" element={<NewVisitForm/>}/>
             <Route path="/buysubscription" element={<BuySubscription/>}/>
             <Route path="/deboard" element={<Deboard />} />
             <Route path="/nvisit2" element={<NewVisitForm2/>}/>
-              <Route path="/prescription" element={<PrescriptionForm/>}/>
+            <Route path="/prescription" element={<PrescriptionForm/>}/>
             <Route path="/onlinecustomerappointment" element={<StaffAppointmentsPage/>} />
             
             <Route path="/customerdaashboard" element={<CustomerDashboard />} />
@@ -85,24 +84,22 @@ function App() {
             <Route path="/bookappointment" element={<AppointmentBooking />} />
             <Route path="/seeappointment" element={<AppointmentsPage />} />
             <Route path="/customerbuysubscription" element={<BuySubcriptionCustomer/>} />
-             <Route path="/customerpetform" element={<CustomerPetForm />} />
-               <Route path="/customersubscription" element={<CustomerSubcription />} />
+            <Route path="/customerpetform" element={<CustomerPetForm />} />
+            <Route path="/customersubscription" element={<CustomerSubcription />} />
 
           </Route>
  
           <Route element={<CheckAuth isAuthenticated={isAuthenticated} />}>
             <Route path="/login" element={<UserLoginPage />} />
-
           </Route>
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<CustomerSignupPage/>}/>
-      
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/contactus" element={<ContactUs />} />
             <Route path="/privacypolicy" element={<PrivacyPolicy />} />
             <Route path="/refundpolicy" element={<RefundPolicy />} />
             <Route path="/termsandcondition" element={<TermsConditions />} />
-              <Route path="/shippingpolicy" element={<ShippingPolicy />} />
+            <Route path="/shippingpolicy" element={<ShippingPolicy />} />
 
         </Routes>
      

@@ -110,7 +110,7 @@ const BreedManagement = () => {
     };
   }, []);
 
-  // return (
+
   //   <div className="w-full max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
   //     <div className="mb-6">
   //       <h2 className="text-2xl font-bold">Pet Breed Management</h2>
@@ -227,6 +227,8 @@ const BreedManagement = () => {
   //   </div>
   // );
   return (
+    <>
+    <Navbar/>
     <div className="w-full max-w-4xl mx-auto p-8 bg-gradient-to-br from-[#EFE3C2] to-white rounded-2xl shadow-2xl border border-[#85A947]/20">
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-[#123524] mb-2 flex items-center gap-3">
@@ -444,6 +446,7 @@ const BreedManagement = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

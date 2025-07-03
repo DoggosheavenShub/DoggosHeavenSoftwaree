@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "../store/slices/authSlice";
 import { Eye, EyeOff } from "lucide-react";
+import Navbar from "../component/navbar";
 
 export default function UserLoginPage() {
   const dispatch = useDispatch();
@@ -57,6 +58,8 @@ export default function UserLoginPage() {
   ];
   
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gradient-to-br from-[#EFE3C2] to-white">
       <div className="flex flex-col lg:flex-row min-h-screen">
   
@@ -267,5 +270,6 @@ export default function UserLoginPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

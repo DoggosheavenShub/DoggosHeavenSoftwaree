@@ -1,9 +1,11 @@
 import React from 'react';
 import ContactForm from "./contactForm";
 import Footer from '../HomepageComponent/Footer';
-
+import Navbar from '../component/navbar'
 function ContactUs() {
   return (
+    <>
+    <Navbar/>
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow overflow-auto">
         <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto bg-white">
@@ -124,6 +126,7 @@ function ContactUs() {
       </div>
       <Footer />
     </div>
+    </>
   );
 }
 

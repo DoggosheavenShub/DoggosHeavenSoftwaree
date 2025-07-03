@@ -11,6 +11,7 @@ import {
 import { getAllInventory } from "../store/slices/inventorySlice";
 import { getPetDetails } from "../store/slices/petSlice";
 import { addVisit } from "../store/slices/visitSlice";
+import Navbar from "./navbar";
 
 export default function PetManagement() {
   const { inventoryList } = useSelector((state) => state.inventory);
@@ -197,6 +198,8 @@ export default function PetManagement() {
   }, [selectedDate]);
 
   return (
+    <>
+    <Navbar/>
     <div className="container mx-auto p-4">
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -608,5 +611,6 @@ export default function PetManagement() {
         </div>
       </div>
     </div>
+    </>
   );
 }

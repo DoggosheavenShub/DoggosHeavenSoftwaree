@@ -12,6 +12,7 @@ import Shop from "./VisitPurpose/Shop";
 import Veterinary from "./VisitPurpose/Veterinary";
 import { useLocation } from "react-router-dom";
 import BuySubscription from "./VisitPurpose/BuySubscription";
+import Navbar from "../navbar";
 
 const NewVisitForm2 = () => {
   const dispatch = useDispatch();
@@ -73,7 +74,7 @@ const NewVisitForm2 = () => {
     }
   };
   
-  //   <div className="w-full flex justify-center">
+
   //     <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
   //       {/* Header */}
   //       <div className="flex justify-between items-center mb-6">
@@ -104,6 +105,8 @@ const NewVisitForm2 = () => {
   //   </div>
   // );
   return (
+    <>
+    <Navbar/>
     <div className="w-full min-h-screen  flex justify-center items-center p-4">
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-[#85A947]/30 p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
@@ -176,6 +179,7 @@ const NewVisitForm2 = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

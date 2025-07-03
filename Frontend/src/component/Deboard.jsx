@@ -18,6 +18,7 @@ import DogParkDeboard from "./Deboard/DogParkDeboard";
 import DaySchoolDeboard from "./Deboard/DaySchoolDeboard";
 import DayCareDebaord from "./Deboard/DayCareDebaord";
 import PlaySchoolDeboard from "./Deboard/PlaySchoolDeboard";
+import Navbar from "./navbar";
 
 const Deboard = () => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -73,7 +74,7 @@ const Deboard = () => {
     );
 
   
-  //   <>
+  
   //     {" "}
   //     {boardingid&&<div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50`}>
   //       {boardingid ? showDeboardingPopup(boardingid) : ""}
@@ -165,6 +166,7 @@ const Deboard = () => {
   // );
   return (
     <>
+      <Navbar/>
       {boardingid && (
         <div
           className={`fixed inset-0 bg-[#123524]/60 backdrop-blur-sm flex items-center justify-center z-50`}

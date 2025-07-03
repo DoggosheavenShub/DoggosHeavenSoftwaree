@@ -11,6 +11,7 @@ import { loadRazorpayScript } from "../../../utils/loadRazorpayScript";
 
 import { PaymentService } from "./PaymentComponents/PaymentService";
 import { usePaymentFlow } from "./PaymentComponents/PaymentHooks";
+import Navbar from "../../navbar";
 
 const BuySubscription = ({ _id, visitPurposeDetails }) => {
   const { subscriptions } = useSelector((state) => state.subscription);
@@ -246,7 +247,7 @@ const BuySubscription = ({ _id, visitPurposeDetails }) => {
       </div>
     );
 
-  // return (
+
 
   //   <div className="flex items-center justify-center p-4">
   //     <form
@@ -300,101 +301,104 @@ const BuySubscription = ({ _id, visitPurposeDetails }) => {
   //     </form>
   //   </div>
   // );
-return (
- <div className="flex items-center justify-center p-4 min-h-screen bg-gray-50">
-   <form
-     onSubmit={handleSubmit(onSubmit)}
-     className="p-6 rounded-lg shadow-lg w-full max-w-md space-y-5 bg-white"
-   >
-     {/* Header */}
-     <div className="text-center mb-5">
-       <h2 className="text-xl font-semibold text-gray-800 mb-2">
-         Choose Your Plan
-       </h2>
-       <div className="w-12 h-1 mx-auto rounded bg-green-500"></div>
-     </div>
+  return (
+    <>
+      <Navbar />
+      <div className="flex items-center justify-center p-4 min-h-screen bg-gray-50">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="p-6 rounded-lg shadow-lg w-full max-w-md space-y-5 bg-white"
+        >
+          {/* Header */}
+          <div className="text-center mb-5">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Choose Your Plan
+            </h2>
+            <div className="w-12 h-1 mx-auto rounded bg-green-500"></div>
+          </div>
 
-     {/* Plan Selection */}
-     <div className="space-y-2">
-       <label className="block text-sm font-medium text-gray-700 mb-2">
-         Select Subscription Plan
-       </label>
-       <div className="relative">
-         <select
-           {...register("planId", {
-             required: "Please select a plan",
-           })}
-           className="w-full p-3 rounded-lg border-2 border-gray-300 focus:border-green-500 focus:outline-none bg-white text-gray-800"
-         >
-           <option value="" disabled className="text-gray-400">
-             Select your preferred plan
-           </option>
-           {subscriptions?.map((item, idx) => {
-             return item?.duration ? (
-               <option key={idx} value={item?._id} className="text-gray-800">
-                 {`${item.subscriptionType?.purpose} - ${item.duration} days`}
-               </option>
-             ) : (
-               <option key={idx} value={item?._id} className="text-gray-800">
-                 {`${item.subscriptionType?.purpose} - ${item.numberOfGroomings} groomings`}
-               </option>
-             );
-           })}
-         </select>
-       </div>
-       {errors.planId && (
-         <p className="text-red-500 text-sm mt-1">
-           {errors.planId.message}
-         </p>
-       )}
-     </div>
+          {/* Plan Selection */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Subscription Plan
+            </label>
+            <div className="relative">
+              <select
+                {...register("planId", {
+                  required: "Please select a plan",
+                })}
+                className="w-full p-3 rounded-lg border-2 border-gray-300 focus:border-green-500 focus:outline-none bg-white text-gray-800"
+              >
+                <option value="" disabled className="text-gray-400">
+                  Select your preferred plan
+                </option>
+                {subscriptions?.map((item, idx) => {
+                  return item?.duration ? (
+                    <option key={idx} value={item?._id} className="text-gray-800">
+                      {`${item.subscriptionType?.purpose} - ${item.duration} days`}
+                    </option>
+                  ) : (
+                    <option key={idx} value={item?._id} className="text-gray-800">
+                      {`${item.subscriptionType?.purpose} - ${item.numberOfGroomings} groomings`}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            {errors.planId && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.planId.message}
+              </p>
+            )}
+          </div>
 
-     {/* Price Details */}
-     <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-       <div className="flex justify-between items-center">
-         <span className="text-sm font-medium text-gray-600">
-           Total Amount:
-         </span>
-         <span className="text-xl font-bold text-gray-800">
-           ₹{totalPrice(planId)}
-         </span>
-       </div>
-       {totalPrice(planId) > 0 && (
-         <div className="mt-2 text-xs text-gray-500">
-           * Secure payment processing
-         </div>
-       )}
-     </div>
+          {/* Price Details */}
+          <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-600">
+                Total Amount:
+              </span>
+              <span className="text-xl font-bold text-gray-800">
+                ₹{totalPrice(planId)}
+              </span>
+            </div>
+            {totalPrice(planId) > 0 && (
+              <div className="mt-2 text-xs text-gray-500">
+                * Secure payment processing
+              </div>
+            )}
+          </div>
 
-     {/* Submit Button */}
-     <button
-       type="submit"
-       disabled={isLoading}
-       className="w-full p-3 rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
-     >
-       {isLoading ? (
-         <span>Processing...</span>
-       ) : totalPrice(planId) === 0 ? (
-         <span>Get Subscription</span>
-       ) : (
-         <span>Proceed to Payment</span>
-       )}
-     </button>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full p-3 rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            {isLoading ? (
+              <span>Processing...</span>
+            ) : totalPrice(planId) === 0 ? (
+              <span>Get Subscription</span>
+            ) : (
+              <span>Proceed to Payment</span>
+            )}
+          </button>
 
-     {/* Security Badge */}
-     <div className="flex items-center justify-center space-x-2 pt-2">
-       <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-         <path
-           fillRule="evenodd"
-           d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-           clipRule="evenodd"
-         />
-       </svg>
-       <span className="text-xs text-gray-500">Secure & Encrypted</span>
-     </div>
-   </form>
- </div>
-);
+          {/* Security Badge */}
+          <div className="flex items-center justify-center space-x-2 pt-2">
+            <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="text-xs text-gray-500">Secure & Encrypted</span>
+          </div>
+        </form>
+      </div>
+    </>
+  );
 };
 
 export default BuySubscription;
