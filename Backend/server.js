@@ -18,6 +18,7 @@ const onlineCustomer = require("./routes/OnlineCustomerRoutes");
 const prescription=require("./routes/Prescription")
 const customerPaymentRoutes=require("./routes/customerRoutes/checkoutRoutes")
 const customerWebhookRoutes=require("./routes/customerRoutes/customerWebhookRoutes")
+const customerPetRoutes=require("./routes/customerRoutes/CustomerPetRoute")
 
 const app = express();
 
@@ -59,6 +60,7 @@ app.use("/api/v1/customerappointment",customerAppointment);
 app.use("/api/v1/appointment",onlineCustomer);
 app.use("/api/v1/prescription",prescription);
 app.use("/api/v1/customer/payment",customerPaymentRoutes)
+app.use("/api/v1/customer/pet",customerPetRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5000;

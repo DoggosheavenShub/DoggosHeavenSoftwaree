@@ -174,12 +174,12 @@ const CustomerDashboard = () => {
     <CustomerNavbar/>
     <div className="min-h-screen bg-gradient-to-br from-[#EFE3C2] to-white">
       {/* Header */}
-      <header className="bg-[#123524] text-white shadow-lg">
+      <header className="bg-gray-100 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 bg-[#85A947] rounded-lg flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
+                <User className="w-6 h-6 text-black" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">Welcome back, John!</h1>
