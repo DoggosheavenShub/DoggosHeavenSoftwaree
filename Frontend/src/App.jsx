@@ -44,6 +44,8 @@ import CustomerPetForm from './CustomerComponent/CustomerPetRegistration'
 import CustomerSubcription from './CustomerComponent/subscription/SubcriptionsAvailable'
 import ShippingPolicy from "./pages/Shippinganddelivery";
 import PrescriptionForm from './component/PetOwnerMaster/PrescriptionForm'
+import PetVisitCardDemo from "./CustomerComponent/Visits/ViewVisits";
+import ViewAllVisits from "./CustomerComponent/Visits/ViewAllVisits";
 
 
 function App() {
@@ -86,7 +88,8 @@ function App() {
             <Route path="/customerbuysubscription" element={<BuySubcriptionCustomer/>} />
             <Route path="/customerpetform" element={<CustomerPetForm />} />
             <Route path="/customersubscription" element={<CustomerSubcription />} />
-
+            <Route path="/customer/viewvisit" element={<PetVisitCardDemo/>}/>
+            <Route path="/customer/viewpetvisit/:petId" element={<ViewAllVisits/>}/>
           </Route>
  
           <Route element={<CheckAuth isAuthenticated={isAuthenticated} />}>

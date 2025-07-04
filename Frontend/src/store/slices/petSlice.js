@@ -227,6 +227,30 @@ export const editOwnerDetails=createAsyncThunk("/pet/editownerdetails",
     return data;
 })
 
+export const getPetByUserId=createAsyncThunk("/customer/getallpet",
+
+  async (formdata, { dispatch }) => {
+    const token = localStorage?.getItem("authtoken") || "";
+    const response = await fetch(`${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/v1/customer/pet/getallpets`, {
+      method: "POST",
+      headers: {
+        "Authorization": token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formdata),
+    });
+
+    if (response.status === 401) {
+      dispatch(logout());
+    }
+    
+    const data = await response.json();
+    return data;
+})
+
+
 const petSlice = createSlice({
   name: "pet",
   initialState,

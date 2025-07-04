@@ -2,46 +2,6 @@ const User = require("../models/user");
 const generateToken = require("../utils/generateToken");
 const bcrypt = require("bcrypt");
 
-// exports. = async (req, res) => {
-//   try {
-//     const { name, email, password } = req.body;
-    
-//    const exitingUser=await User.findOne({email});
-   
-//     if(exitingUser){
-//       return res.status(400).json({
-//         success:false,
-//         message:"User already exists",
-//       });
-//     }
-
-//     const hashedPassword=await bcrypt.hash(password,10);
-
-//     const user= await User.create({
-//       fullName:name,
-//       email:email,
-//       password:hashedPassword,
-//       role:'staff'
-//     });
-
-//     return res.status(200).json({
-//       success:true,
-//       message:"user created successfully",
-//       user:{
-//         fullName:user.fullName,
-//         email:user.email,
-//         password:user.password,
-//         role:user.role
-    
-//       }
-//     });
-
-
-//   } catch (error) {
-//     console.log("Error in signup controller", error.message);
-//     res.status(500).json({success:false, message: "Internal Server Error" });
-//   }
-// };
 
 exports.signUp = async (req, res) => {
   try {

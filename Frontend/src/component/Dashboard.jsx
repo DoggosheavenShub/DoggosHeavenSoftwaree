@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Navbar from "./navbar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ const Dashboard = () => {
   const TermsAndCondition = () => navigate("/termsandcondition");
 
   return (
+    <>
+    <Navbar/>
     <div className="w-screen p-6 space-y-6 bg-gradient-to-br from-[#EFE3C2] to-white min-h-screen">
       {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -284,6 +287,7 @@ const Dashboard = () => {
         )}
       </div> */}
     </div>
+    </>
   );
 };
 

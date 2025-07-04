@@ -1,5 +1,6 @@
 const Visit=require("./../../models/Visit");
 const Pet=require("./../../models/Visit");
+const Owner=require("../../models/Owner");
 
 
 exports.getAllVisitByPetId=async(req,res)=>{
@@ -17,24 +18,24 @@ exports.getAllVisitByPetId=async(req,res)=>{
       }
 }
 
-
-
 exports.getAllPetByCustomerId=async(req,res)=>{
     try {
-        const { customerId } = req.body;
+        const { email } = req.body;
 
-         if (!customerId){
+         if (!email){
             return res.status(400).json({
                 Success: false,
                 message: "Customer ID is required"
              });
         }
-        const pets=await Pet.find({owner:customerId});
+       
+        const owner = await Owner.findOne({email}).populate({path:"pets"});
+        
 
         return res.status(200).json({
-            Success:true,
+            success:true,
             message:"Customer pet fetched successfully",
-            pets
+            pets:owner?.pets
         })
 
     } catch (error) {
