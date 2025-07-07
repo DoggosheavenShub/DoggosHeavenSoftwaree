@@ -132,7 +132,7 @@ const Veterinary = ({ _id, visitPurposeDetails }) => {
           dispatch(addVeterinaryVisit(data)).then((data) => {
             if (data?.payload?.success) {
               alert("✅ Payment Done Successfully and visit saved");
-              navigate("/dashboard")
+              navigate("/staff/dashboard")
             } else
               alert(
                 `✅ Payment Done Successfully but visit not saved ${data?.payload?.message}`

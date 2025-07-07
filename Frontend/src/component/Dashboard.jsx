@@ -5,12 +5,12 @@ import Navbar from "./navbar";
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const addpet = () => navigate("/pet");
-  const addinventory = () => navigate("/inventory");
-  const viewlist = () => navigate("/history");
-  const inventoryList = () => navigate("/inventoryList");
-  const BreedManagement = () => navigate("/BreedManagement");
-  const SalesSectionn = () => navigate("/petByDate");
+  const addpet = () => navigate("/staff/pet");
+  const addinventory = () => navigate("/staff/inventory");
+  const viewlist = () => navigate("/staff/history");
+  const inventoryList = () => navigate("/staff/inventoryList");
+  const BreedManagement = () => navigate("/staff/BreedManagement");
+  const SalesSectionn = () => navigate("/staff/petByDate");
   const AboutUs = () => navigate("/aboutus");
   const ContactUs = () => navigate("/contactus");
   const PrivacyPolicy = () => navigate("/privacypolicy");
@@ -162,15 +162,15 @@ const Dashboard = () => {
             </h2>
             <ul className="space-y-3">
               {[
-                { name: "Reminders Today", path: "/reminders" },
-                { name: "Reminders Next Week", path: "/reminders" },
+                { name: "Reminders Today", path: "/staff/reminders" },
+                { name: "Reminders Next Week", path: "/staff/reminders" },
                 {
                   name: "Reminders Overdue Last Week",
-                  path: "/reminders",
+                  path: "/staff/reminders",
                 },
-                { name: "Birthday Reminders", path: "/reminders" },
-                { name: "Attendance", path: "/attendance" },
-                 { name: "Online customer appointments", path: "/onlinecustomerappointment" },
+                { name: "Birthday Reminders", path: "/staff/reminders" },
+                { name: "Attendance", path: "/staff/attendance" },
+                 { name: "Online customer appointments", path: "/staff/onlinecustomerappointment" },
               ].map((item, index) => (
                 <li key={index}>
                   <Link

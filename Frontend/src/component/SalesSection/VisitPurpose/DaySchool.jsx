@@ -115,7 +115,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
         console.log("Save result:", result);
         if (result?.payload?.success) {
           alert("Visit saved successfully");
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
           reset();
         } else {
           alert(result?.payload?.message || "Failed to save visit");

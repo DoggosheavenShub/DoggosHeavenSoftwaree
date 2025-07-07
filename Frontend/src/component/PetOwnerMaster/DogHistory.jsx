@@ -47,11 +47,11 @@ const DogHistory = () => {
   }, [name, phone, dispatch]);
 
   const navigateToVisit = (_id) => {
-    navigate(`/nvisit2`, { state: { _id } });
+    navigate(`/staff/nvisit2`, { state: { _id } });
   };
 
   const navigateToPrescription = (_id) => {
-    navigate(`/prescription`, { state: { _id } });
+    navigate(`/staff/prescription`, { state: { _id } });
   };
 
   const fetchDogDetails = async (id) => {
@@ -118,7 +118,7 @@ const DogHistory = () => {
             <div className="w-2 h-10 bg-gradient-to-b from-[#85A947] to-[#3E7B27] rounded-full"></div>
           </h1>
 
-          <Link to="/pet">
+          <Link to="/staff/pet">
             <button className="py-3 px-6 border-2 border-[#3E7B27] rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-[#123524] to-[#3E7B27] hover:from-[#3E7B27] hover:to-[#85A947] focus:outline-none focus:ring-4 focus:ring-[#85A947]/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5">
               Add Pet
             </button>

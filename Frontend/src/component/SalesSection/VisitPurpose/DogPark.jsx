@@ -115,7 +115,7 @@ const DogPark = ({ _id, visitPurposeDetails }) => {
       .then((result) => {
         if (result?.payload?.success) {
           alert("✅ Payment Done Successfully! Visit saved.");
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
           reset();
         } else {
           alert("Payment successful but failed to save visit: " + (result?.payload?.message || "Unknown error"));

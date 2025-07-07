@@ -150,7 +150,7 @@ const EditPetInfo = ({ pet }) => {
       .then((data) => {
         if (data?.payload?.success) {
           alert("Changes saved successfully");
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
         } else alert(data?.payload?.message);
       })
       .catch(() => {

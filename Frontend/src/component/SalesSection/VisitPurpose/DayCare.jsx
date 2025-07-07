@@ -208,7 +208,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
     const onVerifySuccess = (data) => {
       dispatch(addDayCareVisit(updatedData));
       alert("Payment successful and visit saved!");
-      navigate("/dashboard");
+      navigate("/staff/dashboard");
       setIsLoading(false);
     };
 
@@ -285,7 +285,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
         console.log("Save result:", result);
         if (result?.payload?.success) {
           alert("Visit saved successfully");
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
         } else {
           alert(result?.payload?.message || "Failed to save visit");
         }
@@ -319,7 +319,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       setBoadringDetails(data?.boardingDetails);
     } else {
       alert("Error in fetching boarding details");
-      navigate("/history");
+      navigate("/staff/history");
     }
   };
 

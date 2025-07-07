@@ -174,7 +174,7 @@ const BuySubscription = ({ _id, visitPurposeDetails }) => {
         .then((result) => {
           if (result?.payload?.success) {
             alert("Payment successful and subscription purchased!");
-            navigate("/dashboard");
+            navigate("/staff/dashboard");
           } else {
             alert(
               result?.payload?.message || "Failed to purchase subscription"
@@ -213,7 +213,7 @@ const BuySubscription = ({ _id, visitPurposeDetails }) => {
       .then((result) => {
         if (result?.payload?.success) {
           alert("Subscription purchased successfully!");
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
         } else {
           alert(result?.payload?.message || "Failed to purchase subscription");
         }

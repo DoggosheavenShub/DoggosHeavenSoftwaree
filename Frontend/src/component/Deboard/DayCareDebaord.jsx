@@ -19,7 +19,7 @@ const DayCareDebaord = ({ _id, setboardingid }) => {
       .then((data) => {
         if (data?.payload?.success) {
           alert("Pet deboarded successfully");
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
         } else {
           alert("There was an error in deboarding pet");
         }

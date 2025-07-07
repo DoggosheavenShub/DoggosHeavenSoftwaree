@@ -13,20 +13,24 @@ const {user}=useSelector((state)=>state.auth);
    
     if (location.includes("login")) {
       if (user.role === 'staff') {
-        return <Navigate to="/dashboard" />;
+        return <Navigate to="/staff/dashboard" />;
       } else if (user.role === 'customer') {
-        return <Navigate to="/customerdaashboard" />;
+        return <Navigate to="/customer/dashboard" />;
       } 
     }
 
-    // Role-based route protection
-    // if (location.includes("/staff") && userRole !== 'staff') {
-    //   return <Navigate to="/unauthorized" />;
-    // }
+  }
 
-    // if (location.includes("/customer") && userRole !== 'customer') {
-    //   return <Navigate to="/unauthorized" />;
-    // }
+  if(location.includes("customer")){
+    if(user.role==="staff"){
+      return <Navigate to="/login"/>
+    }
+  }
+
+   if(location.includes("staff")){
+    if(user.role==="customer"){
+      return <Navigate to="/login"/>
+    }
   }
 
   

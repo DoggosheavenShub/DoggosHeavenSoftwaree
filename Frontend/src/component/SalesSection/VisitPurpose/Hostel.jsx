@@ -135,7 +135,7 @@ const Hostel = ({ _id, visitPurposeDetails }) => {
       setBoadringDetails(data?.boardingDetails);
     } else {
       alert("Error in fetching boarding details");
-      navigate("/history");
+      navigate("/staff/history");
     }
   };
 

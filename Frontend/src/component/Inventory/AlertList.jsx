@@ -13,7 +13,7 @@ const AlertList = () => {
   }, []);
 
   const handleRefill = (id) => {
-    navigate("/editInventory", { state: { id } });
+    navigate("/staff/editInventory", { state: { id } });
   };
 
   return (

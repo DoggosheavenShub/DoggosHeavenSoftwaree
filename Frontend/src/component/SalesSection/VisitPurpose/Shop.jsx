@@ -176,7 +176,7 @@ const Shop = ({ _id, visitPurposeDetails }) => {
         .then((result) => {
           if (result?.payload?.success) {
             alert("Payment successful and visit saved!");
-            navigate("/dashboard");
+            navigate("/staff/dashboard");
           } else {
             alert(result?.payload?.message || "Failed to save shop visit");
           }
@@ -223,7 +223,7 @@ const Shop = ({ _id, visitPurposeDetails }) => {
       .then((result) => {
         if (result?.payload?.success) {
           alert("Visit saved successfully!");
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
         } else {
           alert(result?.payload?.message || "Failed to save shop visit");
         }

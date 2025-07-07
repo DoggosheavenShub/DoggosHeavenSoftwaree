@@ -43,7 +43,7 @@ const InventoryForm = () => {
             unitMinRetailPriceNGO: 0,
             unitMaxRetailPriceCustomer: 0,
           });
-          navigate("/inventoryList")
+          navigate("/staff/inventoryList")
         } else alert(data?.payload?.message);
       })
       .catch((err) => {

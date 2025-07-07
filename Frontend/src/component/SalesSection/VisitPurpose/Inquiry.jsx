@@ -34,7 +34,7 @@ const Inquiry = ({ _id, visitPurposeDetails }) => {
         if (data?.payload?.success) {
           alert("Visit saved successfully");
           reset();
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
         } else alert(data?.payload?.message);
         setIsLoading(false);
       })

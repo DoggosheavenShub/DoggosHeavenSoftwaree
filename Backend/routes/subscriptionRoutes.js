@@ -6,7 +6,7 @@ const router=express.Router();
 router.post("/buysubscription",protectedRoute,buySubscription);
 router.get("/getsubscriptiondetails",protectedRoute,getSubscriptionDetails);
 router.get('/getallsubscription',protectedRoute,getAllSubscriptions);
-router.get('/customer-subscriptions', getCustomerSubscriptions);
-router.get('/petssubscription/:petId', getPetsSubscription);
+router.get('/customer-subscriptions',protectedRoute, getCustomerSubscriptions);
+router.get('/petssubscription/:petId',protectedRoute, getPetsSubscription);
 
 module.exports=router

@@ -45,31 +45,31 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
               <Link
-                  to="/deboard"
+                  to="/staff/deboard"
                   className="text-[#EFE3C2] px-3 py-2 rounded-lg shadow-lg focus:border-b-[2px] focus:border-[#85A947] font-bold transition duration-300 ease-in-out"
                 >
                   Deboard
                 </Link>
                 <Link
-                  to="/history"
+                  to="/staff/history"
                   className="text-[#EFE3C2] px-3 py-2 rounded-lg shadow-lg focus:border-b-[2px] focus:border-[#85A947] font-bold transition duration-300 ease-in-out"
                 >
                   Pet Master
                 </Link>
                 <Link
-                  to="/inventoryList"
+                  to="/staff/inventoryList"
                   className="text-[#EFE3C2] px-3 py-2 rounded-lg shadow-lg focus:border-b-[2px] focus:border-[#85A947] font-bold transition duration-300 ease-in-out"
                 >
                   Inventory
                 </Link>
                 <Link
-                  to="/saleshistory"
+                  to="/staff/saleshistory"
                   className="text-[#EFE3C2] px-3 py-2 rounded-lg shadow-lg focus:border-b-[2px] focus:border-[#85A947] font-bold transition duration-300 ease-in-out"
                 >
                   Sales
                 </Link>
                 <Link
-                  to="/reminders"
+                  to="/staff/reminders"
                   className="text-[#EFE3C2] px-3 py-2 rounded-lg shadow-lg focus:border-b-[2px] focus:border-[#85A947] font-bold transition duration-300 ease-in-out"
                 >
                   Reminders
@@ -90,7 +90,7 @@ const Navbar = () => {
                   </button>
                   {open && (
                     <div className="absolute z-40 right-0 mt-2 w-48 bg-[#EFE3C2] border border-[#3E7B27] rounded-lg shadow-lg" onClick={() => setOpen(!open)}>
-                        <button onClick={()=>navigate("/dashboard")} className="flex items-center w-full px-4 py-2 text-[#123524] hover:bg-[#85A947]">
+                        <button onClick={()=>navigate("/staff/dashboard")} className="flex items-center w-full px-4 py-2 text-[#123524] hover:bg-[#85A947]">
                           <LayoutDashboard className="w-5 h-5 mr-2" /> Dashboard
                         </button>
                       <button className="flex items-center w-full px-4 py-2 text-[#123524] hover:bg-[#85A947]" onClick={handleLogout}>
@@ -177,31 +177,31 @@ const Navbar = () => {
               Home
             </Link>
             <Link
-              to="/history"
+              to="/staff/history"
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-[#85A947]"
             >
               Pet Master
             </Link>
             <Link
-              to="/inventoryList"
+              to="/staff/inventoryList"
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-[#85A947]"
             >
               Inventory
             </Link>
             <Link
-              to="/petByDate"
+              to="/staff/petByDate"
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-[#85A947]"
             >
               Sales
             </Link>
             <Link
-              to="/reminders"
+              to="/staff/reminders"
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-[#85A947]"
             >
               Reminders
             </Link>
             <Link
-              to="/dashboard"
+              to="/staff/dashboard"
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-[#85A947]"
             >
               Dashboard

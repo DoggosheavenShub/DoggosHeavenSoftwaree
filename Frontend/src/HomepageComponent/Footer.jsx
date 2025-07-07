@@ -45,11 +45,11 @@ const Footer = ({onServiceClick,onBookingClick}) => {
 
 
   const ourServices = [
-    { name: "Boarding", url: "/customerservice" },
-    { name: "Day School", url: "/customerservice" },
-    { name: "Play School", url: "/customerservice" },
-    { name: "Veterinary", url: "/customerservice" },
-    { name: "Grooming", url: "/customerservice" },
+    { name: "Boarding", url: "/customer/service" },
+    { name: "Day School", url: "/customer/service" },
+    { name: "Play School", url: "/customer/service" },
+    { name: "Veterinary", url: "/customer/service" },
+    { name: "Grooming", url: "/customer/service" },
   ];
 
   return (

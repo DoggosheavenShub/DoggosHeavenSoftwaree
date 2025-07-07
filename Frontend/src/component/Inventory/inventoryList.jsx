@@ -102,7 +102,7 @@ const InventoryList = () => {
   }
 
   const handleEdit = (id) => {
-    navigate(`/editInventory`, { state: { id } });
+    navigate(`/staff/editInventory`, { state: { id } });
   };
 
   return (
@@ -120,7 +120,7 @@ const InventoryList = () => {
           </div>
 
           <div className="w-full flex justify-between items-center">
-            <Link to="/inventory">
+            <Link to="/staff/inventory">
               <button className="py-3 px-8 border-2 border-[#3E7B27] rounded-xl shadow-lg text-base font-bold text-white bg-gradient-to-r from-[#123524] to-[#3E7B27] hover:from-[#3E7B27] hover:to-[#85A947] focus:outline-none focus:ring-4 focus:ring-[#85A947]/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -129,7 +129,7 @@ const InventoryList = () => {
                 </div>
               </button>
             </Link>
-            <Link to="/alertlist">
+            <Link to="/staff/alertlist">
               <button className="py-3 px-8 border-2 border-[#3E7B27] rounded-xl shadow-lg text-base font-bold text-white bg-gradient-to-r from-[#123524] to-[#3E7B27] hover:from-[#3E7B27] hover:to-[#85A947] focus:outline-none focus:ring-4 focus:ring-[#85A947]/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>

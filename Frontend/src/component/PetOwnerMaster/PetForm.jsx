@@ -23,7 +23,7 @@ const PetForm = () => {
           alert("Data saved successfully");
           reset();
           setPets([{}]);
-          navigate("/history");
+          navigate("/staff/history");
         } else alert(data?.payload?.message);
       })
       .catch((err) => {

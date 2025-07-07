@@ -57,37 +57,37 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<CheckAuth isAuthenticated={isAuthenticated} />}>
-            <Route path="/history" element={<DogHistory />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/pet" element={<PetForm />} />
-            <Route path="/inventory" element={<InventoryForm />} />
-            <Route path="/inventoryList" element={<InventoryList />} />
+            <Route path="/staff/history" element={<DogHistory />} />
+            <Route path="/staff/dashboard" element={<Dashboard />} />
+            <Route path="/staff/pet" element={<PetForm />} />
+            <Route path="/staff/inventory" element={<InventoryForm />} />
+            <Route path="/staff/inventoryList" element={<InventoryList />} />
  
-            <Route path="/editinventory" element={<EditInventory />} />
-            <Route path="/alertlist" element={<AlertList />} />
-            <Route path="/BreedManagement" element={<BreedManagement />} />
+            <Route path="/staff/editinventory" element={<EditInventory />} />
+            <Route path="/staff/alertlist" element={<AlertList />} />
+            <Route path="/staff/BreedManagement" element={<BreedManagement />} />
  
-            <Route path="/salesSection" element={<SalesSection />} />
-            <Route path="/saleshistory" element={<SalesHistory />} />
-            <Route path="/reminders" element={<NewReminders/>} />
+            <Route path="/staff/salesSection" element={<SalesSection />} />
+            <Route path="/staff/saleshistory" element={<SalesHistory />} />
+            <Route path="/staff/reminders" element={<NewReminders/>} />
             {/* <Route path="/new" element={<NewReminders />} /> */}
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/petByDate" element={<PetByDate />} />
+            <Route path="/staff/attendance" element={<Attendance />} />
+            <Route path="/staff/petByDate" element={<PetByDate />} />
 
-            <Route path="/nvisit" element={<NewVisitForm/>}/>
-            <Route path="/buysubscription" element={<BuySubscription/>}/>
-            <Route path="/deboard" element={<Deboard />} />
-            <Route path="/nvisit2" element={<NewVisitForm2/>}/>
-            <Route path="/prescription" element={<PrescriptionForm/>}/>
-            <Route path="/onlinecustomerappointment" element={<StaffAppointmentsPage/>} />
+            <Route path="/staff/nvisit" element={<NewVisitForm/>}/>
+            <Route path="/staff/buysubscription" element={<BuySubscription/>}/>
+            <Route path="/staff/deboard" element={<Deboard />} />
+            <Route path="/staff/nvisit2" element={<NewVisitForm2/>}/>
+            <Route path="/staff/prescription" element={<PrescriptionForm/>}/>
+            <Route path="/staff/onlinecustomerappointment" element={<StaffAppointmentsPage/>} />
             
-            <Route path="/customerdaashboard" element={<CustomerDashboard />} />
-            <Route path="/customerservice" element={<CustomerService />} />
-            <Route path="/bookappointment" element={<AppointmentBooking />} />
-            <Route path="/seeappointment" element={<AppointmentsPage />} />
-            <Route path="/customerbuysubscription" element={<BuySubcriptionCustomer/>} />
-            <Route path="/customerpetform" element={<CustomerPetForm />} />
-            <Route path="/customersubscription" element={<CustomerSubcription />} />
+            <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+            <Route path="/customer/service" element={<CustomerService />} />
+            <Route path="/customer/bookappointment" element={<AppointmentBooking />} />
+            <Route path="/customer/seeappointment" element={<AppointmentsPage />} />
+            <Route path="/customer/buysubscription" element={<BuySubcriptionCustomer/>} />
+            <Route path="/customer/petform" element={<CustomerPetForm />} />
+            <Route path="/customer/subscription" element={<CustomerSubcription />} />
             <Route path="/customer/viewvisit" element={<PetVisitCardDemo/>}/>
             <Route path="/customer/viewpetvisit/:petId" element={<ViewAllVisits/>}/>
           </Route>

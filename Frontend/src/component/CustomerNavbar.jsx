@@ -160,7 +160,7 @@ const CustomerNavbar = () => {
                             Contact Us
                         </Link>
                         <Link
-                            to="/dashboard"
+                            to="/staff/dashboard"
                             className="block px-3 py-2 rounded-md text-base font-medium hover:bg-[#85A947]"
                         >
                             Dashboard

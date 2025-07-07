@@ -210,7 +210,7 @@ const CustomerDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Link to='/customerbuysubscription'>
+        <Link to='/customer/buysubscription'>
              <QuickStatsCard
             title="Buy subscription"
             subtitle="for many services"
@@ -219,7 +219,7 @@ const CustomerDashboard = () => {
           />
         </Link>
          
-          <Link to="/customersubscription" className="block">
+          <Link to="/customer/subscription" className="block">
           <QuickStatsCard
             title="Wallet Balance"
             subtitle="Available balance"
@@ -250,7 +250,7 @@ const CustomerDashboard = () => {
                 <h2 className="text-2xl font-bold text-[#123524]">My Pets</h2>
                 <button className="flex items-center space-x-2 bg-[#85A947] text-white px-4 py-2 rounded-lg hover:bg-[#3E7B27] transition-colors">
                   <PlusCircle className="w-5 h-5" />
-                  <Link to="/customerpetform">
+                  <Link to="/customer/petform">
                       <span>Register New Pet</span>
                   </Link>
                 </button>
@@ -266,7 +266,7 @@ const CustomerDashboard = () => {
             {/* Services Section */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-2xl font-bold text-[#123524] mb-6">Book Services</h2>
-                  <Link to='/customerservice' >
+                  <Link to='/customer/service' >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
                     {services.map(service => (
@@ -315,7 +315,7 @@ const CustomerDashboard = () => {
                   </div>
                 ))}
               </div>
-              <Link to='/seeappointment'>
+              <Link to='customer/seeappointment'>
 
               </Link>
               <button className="w-full mt-4 bg-[#3E7B27] text-white py-2 rounded-lg hover:bg-[#123524] transition-colors">

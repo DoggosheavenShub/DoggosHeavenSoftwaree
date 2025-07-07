@@ -205,7 +205,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
           console.log("Save result:", result);
           if (result?.payload?.success) {
             alert("Payment successful and visit saved!");
-            navigate("/dashboard");
+            navigate("/staff/dashboard");
             reset();
           } else {
             alert(result?.payload?.message || "Failed to save grooming visit");
@@ -258,7 +258,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
         console.log("Save result:", result);
         if (result?.payload?.success) {
           alert("Visit saved successfully!");
-          navigate("/dashboard");
+          navigate("/staff/dashboard");
           reset();
         } else {
           alert(result?.payload?.message || "Failed to save grooming visit");
