@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { addInventoryItem } from "../../store/slices/inventorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../navbar";
 
 const InventoryForm = () => {
   const { addInventoryLoading } = useSelector((state) => state.inventory);

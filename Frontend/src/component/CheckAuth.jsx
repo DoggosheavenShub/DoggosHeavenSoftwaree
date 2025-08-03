@@ -12,9 +12,9 @@ const {user}=useSelector((state)=>state.auth);
   if (isAuthenticated) {
    
     if (location.includes("login")) {
-      if (user.role === 'staff') {
+      if (user?.role === 'staff') {
         return <Navigate to="/staff/dashboard" />;
-      } else if (user.role === 'customer') {
+      } else if (user?.role === 'customer') {
         return <Navigate to="/customer/dashboard" />;
       } 
     }
@@ -22,13 +22,13 @@ const {user}=useSelector((state)=>state.auth);
   }
 
   if(location.includes("customer")){
-    if(user.role==="staff"){
+    if(user?.role==="staff"){
       return <Navigate to="/login"/>
     }
   }
 
    if(location.includes("staff")){
-    if(user.role==="customer"){
+    if(user?.role==="customer"){
       return <Navigate to="/login"/>
     }
   }

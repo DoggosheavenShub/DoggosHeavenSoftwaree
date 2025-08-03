@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
 import VisitHistoryDetails from "./VisitHistoryDetails";
-
 import { getVisitList } from "../../store/slices/visitSlice";
+import Navbar from "../navbar";
 
 const SalesHistory = () => {
   const [date, setdate] = useState(new Date().toISOString().split("T")[0]);

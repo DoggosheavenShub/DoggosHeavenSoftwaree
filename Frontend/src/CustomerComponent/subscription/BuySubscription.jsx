@@ -188,7 +188,6 @@ const BuySubscription = () => {
     }
   };
 
-  // Handle successful payment
   // const handlePaymentSuccess = async (paymentResponse, formData, amount) => {
   //   try {
   //     // Verify payment on backend

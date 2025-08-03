@@ -360,6 +360,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
  
   return (
     <div className="hidescroller">
+      
       <div className="max-w-full flex justify-center p-4">
         <form
           onSubmit={handleSubmit(onSubmit)}

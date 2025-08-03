@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-import { 
-  PlusCircle, 
-  Calendar, 
-  Wallet, 
-  History, 
-  Receipt, 
+import {
+  PlusCircle,
+  Calendar,
+  Wallet,
+  History,
+  Receipt,
   GraduationCap,
   Home,
   Scissors,
@@ -25,12 +25,15 @@ import {
   Award,
   Activity
 } from 'lucide-react';
-import { Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CustomerNavbar from '../component/CustomerNavbar';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllVisitType } from '../store/slices/visitSlice';
 
 const CustomerDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const navigate=useNavigate();
+  const { user } = useSelector((state) => state.auth)
+  const navigate = useNavigate();
   const [pets, setPets] = useState([
     {
       id: 1,
@@ -57,6 +60,10 @@ const CustomerDashboard = () => {
       status: 'Due for vaccination'
     }
   ]);
+  const [visitTypeLoading, setVisitTypeLoading] = useState(false)
+  const [visitTypes, setvisitTypes] = useState([]);
+
+  const dispatch = useDispatch()
 
   // const [walletBalance, setWalletBalance] = useState(1250);
   const [notifications, setNotifications] = useState(3);
@@ -66,8 +73,32 @@ const CustomerDashboard = () => {
     { id: 1, name: 'Grooming', icon: <Scissors className="w-6 h-6" />, color: 'bg-[#3E7B27]' },
     { id: 2, name: 'Hostel', icon: <Home className="w-6 h-6" />, color: 'bg-[#85A947]' },
     { id: 3, name: 'Day School', icon: <GraduationCap className="w-6 h-6" />, color: 'bg-[#3E7B27]' },
-    { id: 4, name: 'Subscription', icon: <Heart className="w-6 h-6" />, color: 'bg-[#85A947]' }
+    { id: 4, name: 'Day Care', icon: <GraduationCap className="w-6 h-6" />, color: 'bg-[#3E7B27]' },
+    { id: 5, name: 'Play School', icon: <GraduationCap className="w-6 h-6" />, color: 'bg-[#3E7B27]' },
+    { id: 6, name: 'Veterinary', icon: <GraduationCap className="w-6 h-6" />, color: 'bg-[#3E7B27]' },
+    { id: 7, name: 'Dog Park', icon: <GraduationCap className="w-6 h-6" />, color: 'bg-[#3E7B27]' },
   ];
+
+  const serviceIconMap = {
+    "Grooming": <Scissors className="w-6 h-6" />,
+    "Hostel": <Home className="w-6 h-6" />,
+    "Day School": <GraduationCap className="w-6 h-6" />,
+    "Day Care": <GraduationCap className="w-6 h-6" />,
+    "Play School": <GraduationCap className="w-6 h-6" />,
+    "Veterinary": <GraduationCap className="w-6 h-6" />,
+    "Dog Park": <GraduationCap className="w-6 h-6" />
+  };
+
+  useEffect(() => {
+    setVisitTypeLoading(true);
+    dispatch(getAllVisitType()).then((data) => {
+      if (data?.payload?.success) {
+        setvisitTypes(data.payload.visitTypes);
+      }
+    }).finally(() => {
+      setVisitTypeLoading(false);
+    });
+  }, []);
 
   const recentActivities = [
     { id: 1, type: 'grooming', petName: 'Buddy', service: 'Full Grooming', date: '2024-05-20', amount: 850 },
@@ -104,8 +135,8 @@ const CustomerDashboard = () => {
   const PetCard = ({ pet }) => (
     <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
       <div className="flex items-center space-x-4">
-        <img 
-          src={pet.image} 
+        <img
+          src={pet.image}
           alt={pet.name}
           className="w-16 h-16 rounded-full object-cover border-3 border-[#EFE3C2]"
         />
@@ -113,11 +144,10 @@ const CustomerDashboard = () => {
           <h3 className="text-lg font-bold text-[#123524]">{pet.name}</h3>
           <p className="text-sm text-[#3E7B27]">{pet.breed} • {pet.age} years old</p>
           <div className="flex items-center mt-2">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              pet.status === 'Healthy' 
-                ? 'bg-[#85A947] text-white' 
-                : 'bg-yellow-100 text-yellow-800'
-            }`}>
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${pet.status === 'Healthy'
+              ? 'bg-[#85A947] text-white'
+              : 'bg-yellow-100 text-yellow-800'
+              }`}>
               {pet.status}
             </span>
           </div>
@@ -137,15 +167,23 @@ const CustomerDashboard = () => {
     </div>
   );
 
+  const handleBookService = (service) => {
+    navigate("/customer/bookservice", {
+      state: {
+        service
+      }
+    })
+  }
+
   const ServiceCard = ({ service }) => (
-    <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-100">
+    <div onClick={() => handleBookService(service)} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-100">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
-            {service.icon}
+          <div className={`w-12 h-12 bg-[#3E7B27] rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
+            {serviceIconMap[service?.purpose || "Hostel"]}
           </div>
           <h3 className="text-lg font-semibold text-[#123524] group-hover:text-[#3E7B27] transition-colors">
-            {service.name}
+            {service?.purpose}
           </h3>
         </div>
         <ArrowRight className="w-5 h-5 text-[#85A947] group-hover:translate-x-1 transition-transform duration-300" />
@@ -170,224 +208,183 @@ const CustomerDashboard = () => {
     </div>
   );
 
+  const excludedVisits = ["Buy Subscription", "Shop", "Inquiry"];
+
   return (
     <>
-    <CustomerNavbar/>
-    <div className="min-h-screen bg-gradient-to-br from-[#EFE3C2] to-white">
-      {/* Header */}
-      <header className="bg-gray-100 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-[#85A947] rounded-lg flex items-center justify-center">
-                <User className="w-6 h-6 text-black" />
+      <CustomerNavbar />
+      <div className="min-h-screen ">
+        {/* Header */}
+        <header className="text-black shadow-lg">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10  rounded-lg flex items-center justify-center">
+                  <User className="w-6 h-6 text-black" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold">Welcome back, {user?.fullName}</h1>
+                  <p className=" text-sm">Manage your pets and services</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold">Welcome back, John!</h1>
-                <p className="text-[#EFE3C2] text-sm">Manage your pets and services</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Bell className="w-6 h-6 text-[#EFE3C2] cursor-pointer hover:text-white transition-colors" />
-                {notifications > 0 && (
-                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {notifications}
-                  </span>
-                )}
-              </div>
-{/*               
-              <div className="flex items-center space-x-2 bg-[#3E7B27] px-4 py-2 rounded-lg">
-                <Wallet className="w-5 h-5 text-[#EFE3C2]" />
-                <span className="font-semibold text-[#EFE3C2]">₹{walletBalance}</span>
-              </div> */}
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Link to='/customer/buysubscription'>
-             <QuickStatsCard
-            title="Buy subscription"
-            subtitle="for many services"
-            icon={<Heart className="w-6 h-6 text-[#3E7B27]" />}
-            
-          />
-        </Link>
-         
-          <Link to="/customer/subscription" className="block">
-          <QuickStatsCard
-            title="Wallet Balance"
-            subtitle="Available balance"
-            icon={<Wallet className="w-6 h-6 text-[#3E7B27]" />}
-          />
-          </Link>
-          <QuickStatsCard
-            title="This Month"
-            subtitle="Services booked"
-            icon={<Calendar className="w-6 h-6 text-[#3E7B27]" />}
-          
-          />
-          <QuickStatsCard
-            title="Total Spent"
-            subtitle="Lifetime spending"
-            icon={<Receipt className="w-6 h-6 text-[#3E7B27]" />}
-            
-          />
-        </div>
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Link to='/customer/buysubscription'>
+              <QuickStatsCard
+                title="Buy subscription"
+                subtitle="for many services"
+                icon={<Heart className="w-6 h-6 text-[#3E7B27]" />}
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* My Pets Section */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-[#123524]">My Pets</h2>
-                <button className="flex items-center space-x-2 bg-[#85A947] text-white px-4 py-2 rounded-lg hover:bg-[#3E7B27] transition-colors">
-                  <PlusCircle className="w-5 h-5" />
-                  <Link to="/customer/petform">
+              />
+            </Link>
+
+            <Link to="/customer/subscription" className="block">
+              <QuickStatsCard
+                title="Wallet Balance"
+                subtitle="Available balance"
+                icon={<Wallet className="w-6 h-6 text-[#3E7B27]" />}
+              />
+            </Link>
+            <QuickStatsCard
+              title="This Month"
+              subtitle="Services booked"
+              icon={<Calendar className="w-6 h-6 text-[#3E7B27]" />}
+
+            />
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* My Pets Section */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-[#123524]">My Pets</h2>
+                  <button className="flex items-center space-x-2 bg-[#85A947] text-white px-4 py-2 rounded-lg hover:bg-[#3E7B27] transition-colors">
+                    <PlusCircle className="w-5 h-5" />
+                    <Link to="/customer/petform">
                       <span>Register New Pet</span>
-                  </Link>
-                </button>
+                    </Link>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {pets.map(pet => (
+                    <PetCard key={pet.id} pet={pet} />
+                  ))}
+                </div>
               </div>
-              
-              <div className="space-y-4">
-                {pets.map(pet => (
-                  <PetCard key={pet.id} pet={pet} />
-                ))}
+
+              {/* Services Section */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-[#123524] mb-6">Book Services</h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {visitTypes.filter((item) => !excludedVisits.includes(item?.purpose)).map(service => (
+                    <ServiceCard key={service._id} service={service} />
+                  ))}
+                </div>
+
               </div>
+
             </div>
 
-            {/* Services Section */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-[#123524] mb-6">Book Services</h2>
-                  <Link to='/customer/service' >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
-                    {services.map(service => (
-                  <ServiceCard key={service.id} service={service} />
-                ))}
-             
-              
-              </div>
-               </Link>
-            </div>
-
-            {/* Recent Activities */}
-            
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-[#123524]">Recent Activities</h2>
-                <button className="text-[#3E7B27] hover:text-[#123524] font-medium flex items-center space-x-1">
-                  <span>View All</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                {recentActivities.map(activity => (
-                  <ActivityItem key={activity.id} activity={activity} />
-                ))}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Upcoming Appointments */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-bold text-[#123524] mb-4">Upcoming Appointments</h3>
-              <div className="space-y-4">
-                {upcomingAppointments.map(appointment => (
-                  <div key={appointment.id} className="p-4 bg-gradient-to-r from-[#EFE3C2] to-[#EFE3C2] bg-opacity-50 rounded-lg border-l-4 border-[#85A947]">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-[#123524]">{appointment.service}</h4>
-                      <Clock className="w-4 h-4 text-[#3E7B27]" />
+            {/* Right Column - Sidebar */}
+            <div className="space-y-6">
+              {/* Upcoming Appointments */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-lg font-bold text-[#123524] mb-4">Upcoming Appointments</h3>
+                <div className="space-y-4">
+                  {upcomingAppointments.map(appointment => (
+                    <div key={appointment.id} className="p-4 bg-gradient-to-r from-[#EFE3C2] to-[#EFE3C2] bg-opacity-50 rounded-lg border-l-4 border-[#85A947]">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-[#123524]">{appointment.service}</h4>
+                        <Clock className="w-4 h-4 text-[#3E7B27]" />
+                      </div>
+                      <p className="text-sm text-[#3E7B27]">{appointment.petName}</p>
+                      <p className="text-sm text-gray-600">{appointment.date} at {appointment.time}</p>
                     </div>
-                    <p className="text-sm text-[#3E7B27]">{appointment.petName}</p>
-                    <p className="text-sm text-gray-600">{appointment.date} at {appointment.time}</p>
-                  </div>
-                ))}
-              </div>
-              <Link to='customer/seeappointment'>
-
-              </Link>
-              <button className="w-full mt-4 bg-[#3E7B27] text-white py-2 rounded-lg hover:bg-[#123524] transition-colors">
-                Appointments
-              </button>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-bold text-[#123524] mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-3 bg-[#EFE3C2] bg-opacity-50 rounded-lg hover:bg-opacity-100 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <Receipt className="w-5 h-5 text-[#3E7B27]" />
-                    <span className="font-medium text-[#123524]">View Bills</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[#85A947]" />
-                </button>
-                
-                <button className="w-full flex items-center justify-between p-3 bg-[#EFE3C2] bg-opacity-50 rounded-lg hover:bg-opacity-100 transition-colors">
-                  <div onClick={()=>Navigate} className="flex items-center space-x-3">
-                    <History className="w-5 h-5 text-[#3E7B27]" />
-                    <span className="font-medium text-[#123524]">Visit History</span>
-                  </div> 
-                  <ChevronRight className="w-4 h-4 text-[#85A947]" />
-                </button>
-                
-                <button className="w-full flex items-center justify-between p-3 bg-[#EFE3C2] bg-opacity-50 rounded-lg hover:bg-opacity-100 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <Activity className="w-5 h-5 text-[#3E7B27]" />
-                    <span className="font-medium text-[#123524]">Pet Attendance</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[#85A947]" />
-                </button>
-                
-                <button className="w-full flex items-center justify-between p-3 bg-[#EFE3C2] bg-opacity-50 rounded-lg hover:bg-opacity-100 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <Wallet className="w-5 h-5 text-[#3E7B27]" />
-                    <span className="font-medium text-[#123524]">Add Money</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[#85A947]" />
-                </button>
-              </div>
-            </div>
-
-            {/* Support */}
-            <div className="bg-gradient-to-br from-[#123524] to-[#3E7B27] rounded-xl shadow-lg p-6 text-white">
-              <h3 className="text-lg font-bold mb-4">Need Help?</h3>
-              <p className="text-[#EFE3C2] text-sm mb-4">
-                Our support team is here to help you 24/7
-              </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4" />
-                  <span>+91 98765 43210</span>
+                  ))}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
-                  <span>support@petcare.com</span>
+                <Link to='customer/seeappointment'>
+
+                </Link>
+                <button className="w-full mt-4 bg-[#3E7B27] text-white py-2 rounded-lg hover:bg-[#123524] transition-colors">
+                  Appointments
+                </button>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-lg font-bold text-[#123524] mb-4">Quick Actions</h3>
+                <div className="space-y-3">
+                  {/* <button className="w-full flex items-center justify-between p-3 bg-[#EFE3C2] bg-opacity-50 rounded-lg hover:bg-opacity-100 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <Receipt className="w-5 h-5 text-[#3E7B27]" />
+                      <span className="font-medium text-[#123524]">View Bills</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#85A947]" />
+                  </button> */}
+
+                  <button className="w-full flex items-center justify-between p-3 bg-[#EFE3C2] bg-opacity-50 rounded-lg hover:bg-opacity-100 transition-colors">
+                    <div onClick={() => Navigate} className="flex items-center space-x-3">
+                      <History className="w-5 h-5 text-[#3E7B27]" />
+                      <span className="font-medium text-[#123524]">Visit History</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#85A947]" />
+                  </button>
+
+                  {/* <button className="w-full flex items-center justify-between p-3 bg-[#EFE3C2] bg-opacity-50 rounded-lg hover:bg-opacity-100 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <Activity className="w-5 h-5 text-[#3E7B27]" />
+                      <span className="font-medium text-[#123524]">Pet Attendance</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#85A947]" />
+                  </button> */}
+
+                  {/* <button className="w-full flex items-center justify-between p-3 bg-[#EFE3C2] bg-opacity-50 rounded-lg hover:bg-opacity-100 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <Wallet className="w-5 h-5 text-[#3E7B27]" />
+                      <span className="font-medium text-[#123524]">Add Money</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#85A947]" />
+                  </button> */}
                 </div>
               </div>
-              <Link to="/contactus">
-                <button className="w-full mt-4 bg-[#85A947] text-white py-2 rounded-lg hover:bg-[#EFE3C2] hover:text-[#123524] transition-colors">
-                Contact Support
-              </button>
-              </Link>
-              
+
+              {/* Support */}
+              <div className="bg-gradient-to-br from-[#123524] to-[#3E7B27] rounded-xl shadow-lg p-6 text-white">
+                <h3 className="text-lg font-bold mb-4">Need Help?</h3>
+                <p className="text-[#EFE3C2] text-sm mb-4">
+                  Our support team is here to help you 24/7
+                </p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <Phone className="w-4 h-4" />
+                    <span>+91 98765 43210</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Mail className="w-4 h-4" />
+                    <span>support@petcare.com</span>
+                  </div>
+                </div>
+                <Link to="/contactus">
+                  <button className="w-full mt-4 bg-[#85A947] text-white py-2 rounded-lg hover:bg-[#EFE3C2] hover:text-[#123524] transition-colors">
+                    Contact Support
+                  </button>
+                </Link>
+
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

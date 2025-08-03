@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+
 import {
   getAllInventory,
   deleteInventoryItem,
 } from "../../store/slices/inventorySlice";
+
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { logout } from "../../store/slices/authSlice";

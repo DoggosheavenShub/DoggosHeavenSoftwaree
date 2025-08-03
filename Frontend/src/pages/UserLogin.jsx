@@ -42,9 +42,9 @@ export default function UserLoginPage() {
         
         // You might want to redirect based on role here
         if (data?.payload?.user?.role === 'staff') {
-          window.location.href = '/dashboard';
+          window.location.href = '/staff/dashboard';
         } else if (data?.payload?.user?.role === 'customer') {
-          window.location.href = '/customerdaashboard';
+          window.location.href = '/customer/dashboard';
         }
       } else {
         alert(data?.payload?.message);

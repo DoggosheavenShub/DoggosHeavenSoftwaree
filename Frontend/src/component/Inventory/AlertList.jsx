@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAlertListOfInventory } from "../../store/slices/inventorySlice";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../store/slices/authSlice";
+import Navbar from "../navbar";
 
 const AlertList = () => {
   const dispatch = useDispatch();
