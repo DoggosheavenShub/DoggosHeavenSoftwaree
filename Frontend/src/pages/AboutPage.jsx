@@ -1,5 +1,6 @@
 import React from 'react';
 import Footer from '../HomepageComponent/Footer';
+import Navbar from '../component/navbar';
 
 const AboutUs = () => {
   return (
