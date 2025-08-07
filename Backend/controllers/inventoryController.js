@@ -16,7 +16,6 @@ exports.addinventory = async (req, res) => {
     // Validate all required fields
     if (
       !itemName ||
-      !stock ||
       !stockUnit ||
       !itemType ||
       !unitCostPrice ||
@@ -29,9 +28,11 @@ exports.addinventory = async (req, res) => {
       });
     }
 
+ 
+
     // Validate numeric fields
     if (
-      stock < 0 ||
+    
       unitCostPrice < 0 ||
       unitMinRetailPriceNGO < 0 ||
       unitMaxRetailPriceCustomer < 0
@@ -62,7 +63,10 @@ exports.addinventory = async (req, res) => {
     }
 
     
-    if (unitMinRetailPriceNGO > unitMaxRetailPriceCustomer) {
+    if (Number(unitMinRetailPriceNGO) > Number(unitMaxRetailPriceCustomer)) {
+
+        
+
       return res.status(400).json({
         success: false,
         message: "NGO price cannot be higher than customer price",
@@ -72,7 +76,7 @@ exports.addinventory = async (req, res) => {
   
     const newItem = new Inventory({
       itemName,
-      stock: Number(stock),
+      stock: stock?Number(stock):0,
       stockUnit,
       itemType,
       unitCostPrice: Number(unitCostPrice),
