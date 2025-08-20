@@ -18,6 +18,10 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
   const [formData, setFormData] = useState(null);
   const [planId, setPlanId] = useState("");
 
+  const [selectedPayment, setSelectedPayment] = useState('');
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+
   const { register, handleSubmit, setValue, watch, reset } = useForm({
     defaultValues: {
       isSubscriptionAvailed: false,
@@ -27,6 +31,9 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
 
   const isSubscriptionAvailed = watch("isSubscriptionAvailed");
   const discount = watch("discount");
+  const handlePaymentSelect = (method) => {
+    setSelectedPayment(method);
+  };
 
   const { subscriptionDetails } = useSelector((state) => state.subscription);
 
@@ -77,7 +84,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
     setValue("isSubscriptionAvailed", !isSubscriptionAvailed);
   };
 
-  const onSubmit = (formData) => {
+  const onSubmit = () => {
     console.log("Submitting form with pet ID:", _id);
     console.log("Visit purpose details ID:", visitPurposeDetails._id);
 
@@ -97,167 +104,29 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
       return;
     }
 
-    console.log("planid", planId);
 
     const data = {
       petId: _id,
       visitType: visitPurposeDetails._id,
       details: {
         planId: planId || null,
-        isSubscriptionAvailed: formData.isSubscriptionAvailed,
-        discount: formData.discount,
-        fullPrice: visitPurposeDetails.price,
+        selectedPayment,
+        isSubscriptionAvailed: isSubscriptionAvailed,
+        discount: discount,
+        price: visitPurposeDetails.price,
         finalPrice: getTotalPrice(),
       },
     };
 
-    console.log("Form data prepared:", data);
-    setFormData(data);
+    console.log(data);
 
-    if (getTotalPrice() === 0) {
-      processGroomingVisitSave(data);
-    } else {
-      initializeRazorpay(data);
-    }
-  };
 
-  const initializeRazorpay = (data) => {
-    const amount = getTotalPrice();
 
-    const orderData = {
-      receipt: `grooming_${_id.slice(-15)}`,
-      notes: {
-        petId: _id,
-        visitType: visitPurposeDetails._id,
-        paymentType: "advance",
-      },
-    };
-
-    const customData = {
-      businessName: "Pet Grooming Service",
-      description: "Full Payment for Grooming",
-      themeColor: "#3399cc",
-      prefill: {
-        name: "",
-        email: "",
-        contact: "",
-      },
-    };
-
-    const onPaymentSuccess = (response) => {
-      const updatedData = {
-        ...data,
-        details: {
-          ...data.details,
-          payment: {
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_signature: response.razorpay_signature,
-            paymentType: "advance",
-            amount: amount,
-            paidAt: new Date().toISOString(),
-            isPaid: true,
-            remainingAmount: 0,
-            isRemainingPaid: true,
-          },
-        },
-      };
-
-      handlePaymentSuccess(updatedData, response);
-    };
-
-    const onPaymentError = (error) => {
-      alert(error);
-    };
-
-    processPaymentFlow(
-      "advance",
-      amount,
-      orderData,
-      customData,
-      onPaymentSuccess,
-      onPaymentError
-    );
-  };
-
-  const handlePaymentSuccess = (updatedData, response) => {
-    const paymentData = {
-      razorpay_payment_id: response.razorpay_payment_id,
-      razorpay_order_id: response.razorpay_order_id,
-      razorpay_signature: response.razorpay_signature,
-      visitData: updatedData,
-    };
-
-    const onVerifySuccess = (data) => {
-      console.log(data);
-      // Format data for grooming visit dispatch
-      const groomingData = {
-        petId: updatedData.petId,
-        visitType: updatedData.visitType,
-        discount: updatedData.details.discount || 0,
-        isSubscriptionAvailed: updatedData.details.isSubscriptionAvailed || false,
-        planId: updatedData.details.planId || null,
-        details: updatedData.details,
-      };
-
-      dispatch(addGroomingVisit(groomingData))
-        .then((result) => {
-          console.log("Save result:", result);
-          if (result?.payload?.success) {
-            alert("Payment successful and visit saved!");
-            navigate("/staff/dashboard");
-            reset();
-          } else {
-            alert(result?.payload?.message || "Failed to save grooming visit");
-          }
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error saving grooming visit:", error);
-          alert("An error occurred: " + error.message);
-          setIsLoading(false);
-        });
-    };
-
-    const onVerifyError = (error) => {
-      alert(error);
-      setIsLoading(false);
-    };
-
-    paymentService.verifyPayment(paymentData, onVerifySuccess, onVerifyError);
-  };
-
-  const processGroomingVisitSave = (data) => {
-    setIsLoading(true);
-
-    console.log("Processing grooming visit save with data:", data);
-
-    const groomingData = {
-      petId: data.petId,
-      visitType: data.visitType,
-      discount: data.details.discount || 0,
-      isSubscriptionAvailed: data.details.isSubscriptionAvailed || false,
-      planId: data.details.planId || null,
-      details: {
-        ...data.details,
-        payment: {
-          paymentType: "subscription",
-          isPaid: false,
-          amount: 0,
-          paidAt: null,
-          remainingAmount: getTotalPrice(),
-          isRemainingPaid: true,
-        },
-      },
-    };
-
-    console.log("Saving visit with data:", groomingData);
-
-    dispatch(addGroomingVisit(groomingData))
+    dispatch(addGroomingVisit(data))
       .then((result) => {
         console.log("Save result:", result);
         if (result?.payload?.success) {
-          alert("Visit saved successfully!");
+          alert("Payment successful and visit saved!");
           navigate("/staff/dashboard");
           reset();
         } else {
@@ -295,6 +164,105 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
       </div>
     );
   }
+
+  if (showPopup)
+    return (<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4 relative">
+        <button
+          onClick={() => setShowPopup(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Payment Options
+        </h2>
+
+        {/* Payment Method Selection */}
+        <div className="mb-6">
+          <p className="text-gray-700 mb-4 font-medium">Select Payment Method:</p>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => handlePaymentSelect('cash')}
+              className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${selectedPayment === 'cash'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-300 hover:border-gray-400'
+                }`}
+            >
+              <div className="flex items-center">
+                <div className={`w-4 h-4 rounded-full border-2 mr-3 ${selectedPayment === 'cash'
+                  ? 'border-blue-500 bg-blue-500'
+                  : 'border-gray-300'
+                  }`}>
+                  {selectedPayment === 'cash' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                  )}
+                </div>
+                <span className="font-medium">Cash Payment</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handlePaymentSelect('payment_link')}
+              className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${selectedPayment === 'payment_link'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-300 hover:border-gray-400'
+                }`}
+            >
+              <div className="flex items-center">
+                <div className={`w-4 h-4 rounded-full border-2 mr-3 ${selectedPayment === 'payment_link'
+                  ? 'border-blue-500 bg-blue-500'
+                  : 'border-gray-300'
+                  }`}>
+                  {selectedPayment === 'payment_link' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                  )}
+                </div>
+                <span className="font-medium">Payment Link</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Confirmation Checkbox */}
+        <div className="mb-6">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isConfirmed}
+              onChange={(e) => setIsConfirmed(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span className="ml-3 text-gray-700">
+              {`I confirm that the payment of ₹ ${getTotalPrice()} has been completed`}
+            </span>
+          </label>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowPopup(false)}
+            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={isLoading}
+            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-colors ${selectedPayment && isConfirmed
+              ? 'bg-blue-500 text-white hover:bg-blue-600'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>)
 
   return (
     <div
@@ -528,7 +496,7 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
       {/* Grooming Form */}
       <div className="max-w-full flex justify-center">
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          
           className="p-8 rounded-2xl shadow-2xl w-full space-y-6 backdrop-blur-sm"
           style={{
             border: "1px solid rgba(133, 169, 71, 0.3)",
@@ -775,42 +743,24 @@ const Grooming = ({ _id, visitPurposeDetails }) => {
                 <span>Processing...</span>
               </div>
             ) : (
-              <div className="flex items-center justify-center space-x-2">
-                {getTotalPrice() === 0 ? (
-                  <>
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span>Book Grooming</span>
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                      />
-                    </svg>
-                    <span>Proceed to Payment</span>
-                  </>
-                )}
+              <div className="flex items-center justify-center space-x-2" onClick={()=>setShowPopup(true)}>
+                <>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Book Grooming</span>
+                </>
+
               </div>
             )}
           </button>

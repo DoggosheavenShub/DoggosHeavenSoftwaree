@@ -10,9 +10,6 @@ import InstagramReelsGrid from "../HomepageComponent/instareel";
 import { useRef } from 'react';
 import Navbar from './navbar';
 
-
-
-
 const home = () => {
 
   const serviceRef = useRef(null);

@@ -22,7 +22,7 @@ const SubscriptionPopup = ({ isOpen, onClose, petId }) => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        //   'Authorization': `Bearer ${localStorage.getItem('authtoken')}`
+          Authorization: `${localStorage.getItem('authtoken')}`
         }
       });
 

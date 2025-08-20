@@ -30,6 +30,11 @@ const subscriptionSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    discount:{
+      type:Number,
+      required:true,
+      default:0
+    },
     active: {
       type: Boolean,
       default:true,

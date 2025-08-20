@@ -42,7 +42,7 @@ export const PaymentOptionModal = ({ isOpen, onClose, onSelectOption, totalPrice
   );
 };
 
-export const PartialPaymentModal = ({ isOpen, onClose, onConfirm, totalPrice }) => {
+export const PartialPaymentModal = ({ isOpen, onClose, onConfirm, totalPrice,setShowPopup }) => {
   const [advanceAmount, setAdvanceAmount] = useState(0);
   const [remainingAmount, setRemainingAmount] = useState(0);
   const [error, setError] = useState("");

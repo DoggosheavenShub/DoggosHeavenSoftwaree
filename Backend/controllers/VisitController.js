@@ -555,9 +555,9 @@ exports.addDogParkVisit = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { petId, discount = 0, visitType, details: details_new } = req.body;
+    const { petId, visitType, details: details_new } = req.body;
 
-    const { payment } = details_new;
+    const {discount}=details_new
 
     if (!petId) {
       return res.json({
@@ -588,15 +588,10 @@ exports.addDogParkVisit = async (req, res) => {
       });
     }
 
-    // Create a new visit record
-    const details = {};
-    details.price = visitDetails.price - discount;
-    details.payment = payment;
-
     const visit = new Visit({
       pet: petId,
       visitType,
-      details,
+      details:details_new,
     });
 
     await visit.save({ session });
@@ -624,7 +619,7 @@ exports.addVeterinaryVisit = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { petId, visitType, customerType, payment } = req.body;
+    const { petId, visitType, customerType, details } = req.body;
 
     if (!petId) {
       return res.json({
@@ -646,11 +641,8 @@ exports.addVeterinaryVisit = async (req, res) => {
         message: "A customertype must be selected to save visit",
       });
     }
-
-    // Create a new visit record
-    const details = {};
-    details.customerType = customerType;
-    details.payment = payment;
+    
+    details.customerType=customerType
 
     const visit = new Visit({
       pet: petId,
@@ -683,18 +675,12 @@ exports.addHostelVisit = async (req, res) => {
   try {
     const {
       petId,
-      discount,
-      numberOfDays,
-      isSubscriptionAvailed,
-      planId,
-      price,
       visitType,
       details: details_new,
+
     } = req.body;
 
-    const { payment } = details_new;
-
-    let pricee = price;
+    const { discount,isSubscriptionAvailed,numberOfDays,planId } = details_new;
 
     if (!petId) {
       return res.json({
@@ -718,7 +704,7 @@ exports.addHostelVisit = async (req, res) => {
           message: "The pet has no subscription for given plan",
         });
       }
-      pricee = 0;
+    
     } else if (discount) {
       const Hostel = await VisitType.findOne({ _id: visitType });
 
@@ -728,23 +714,12 @@ exports.addHostelVisit = async (req, res) => {
           message: "Discount must be less than original price",
         });
       }
-
-      pricee = (Hostel?.price - discount) * numberOfDays;
     }
-
-    const details = {};
-
-    details["isSubscriptionAvailed"] = isSubscriptionAvailed;
-    details["price"] = pricee;
-    details["numberOfDays"] = numberOfDays;
-    details["discount"] = discount;
-
-    details.payment = payment;
 
     const visit = new Visit({
       pet: petId,
       visitType,
-      details,
+      details:details_new,
     });
 
     await visit.save({ session });
@@ -783,11 +758,13 @@ exports.addHostelVisit = async (req, res) => {
 };
 
 exports.addDayCareVisit = async (req, res) => {
-  console.log(req.body);
+  
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { petId, discount = 0, visitType, details } = req.body;
+    const { petId, visitType, details } = req.body;
+
+    const {discount}=details
 
     if (!petId) {
       return res.json({
@@ -818,7 +795,6 @@ exports.addDayCareVisit = async (req, res) => {
       });
     }
 
-    details.price = visitDetails?.price - discount;
 
     const visit = new Visit({
       pet: petId,
@@ -1195,15 +1171,13 @@ exports.addGroomingVisit = async (req, res) => {
   try {
     const {
       petId,
-      discount = 0,
       isSubscriptionAvailed,
-      planId,
       visitType,
       details: details_new,
     } = req.body;
 
-    const { payment } = details_new;
-    console.log("payment", payment);
+    const { discount } = details_new;
+  
 
     let price = 0;
 
@@ -1221,7 +1195,6 @@ exports.addGroomingVisit = async (req, res) => {
       });
     }
 
-    console.log("hi2");
 
     const visitDetails = await VisitType.findOne({ _id: visitType });
     details = {};
@@ -1254,14 +1227,8 @@ exports.addGroomingVisit = async (req, res) => {
       price = visitDetails?.price - discount;
     }
 
-    console.log("hi3");
-
     details.price = price;
-    details.payment = payment;
 
-    console.log("hi4");
-
-    console.log(details);
     const visit = new Visit({
       pet: petId,
       visitType,
@@ -1328,7 +1295,7 @@ exports.getBoardingCategoryList = async (req, res) => {
 exports.addShoppingVisit = async (req, res) => {
   try {
     const { items, petId, visitType, details: details_new } = req.body;
-    const { payment } = details_new;
+  
 
     if (!petId) {
       return res.json({
@@ -1347,7 +1314,7 @@ exports.addShoppingVisit = async (req, res) => {
     let price = 0;
 
     for (let i = 0; i < items.length; i++) {
-      console.log(typeof items[i].price);
+    
       if (!items[i].name) {
         return res.json({
           success: false,
@@ -1367,7 +1334,7 @@ exports.addShoppingVisit = async (req, res) => {
     details = {};
     details.price = price;
     details.items = items;
-    details.payment = payment;
+
 
     const newVisit = new Visit({
       visitType,

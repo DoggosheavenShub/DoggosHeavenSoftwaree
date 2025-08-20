@@ -126,7 +126,7 @@ exports.buySubscription = async (req, res) => {
   try {
     const { petId, visitType,planId, details:details_new } = req.body;
 
-    const { payment}=details_new;
+  
     
     if (!petId || !planId) {
       return res.status(400).json({
@@ -160,19 +160,14 @@ exports.buySubscription = async (req, res) => {
       await subscription.save({ session });
     }
 
-    const details = {};
-    (details.purpose = subscription
+    details_new.purpose = subscription
       ? "Renew Subscription"
-      : "Buy Subscription"),
-      (details.subscriptionPlan =planId);
-    details.price = PlanDetails.price;
-    price = PlanDetails.price;
-    details.payment=payment;
+      : "Buy Subscription"
 
     const visit = new Visit({
       pet: petId,
       visitType,
-      details,
+      details:details_new,
     });
 
     await visit.save({ session });

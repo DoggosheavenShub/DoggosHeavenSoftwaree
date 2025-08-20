@@ -40,6 +40,9 @@ exports.dogParkDeboarding = async (req, res) => {
 };
 
 exports.dayCareDeboarding = async (req, res) => {
+
+  const session = await mongoose.startSession()
+  session.startTransaction()
   try {
     const { boardingid } = req.body;
 
@@ -56,14 +59,29 @@ exports.dayCareDeboarding = async (req, res) => {
 
     boardingDetails.exitTime = new Date();
     boardingDetails.isBoarded = false;
-    await boardingDetails.save();
+    await boardingDetails.save({ session });
 
+    const visit = await Visit.findOne({ _id: boardingDetails?.visitId });
+
+    if (visit) {
+      visit.details.paymentLeft = 0;
+      visit.details.leftpaymentdonetime = new Date();
+      visit.markModified("details");
+      await visit.save({ session })
+    } else
+      return res.json({
+        success: false,
+        message: "No such visit exist",
+      });
+
+    session.commitTransaction()
     return res.json({
       success: true,
       message: "Pet Deboarded Successfully",
     });
   } catch (error) {
     console.log("Error in day care deboarding controlller", error);
+    session.abortTransaction()
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -207,7 +225,7 @@ exports.HostelDeboarding = async (req, res) => {
 
       const diffInMs = Math.abs(
         new Date().setHours(0, 0, 0, 0) -
-          new Date(boardingDetails.entryTime).setHours(0, 0, 0, 0)
+        new Date(boardingDetails.entryTime).setHours(0, 0, 0, 0)
       );
 
       const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
@@ -220,6 +238,19 @@ exports.HostelDeboarding = async (req, res) => {
 
       await subscriptionDetails.save({ session });
     }
+
+    const visit = await Visit.findOne({ _id: boardingDetails?.visitId });
+
+    if (visit) {
+      visit.details.paymentLeft = 0;
+      visit.details.leftpaymentdonetime = new Date();
+      visit.markModified("details");
+      await visit.save({ session })
+    } else
+      return res.json({
+        success: false,
+        message: "No such visit exist",
+      });
 
     await session.commitTransaction();
     return res.json({
@@ -253,7 +284,7 @@ exports.getBoardingDetails = async (req, res) => {
 
     const diffInMs = Math.abs(
       new Date().setHours(0, 0, 0, 0) -
-        new Date(boardingDetails.entryTime).setHours(0, 0, 0, 0)
+      new Date(boardingDetails.entryTime).setHours(0, 0, 0, 0)
     );
 
     const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
@@ -316,8 +347,8 @@ exports.checkBoardingDetails = async (req, res) => {
     const { _id } = req.body;
 
     const boardingDetails = await Boarding.findOne({
-      petId:_id,isBoarded:true
-    }).populate([{ path: "boardingType",select:"entryTime purpose" }]);
+      petId: _id, isBoarded: true
+    }).populate([{ path: "boardingType", select: "entryTime purpose" }]);
 
 
     return res.json({

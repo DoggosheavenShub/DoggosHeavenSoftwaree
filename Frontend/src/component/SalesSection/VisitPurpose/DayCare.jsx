@@ -4,24 +4,30 @@ import "../../../App.css";
 import { addDayCareVisit } from "../../../store/slices/visitSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import {
-  PaymentOptionModal,
-  PartialPaymentModal,
-} from "./PaymentComponents/PaymentModals";
-import { PaymentService } from "./PaymentComponents/PaymentService";
-import { usePaymentFlow } from "./PaymentComponents/PaymentHooks";
+
 
 const DayCare = ({ _id, visitPurposeDetails }) => {
-  const dispatch = useDispatch();
+
   const navigate = useNavigate();
-  const backendURL = import.meta.env.VITE_BACKEND_URL;
-  const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY;
+  const dispatch=useDispatch()
 
   const [formData, setFormData] = useState(null);
   const [boardingDetails, setBoadringDetails] = useState(null);
+  const [showPaymentOption, setShowPaymentOption] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState('');
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedPaymentType, setSelectedPaymentType] = useState('');
+  const [price, setPrice] = useState(0);
 
-  // Initialize payment service
-  const paymentService = new PaymentService(backendURL, razorpayKeyId);
+  const handlePaymentSelect = (method) => {
+    setSelectedPayment(method);
+  };
+
+  const handlePaymentTypeSelect = (type) => {
+    setSelectedPaymentType(type);
+  }
 
   const { register, handleSubmit, watch } = useForm({
     defaultValues: {
@@ -32,28 +38,14 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
   const discount = watch("discount");
 
   const getTotalPrice = () => {
+
     return visitPurposeDetails.price - discount > 0
       ? visitPurposeDetails.price - discount
       : 0;
   };
 
-  // Use payment hook
-  const {
-    isLoading,
-    setIsLoading,
-    showPaymentModal,
-    setShowPaymentModal,
-    showPartialPaymentModal,
-    setShowPartialPaymentModal,
-    paymentOption,
-    advanceAmount,
-    remainingAmount,
-    handlePartialPaymentConfirm,
-    handlePaymentOptionSelect,
-    processPaymentFlow,
-  } = usePaymentFlow(paymentService, getTotalPrice);
 
-  const onSubmit = (data) => {
+  const onSubmit = () => {
     if (!_id || _id.trim() === "") {
       console.error("Missing pet ID");
       alert("A pet must be selected. Please select a pet before proceeding.");
@@ -70,232 +62,44 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
       return;
     }
 
-    const formDataWithPayment = {
+     
+    if(!isConfirmed) {
+    alert("Please check the box")  
+    return ;
+    }
+
+    if(!selectedPayment){
+      alert("Please select payment method")  
+    return ;
+    }
+
+
+    const formData = {
       petId: _id,
       visitType: visitPurposeDetails._id,
       details: {
-        discount: data.discount,
-        fullPrice: visitPurposeDetails.price,
+        selectedPaymentType,
+        selectedPayment,
+        discount,
+        paymentLeft:selectedPaymentType==="advance_payment"?0:selectedPaymentType==="partial_payment"?getTotalPrice()-price:getTotalPrice(),
+        price: visitPurposeDetails.price,
         finalPrice: getTotalPrice(),
       },
     };
 
-    console.log("Form data prepared:", formDataWithPayment);
-    setFormData(formDataWithPayment);
 
-    if (getTotalPrice() === 0) {
-      processVisitSave(formDataWithPayment, "after");
-    } else {
-      setShowPaymentModal(true);
-    }
-  };
+    setIsLoading(true)
+    dispatch(addDayCareVisit(formData)).then((data) => {
+      if (data?.payload?.success) {
+        alert("Dog boarded successfully");
+        navigate("/staff/dashboard")
+      }
+      else
+        alert(data?.payload?.message);
 
-  const initializeRazorpay = (
-    paymentType,
-    advanceAmt = null,
-    remainingAmt = null
-  ) => {
-    let amount;
-
-    if (advanceAmt !== null) {
-      amount = advanceAmt;
-    } else {
-      amount =
-        paymentType === "advance"
-          ? getTotalPrice()
-          : Math.round(getTotalPrice() * 0.5);
-    }
-
-    const orderData = {
-      receipt: `pet_daycare_${_id}`,
-      notes: {
-        petId: _id,
-        visitType: visitPurposeDetails._id,
-        paymentType: paymentType,
-      },
-    };
-
-    let paymentDescription;
-    let paymentAmount;
-    let remainingPaymentAmount;
-
-    console.log("remamt", remainingAmt);
-
-    if (paymentType === "advance") {
-      paymentDescription = "Full Payment";
-      paymentAmount = getTotalPrice();
-      remainingPaymentAmount = 0;
-    } else if (paymentType === "partial") {
-      paymentAmount = advanceAmt;
-      remainingPaymentAmount = remainingAmt;
-      paymentDescription = `Partial Payment (₹${paymentAmount} now, ₹${remainingPaymentAmount} later)`;
-    } else {
-      paymentAmount = 0;
-      remainingPaymentAmount = getTotalPrice();
-      paymentDescription = "Payment After Service";
-    }
-
-    console.log("Payment setup:", {
-      paymentType,
-      paymentAmount,
-      remainingPaymentAmount,
-      totalPrice: getTotalPrice(),
-    });
-
-    const customData = {
-      businessName: "Pet DayCare Service",
-      description: paymentDescription,
-      themeColor: "#3399cc",
-      prefill: {
-        name: "",
-        email: "",
-        contact: "",
-      },
-    };
-
-    const onPaymentSuccess = (response) => {
-      const updatedData = {
-        ...formData,
-        details: {
-          ...formData.details,
-          payment: {
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_signature: response.razorpay_signature,
-            paymentType: paymentType,
-            amount: paymentAmount,
-            paidAt: new Date().toISOString(),
-            isPaid: paymentAmount > 0,
-            remainingAmount: remainingPaymentAmount,
-            isRemainingPaid: remainingPaymentAmount === 0,
-          },
-        },
-      };
-
-      handlePaymentSuccess(updatedData, response);
-    };
-
-    const onPaymentError = (error) => {
-      alert(error);
-    };
-
-    processPaymentFlow(
-      paymentType,
-      amount,
-      orderData,
-      customData,
-      onPaymentSuccess,
-      onPaymentError
-    );
-  };
-
-  const handlePaymentSuccess = (updatedData, response) => {
-    setIsLoading(true);
-
-    console.log("Sending payment data to backend:", {
-      paymentType: updatedData.details.payment.paymentType,
-      amount: updatedData.details.payment.amount,
-      remainingAmount: updatedData.details.payment.remainingAmount,
-    });
-
-    const paymentData = {
-      razorpay_payment_id: response.razorpay_payment_id,
-      razorpay_order_id: response.razorpay_order_id,
-      razorpay_signature: response.razorpay_signature,
-      visitData: updatedData,
-    };
-
-    const onVerifySuccess = (data) => {
-      dispatch(addDayCareVisit(updatedData));
-      alert("Payment successful and visit saved!");
-      navigate("/staff/dashboard");
-      setIsLoading(false);
-    };
-
-    const onVerifyError = (error) => {
-      alert(error);
-      setIsLoading(false);
-    };
-
-    paymentService.verifyPayment(paymentData, onVerifySuccess, onVerifyError);
-  };
-
-  const onPaymentOptionSelect = (option) => {
-    handlePaymentOptionSelect(
-      option,
-      formData,
-      processVisitSave, // onAfterPayment
-      () => {}, // onPartialPayment
-      initializeRazorpay // onAdvancePayment
-    );
-  };
-
-  const onPartialPaymentConfirm = (advance, remaining) => {
-    handlePartialPaymentConfirm(advance, remaining, (adv, rem) => {
-      initializeRazorpay("partial", adv, rem);
-    });
-  };
-
-  const processVisitSave = (data, paymentType) => {
-    setIsLoading(true);
-
-    if (
-      !data.petId ||
-      typeof data.petId !== "string" ||
-      data.petId.trim() === ""
-    ) {
-      console.error("Invalid pet ID:", data.petId);
-      alert("Invalid pet ID. Please select a pet before proceeding.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (
-      !data.visitType ||
-      typeof data.visitType !== "string" ||
-      data.visitType.trim() === ""
-    ) {
-      console.error("Invalid visit type ID:", data.visitType);
-      alert("Invalid visit type. Please try again.");
-      setIsLoading(false);
-      return;
-    }
-
-    const requestBody = {
-      petId: data.petId.trim(),
-      visitType: data.visitType.trim(),
-      discount: data.details?.discount || 0,
-      details: {
-        price: formData.finalPrice,
-        payment: {
-          paymentType: paymentType,
-          isPaid: false,
-          amount: 0,
-          paidAt: null,
-          remainingAmount: getTotalPrice(),
-          isRemainingPaid: false,
-        },
-      },
-    };
-
-    console.log("Saving visit with data:", requestBody);
-
-    dispatch(addDayCareVisit(requestBody))
-      .then((result) => {
-        console.log("Save result:", result);
-        if (result?.payload?.success) {
-          alert("Visit saved successfully");
-          navigate("/staff/dashboard");
-        } else {
-          alert(result?.payload?.message || "Failed to save visit");
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error saving visit:", error);
-        alert("An error occurred: " + error.message);
-        setIsLoading(false);
-      });
+    }).finally(() => {
+      setIsLoading(false)
+    })
   };
 
   const checkBoarding = async () => {
@@ -329,13 +133,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
     }
   }, [_id]);
 
-  if (isLoading)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
-      </div>
-    );
-
+ 
   if (boardingDetails)
     return (
       <div className="flex flex-col items-center space-y-4">
@@ -357,13 +155,246 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
         </p>
       </div>
     );
- 
+
+  if (showPopup)
+    return (<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4 relative">
+        <button
+          onClick={() => setShowPopup(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Payment Options
+        </h2>
+
+        {/* Payment Method Selection */}
+        <div className="mb-6">
+          <p className="text-gray-700 mb-4 font-medium">Select Payment Method:</p>
+
+          {selectedPaymentType === "partial_payment" && (
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <div className="space-y-4">
+                <div className="text-lg font-medium text-gray-800">
+                  Total Amount: {getTotalPrice()}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Amount Paid Right Now
+                  </label>
+                  <input
+                    type="number"
+                    value={price}
+                    onChange={(e) => {
+                      const inputValue = Number(e.target.value);
+                      const maxValue = getTotalPrice()
+
+                      if (inputValue > maxValue) return; // ignore input
+
+                      setPrice(inputValue);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter amount"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <button
+              onClick={() => handlePaymentSelect('cash')}
+              className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${selectedPayment === 'cash'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-300 hover:border-gray-400'
+                }`}
+            >
+              <div className="flex items-center">
+                <div className={`w-4 h-4 rounded-full border-2 mr-3 ${selectedPayment === 'cash'
+                  ? 'border-blue-500 bg-blue-500'
+                  : 'border-gray-300'
+                  }`}>
+                  {selectedPayment === 'cash' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                  )}
+                </div>
+                <span className="font-medium">Cash Payment</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handlePaymentSelect('payment_link')}
+              className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${selectedPayment === 'payment_link'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-300 hover:border-gray-400'
+                }`}
+            >
+              <div className="flex items-center">
+                <div className={`w-4 h-4 rounded-full border-2 mr-3 ${selectedPayment === 'payment_link'
+                  ? 'border-blue-500 bg-blue-500'
+                  : 'border-gray-300'
+                  }`}>
+                  {selectedPayment === 'payment_link' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                  )}
+                </div>
+                <span className="font-medium">Payment Link</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Confirmation Checkbox */}
+
+        <div className="mb-6">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isConfirmed}
+              min={0}
+              onChange={(e) => setIsConfirmed(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span className="ml-3 text-gray-700">
+              {`I confirm that the payment of ₹  ${selectedPaymentType === "partial_payment" ? price : selectedPaymentType === "payment_after_service" ? 0 : getTotalPrice()} has been completed`}
+            </span>
+          </label>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowPopup(false)}
+            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={isLoading}
+            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-colors bg-blue-500 text-white hover:bg-blue-600
+              `}
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>)
+
+  if (showPaymentOption)
+    return (<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4 relative">
+        <button
+          onClick={() => setShowPaymentOption(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Payment Options
+        </h2>
+
+        {/* Payment Type Selection */}
+        <div className="mb-6">
+          <p className="text-gray-700 mb-4 font-medium">Select Payment Type:</p>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => handlePaymentTypeSelect('partial_payment')}
+              className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${selectedPaymentType === 'partial_payment'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-300 hover:border-gray-400'
+                }`}
+            >
+              <div className="flex items-center">
+                <div className={`w-4 h-4 rounded-full border-2 mr-3 ${selectedPaymentType === 'partial_payment'
+                  ? 'border-blue-500 bg-blue-500'
+                  : 'border-gray-300'
+                  }`}>
+                  {selectedPaymentType === 'partial_payment' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                  )}
+                </div>
+                <span className="font-medium">Partial Payment</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handlePaymentTypeSelect('advance_payment')}
+              className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${selectedPaymentType === 'advance_payment'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-300 hover:border-gray-400'
+                }`}
+            >
+              <div className="flex items-center">
+                <div className={`w-4 h-4 rounded-full border-2 mr-3 ${selectedPaymentType === 'advance_payment'
+                  ? 'border-blue-500 bg-blue-500'
+                  : 'border-gray-300'
+                  }`}>
+                  {selectedPaymentType === 'advance_payment' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                  )}
+                </div>
+                <span className="font-medium">Advance Payment</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handlePaymentTypeSelect('payment_after_service')}
+              className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${selectedPaymentType === 'payment_after_service'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-300 hover:border-gray-400'
+                }`}
+            >
+              <div className="flex items-center">
+                <div className={`w-4 h-4 rounded-full border-2 mr-3 ${selectedPaymentType === 'payment_after_service'
+                  ? 'border-blue-500 bg-blue-500'
+                  : 'border-gray-300'
+                  }`}>
+                  {selectedPaymentType === 'payment_after_service' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                  )}
+                </div>
+                <span className="font-medium">Payment After Service</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowPaymentOption(false)}
+            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => setShowPopup(true)}
+            disabled={!selectedPaymentType}
+            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-colors ${selectedPaymentType
+              ? 'bg-blue-500 text-white hover:bg-blue-600'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>)
+
   return (
     <div className="hidescroller">
-      
+
       <div className="max-w-full flex justify-center p-4">
         <form
-          onSubmit={handleSubmit(onSubmit)}
+
           className="p-8 rounded-2xl shadow-2xl w-full space-y-6 backdrop-blur-sm"
           style={{
             background:
@@ -524,7 +555,7 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
 
           {/* Payment Button */}
           <button
-            type="submit"
+            onClick={() => setShowPaymentOption(true)}
             disabled={isLoading}
             className="w-full p-4 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             style={{
@@ -591,59 +622,10 @@ const DayCare = ({ _id, visitPurposeDetails }) => {
             )}
           </button>
 
-          {/* Security & Payment Info */}
-          <div className="grid grid-cols-2 gap-4 pt-4">
-            <div className="flex items-center space-x-2">
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                style={{ color: "#85A947" }}
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-xs" style={{ color: "#85A947" }}>
-                Secure Payment
-              </span>
-            </div>
-            <div className="flex items-center space-x-2 justify-end">
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                style={{ color: "#85A947" }}
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-xs" style={{ color: "#85A947" }}>
-                SSL Encrypted
-              </span>
-            </div>
-          </div>
         </form>
       </div>
 
-      <PaymentOptionModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        onSelectOption={onPaymentOptionSelect}
-        totalPrice={getTotalPrice()}
-      />
 
-      <PartialPaymentModal
-        isOpen={showPartialPaymentModal}
-        onClose={() => setShowPartialPaymentModal(false)}
-        onConfirm={onPartialPaymentConfirm}
-        totalPrice={getTotalPrice()}
-      />
     </div>
   );
 };

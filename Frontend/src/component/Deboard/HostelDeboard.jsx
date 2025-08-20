@@ -20,6 +20,7 @@ const HostelDeboard = ({ _id, setboardingid }) => {
 
   const [actualnumberofdays, setactualnumberofdays] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
+    const [isConfirmed, setIsConfirmed] = useState(false);
 
   const navigate = useNavigate();
 
@@ -82,99 +83,35 @@ const HostelDeboard = ({ _id, setboardingid }) => {
   }, [boardingDetails]);
 
   const getDiscountedPrice = (discount) => {
-     let amount= 0;
-    if(actualnumberofdays>subscriptionDetails?.daysLeft) {
-    amount =
-      (actualnumberofdays - subscriptionDetails?.daysLeft) *
-      (boardingDetails?.boardingType?.price - discount);
+    let amount = 0;
+    if (actualnumberofdays > subscriptionDetails?.daysLeft) {
+      amount =
+        (actualnumberofdays - subscriptionDetails?.daysLeft) *
+        (boardingDetails?.boardingType?.price - discount);
     }
     return amount;
   };
 
-  useEffect(() => {
-    let amt = 0;
-    if (actualnumberofdays > boardingDetails?.numberOfDays) {
-      amt +=
-        (boardingDetails?.visitId?.details?.price /
-          boardingDetails?.numberOfDays) *
-        (actualnumberofdays - boardingDetails?.numberOfDays);
-    }
-    amt += boardingDetails?.visitId?.details?.payment?.remainingAmount;
+  const extraPrice = () => {
 
-    setTotalAmount(amt);
-  }, [boardingDetails, actualnumberofdays]);
+    return actualnumberofdays - boardingDetails?.numberOfDays > 0
+      ? (boardingDetails?.visitId?.details?.finalPrice /
+        boardingDetails?.numberOfDays) *
+      (actualnumberofdays - boardingDetails?.numberOfDays)
+      : 0
+  }
 
-  const startPayment = async (amount) => {
-    const razorpayLoaded = await loadRazorpayScript(
-      "https://checkout.razorpay.com/v1/checkout.js"
-    );
+  useEffect(()=>{
+    if(boardingDetails?.visitId?.details?.isSubscriptionAvailed){
+      let extradays=actualnumberofdays - subscriptionDetails?.daysLeft
+      if(extradays) {
+        setTotalAmount(()=>((extradays)*(subscriptionDetails?.planId?.price/subscriptionDetails?.planId?.duration-subscriptionDetails?.discount)))
+      } else
+        setTotalAmount(0)
+    }else
+    setTotalAmount(()=>boardingDetails?.visitId?.details?.paymentLeft + extraPrice())
+  },[actualnumberofdays,boardingDetails])
 
-    if (!razorpayLoaded) {
-      alert("Razorpay SDK failed to load. Are you online?");
-      return;
-    }
-
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/v1/payments/create-order`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("authtoken"),
-        },
-        body: JSON.stringify({
-          amount: amount,
-          receipt: `left_amt_board:${_id}`,
-          notes: {
-            boardingId: _id,
-          },
-        }),
-      }
-    );
-
-    const { order } = await res.json();
-
-    // 2. Setup Razorpay options
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY, // Replace with your Razorpay key_id
-      amount: order.amount,
-      currency: "INR",
-      name: "Doggos Heaven",
-      description: "Test Transaction",
-      order_id: order.id,
-      handler: async function (response) {
-        // 3. Verify payment on backend
-        const verifyRes = await fetch(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/api/v1/payments/verify-pending-payment`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: localStorage.getItem("authtoken") || "",
-            },
-            body: JSON.stringify({
-              razorpay_payment_id: response.razorpay_payment_id,
-              visitId: boardingDetails?.visitId?._id,
-            }),
-          }
-        );
-
-        const result = await verifyRes.json();
-
-        if (result.success) {
-          handleVisitUpdate();
-        } else {
-          alert("❌ Payment Failed!");
-        }
-      },
-      theme: { color: "#528FF0" },
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.open();
-  };
 
   return (
     <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl w-11/12 sm:w-1/2 max-w-lg flex flex-col p-8 border border-[#85A947]/20">
@@ -219,67 +156,18 @@ const HostelDeboard = ({ _id, setboardingid }) => {
             <span className="text-[#123524] font-semibold text-lg">Yes</span>
           </div>
 
-          { actualnumberofdays <= subscriptionDetails?.daysLeft||boardingDetails?.visitId?.details?.extradayspricepaid ? (
+          {actualnumberofdays <= subscriptionDetails?.daysLeft ?(
             <> <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-                  <span className="text-[#3E7B27] font-bold text-sm">
-                    Number of Days:
-                  </span>
-                </div>
-                <span className="text-[#123524] font-semibold text-lg">
-                  {actualnumberofdays}
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                <span className="text-[#3E7B27] font-bold text-sm">
+                  Number of Days:
                 </span>
               </div>
-              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-                  <span className="text-[#3E7B27] font-bold text-sm">
-                    Days Left of Subscription
-                  </span>
-                </div>
-                <span className="text-[#123524] font-semibold text-lg">
-                  {subscriptionDetails?.daysLeft}
-                </span>
-              </div>
-               <div className="flex justify-center pt-4">
-              <button
-                disabled={loading}
-                onClick={handleDeboard}
-                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
-                  loading
-                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
-                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
-                }`}
-              >
-                {loading ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Processing...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                    <span>Deboard Pet</span>
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  </div>
-                )}
-              </button>
+              <span className="text-[#123524] font-semibold text-lg">
+                {actualnumberofdays}
+              </span>
             </div>
-              </>
-           
-          ): ( <>
-              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-                  <span className="text-[#3E7B27] font-bold text-sm">
-                    Number of Days:
-                  </span>
-                </div>
-                <span className="text-[#123524] font-semibold text-lg">
-                  {actualnumberofdays}
-                </span>
-              </div>
               <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
@@ -289,65 +177,16 @@ const HostelDeboard = ({ _id, setboardingid }) => {
                 </div>
                 <span className="text-[#123524] font-semibold text-lg">
                   {subscriptionDetails?.daysLeft}
-                </span>
-              </div>
-              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-                  <span className="text-[#3E7B27] font-bold text-sm">
-                    Hostel Price / day
-                  </span>
-                </div>
-                <span className="text-[#123524] font-semibold text-lg">
-                  {boardingDetails?.boardingType?.price}
-                </span>
-              </div>
-
-              <div className="space-y-2 mt-2">
-                <label
-                  className="block text-sm font-medium"
-                  style={{ color: "#3E7B27" }}
-                >
-                  Apply Discount
-                </label>
-                <div className="relative bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-                  <span
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lg font-medium"
-                    style={{ color: "#85A947" }}
-                  >
-                    ₹
-                  </span>
-                  <input
-                    type="number"
-                    max={boardingDetails?.boardingType?.price}
-                    onChange={(e) => setDiscount(Number(e.target.value))}
-                    value={discount}
-                    min={0}
-                    className="w-full pl-8 pr-4 py-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-0"
-                  />
-                </div>
-              </div>
-
-              <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
-                  <span className="text-[#3E7B27] font-bold text-sm">
-                    Amount To Pay
-                  </span>
-                </div>
-                <span className="text-[#123524] font-semibold text-lg">
-                  {getDiscountedPrice(discount)}
                 </span>
               </div>
               <div className="flex justify-center pt-4">
                 <button
                   disabled={loading}
-                  onClick={() => startPayment(getDiscountedPrice(discount))}
-                  className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
-                    loading
-                      ? "bg-[#123524]/50 text-white cursor-not-allowed"
-                      : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
-                  }`}
+                  onClick={handleDeboard}
+                  className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${loading
+                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                    }`}
                 >
                   {loading ? (
                     <div className="flex items-center gap-3">
@@ -357,13 +196,85 @@ const HostelDeboard = ({ _id, setboardingid }) => {
                   ) : (
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-white rounded-full"></div>
-                      <span>Pay Remaining Amount</span>
+                      <span>Deboard Pet</span>
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
                   )}
                 </button>
               </div>
-            </>) }       
+            </>
+
+          ) : (<>
+            <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                <span className="text-[#3E7B27] font-bold text-sm">
+                  Number of Days:
+                </span>
+              </div>
+              <span className="text-[#123524] font-semibold text-lg">
+                {actualnumberofdays}
+              </span>
+            </div>
+            <div className="flex mt-2 justify-between items-center p-5 bg-gradient-to-r from-[#85A947]/10 to-[#EFE3C2]/40 rounded-xl border border-[#85A947]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-[#85A947] rounded-full"></div>
+                <span className="text-[#3E7B27] font-bold text-sm">
+                  Days Left of Subscription
+                </span>
+              </div>
+              <span className="text-[#123524] font-semibold text-lg">
+                {subscriptionDetails?.daysLeft}
+              </span>
+            </div>
+             <>   
+              <div className="mb-6">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isConfirmed}
+                  onChange={(e) => setIsConfirmed(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="ml-3 text-black">
+                  {`I confirm that the payment of ₹ ${totalAmount} has been completed`}
+                </span>
+              </label>
+            </div>
+              <div className="flex justify-center pt-4">
+                {!loading ?
+                  <button
+                    disabled={!isConfirmed}
+                    onClick={handleDeboard}
+                    className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${!isConfirmed
+                      ? "bg-gradient-to-r from-red-700 to-green-700 opacity-50 text-white cursor-not-allowed"
+                      : "bg-gradient-to-r from-red-500 to-green-500 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <span>Deboard Pet</span>
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+
+                  </button> :
+                  <button
+                    disabled={loading}
+                    className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg 
+                    bg-gradient-to-r from-red-500 to-green-500 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300
+                    }`}
+                  >
+
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Processing...</span>
+                    </div>
+                  </button>
+                }
+              </div>
+            </>
+           
+          </>)}
         </div>
       ) : (
         <div className="flex-1 flex flex-col justify-center space-y-6">
@@ -411,11 +322,7 @@ const HostelDeboard = ({ _id, setboardingid }) => {
               </span>
             </div>
             <span className="text-[#123524] font-semibold text-lg">
-              {actualnumberofdays - boardingDetails?.numberOfDays > 0
-                ? (boardingDetails?.visitId?.details?.price /
-                    boardingDetails?.numberOfDays) *
-                  (actualnumberofdays - boardingDetails?.numberOfDays)
-                : 0}
+              {extraPrice()}
             </span>
           </div>
 
@@ -430,8 +337,7 @@ const HostelDeboard = ({ _id, setboardingid }) => {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-[#123524] font-semibold">
-                  {boardingDetails?.visitId?.details?.payment
-                    ?.remainingAmount || 0}
+                  {boardingDetails?.visitId?.details?.paymentLeft || 0}
                 </span>
               </div>
             </div>
@@ -448,50 +354,69 @@ const HostelDeboard = ({ _id, setboardingid }) => {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-[#123524] font-semibold">
-                  {!boardingDetails?.visitId?.details?.payment?.isRemainingPaid
-                    ? totalAmount
-                    : 0}
+                  {boardingDetails?.visitId?.details?.paymentLeft + extraPrice()}
                 </span>
               </div>
             </div>
           </div>
 
-          {!boardingDetails?.visitId?.details?.payment?.isRemainingPaid ||
-          boardingDetails?.visitId?.details?.payment?.remainingAmount !== 0 ? (
-            <div className="flex justify-center pt-4">
-              <button
-                disabled={loading}
-                onClick={() => startPayment(totalAmount)}
-                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
-                  loading
-                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
-                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
-                }`}
-              >
-                {loading ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Processing...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                    <span>Pay Remaining Amount</span>
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  </div>
-                )}
-              </button>
+          {totalAmount ? (
+            <>   <div className="mb-6">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isConfirmed}
+                  onChange={(e) => setIsConfirmed(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="ml-3 text-black">
+                  {`I confirm that the payment of ₹ ${totalAmount} has been completed`}
+                </span>
+              </label>
             </div>
+              <div className="flex justify-center pt-4">
+                {!loading ?
+                  <button
+                    disabled={!isConfirmed}
+                    onClick={handleDeboard}
+                    className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${!isConfirmed
+                      ? "bg-gradient-to-r from-red-700 to-green-700 opacity-50 text-white cursor-not-allowed"
+                      : "bg-gradient-to-r from-red-500 to-green-500 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                      }`}
+                  >
+
+
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <span>Deboard Pet</span>
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+
+                  </button> :
+                  <button
+                    disabled={loading}
+                    className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg 
+                    bg-gradient-to-r from-red-500 to-green-500 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300
+                    }`}
+                  >
+
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Processing...</span>
+                    </div>
+                  </button>
+                }
+              </div>
+            </>
           ) : (
             <div className="flex justify-center pt-4">
               <button
                 disabled={loading}
                 onClick={handleDeboard}
-                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${
-                  loading
-                    ? "bg-[#123524]/50 text-white cursor-not-allowed"
-                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
-                }`}
+                className={`px-8 py-4 text-base font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 shadow-lg ${loading
+                  ? "bg-[#123524]/50 text-white cursor-not-allowed"
+                  : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-xl hover:-translate-y-0.5 focus:ring-red-300"
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center gap-3">
