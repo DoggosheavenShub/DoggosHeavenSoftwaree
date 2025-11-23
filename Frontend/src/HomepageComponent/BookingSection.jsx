@@ -458,12 +458,16 @@ const ServicesPage = () => {
   const loading = false;
 
   const serviceCategories = [
-    { id: 1, name: 'Boarding/Hostel', duration: 1440, price: 1000 },
-    { id: 2, name: 'Day Boarding/Hostel', duration: 1440, price: 1000 },
-    { id: 3, name: 'Day School', duration: 480, price: 650 },
-    { id: 4, name: 'Dog Park', duration: 180, price: 350 },
-    { id: 5, name: 'Grooming', duration: 60, price: 700 },
-    { id: 6, name: 'Play School', duration: 120, price: 450 }
+    { id: 1, name: 'Boarding', duration: 1440, price: 900 },
+    { id: 2, name: 'Day Boarding', duration: 1440, price: 600 },
+    { id: 3, name: 'Boarding Wallet (15 days)', duration: 480, price: 11500 },
+    { id: 4, name: 'Day School (26 days)', duration: 180, price: 13650 },
+    { id: 5, name:'Play School (26 days)', duration: 60, price: 9650 },
+    { id: 6, name: 'Grooming (small breed)', duration: 120, price: 800 },
+    { id: 7, name: 'Grooming (large breed)', duration: 120, price: 900 },
+    { id: 8, name: 'Full Grooming (small breed)', duration: 120, price: 1500 },
+    { id: 9, name: 'Full Grooming (large breed)', duration: 120, price: 1600 },
+    { id: 10, name: 'Oil Massage', duration: 120, price: 250 }
   ];
 
  const handleBookService = (service) => {
