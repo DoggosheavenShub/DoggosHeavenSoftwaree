@@ -1,16 +1,28 @@
 {
   "version": 2,
   "builds": [
-   {
-    "src": "server.js",
-    "use": "@vercel/node",
-    "config": { "includeFiles": ["dist/**"] }
-   }
+    {
+      "src": "server.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["dist/**"] }
+    }
   ],
   "routes": [
-   {
-    "src": "/(.*)",
-    "dest": "server.js"
-   }
+    {
+      "src": "/(.*)",
+      "methods": ["OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://doggosheaven.com",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization,Accept-Type",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "status": 204,
+      "continue": false
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
   ]
- }
+}
