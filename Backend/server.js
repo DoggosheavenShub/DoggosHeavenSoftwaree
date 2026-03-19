@@ -28,17 +28,30 @@ const app = express();
 
 app.use('/api/v1/customer-webhook', express.raw({ type: 'application/json' }), customerWebhookRoutes);
 
+const allowedOrigins = [
+  "https://doggosheaven.com",
+  "https://www.doggosheaven.com",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
-app.use(express.json());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization","Accept-Type"],
-    
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept-Type"],
   })
 );
+
+app.options("*", cors());
+
+app.use(express.json());
 
 
 const dbConnect = require("./config/db");
