@@ -3,11 +3,12 @@ import { logout } from "./authSlice";
 
 const initialState = {
   getAllInventoryLoading: false,
-  loading:false,
+  loading: false,
   inventoryList: [],
   editInventoryLoading: false,
   addInventoryLoading: false,
-  deleteInventoryLoading: false
+  deleteInventoryLoading: false,
+  useMedicineLoading: false,
 };
 
 export const getAllInventory = createAsyncThunk(
@@ -160,6 +161,68 @@ export const getAlertListOfInventory = createAsyncThunk(
   }
 );
 
+export const useMedicine = createAsyncThunk(
+  "/medicine/use",
+  async (formData, { dispatch }) => {
+    const token = localStorage.getItem("authtoken") || "";
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/medicine/use`,
+      {
+        method: "POST",
+        headers: { "Authorization": token, "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      }
+    );
+    if (response.status === 401) dispatch(logout());
+    return await response.json();
+  }
+);
+
+export const getUsageLogs = createAsyncThunk(
+  "/medicine/usagelogs",
+  async (_, { dispatch }) => {
+    const token = localStorage.getItem("authtoken") || "";
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/medicine/usagelogs`,
+      { method: "GET", headers: { "Authorization": token, "Content-Type": "application/json" } }
+    );
+    if (response.status === 401) dispatch(logout());
+    return await response.json();
+  }
+);
+
+export const getStockHistory = createAsyncThunk(
+  "/medicine/stockhistory",
+  async (_, { dispatch }) => {
+    const token = localStorage.getItem("authtoken") || "";
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/medicine/stockhistory`,
+      { method: "GET", headers: { "Authorization": token, "Content-Type": "application/json" } }
+    );
+    if (response.status === 401) dispatch(logout());
+    return await response.json();
+  }
+);
+
+export const getRevenue = createAsyncThunk(
+  "/medicine/revenue",
+  async ({ year, month, day, page = 1, limit = 10 } = {}, { dispatch }) => {
+    const token = localStorage.getItem("authtoken") || "";
+    const params = new URLSearchParams();
+    if (year)  params.append("year",  year);
+    if (month) params.append("month", month);
+    if (day)   params.append("day",   day);
+    params.append("page",  page);
+    params.append("limit", limit);
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/medicine/revenue?${params.toString()}`,
+      { method: "GET", headers: { "Authorization": token, "Content-Type": "application/json" } }
+    );
+    if (response.status === 401) dispatch(logout());
+    return await response.json();
+  }
+);
+
 const inventorySlice = createSlice({
   name: "inventory",
   initialState,
@@ -206,7 +269,10 @@ const inventorySlice = createSlice({
         state.addInventoryLoading=false
       }).addCase(editInventoryItem.rejected,(state)=>{
         state.addInventoryLoading=false
-      });;
+      })
+      .addCase(useMedicine.pending,   (state) => { state.useMedicineLoading = true; })
+      .addCase(useMedicine.fulfilled, (state) => { state.useMedicineLoading = false; })
+      .addCase(useMedicine.rejected,  (state) => { state.useMedicineLoading = false; });
   },
 });
 

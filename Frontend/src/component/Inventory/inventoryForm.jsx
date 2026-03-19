@@ -17,6 +17,7 @@ const InventoryForm = () => {
     unitCostPrice: 0,
     unitMinRetailPriceNGO: 0,
     unitMaxRetailPriceCustomer: 0,
+    expiryDate: "",
   });
 
   const dispatch = useDispatch();
@@ -43,6 +44,7 @@ const InventoryForm = () => {
             unitCostPrice: 0,
             unitMinRetailPriceNGO: 0,
             unitMaxRetailPriceCustomer: 0,
+            expiryDate: "",
           });
           navigate("/staff/inventoryList")
         } else alert(data?.payload?.message);
@@ -161,6 +163,22 @@ const InventoryForm = () => {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="block text-sm font-bold text-[#3E7B27] mb-2">
+                      Expiry Date
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        name="expiryDate"
+                        value={formData.expiryDate}
+                        onChange={handleChange}
+                        className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
                     </div>
                   </div>
 

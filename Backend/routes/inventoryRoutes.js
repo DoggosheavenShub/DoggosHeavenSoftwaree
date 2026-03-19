@@ -1,14 +1,19 @@
-const express =require('express');
-const { addinventory, editInventory, getInventoryList, getInventoryItemDetails, getAlertListOfInventory, deleteInventory } = require('../controllers/inventoryController');
-const {protectedRoute}=require("../middlewares/protectedRoute")
+const express = require('express');
+const { addinventory, editInventory, getInventoryList, getInventoryItemDetails, getAlertListOfInventory, deleteInventory, lowStockAlertsSSE } = require('../controllers/inventoryController');
+const { protectedRoute, authorizeRole } = require("../middlewares/protectedRoute");
 
-const router=express.Router();
+const router = express.Router();
 
-router.post("/addinventory",protectedRoute,addinventory);
-router.post("/editinventory",protectedRoute,editInventory);
-router.get("/getallinventory",protectedRoute,getInventoryList);
-router.delete('/deleteinventory/:id', protectedRoute, deleteInventory);
-router.get("/getinventoryitemdetails/:id",protectedRoute,getInventoryItemDetails);
-router.get("/getalertlist",protectedRoute,getAlertListOfInventory);
+const adminOnly = authorizeRole(["admin"]);
+const anyRole   = authorizeRole(["admin", "staff"]);
 
-module.exports=router
+router.post("/addinventory",          protectedRoute, adminOnly, addinventory);
+router.post("/editinventory",         protectedRoute, adminOnly, editInventory);
+router.delete('/deleteinventory/:id', protectedRoute, adminOnly, deleteInventory);
+
+router.get("/getallinventory",           protectedRoute, anyRole, getInventoryList);
+router.get("/getinventoryitemdetails/:id", protectedRoute, anyRole, getInventoryItemDetails);
+router.get("/getalertlist",              protectedRoute, anyRole, getAlertListOfInventory);
+router.get("/lowstockalerts-sse",        protectedRoute, anyRole, lowStockAlertsSSE);
+
+module.exports = router;

@@ -4,17 +4,29 @@ import Navbar from "../component/navbar";
 
 export default function CustomerSignupPage() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("admin");
 
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
-    role: "customer" // Fixed role for customer signup
+    role: "admin"
   });
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setFormData({
+      fullName: "",
+      email: "",
+      password: "",
+      role: tab === "admin" ? "admin" : "staff"
+    });
+    setErrors({});
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,7 +35,6 @@ export default function CustomerSignupPage() {
       [name]: value
     }));
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -63,8 +74,9 @@ export default function CustomerSignupPage() {
     setLoading(true);
 
     try {
+      const endpoint = formData.role === "admin" ? "/api/v1/auth/admin-signup" : "/api/v1/auth/signup";
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/signup`,
+        `${import.meta.env.VITE_BACKEND_URL}${endpoint}`,
         {
           method: "POST",
           headers: {
@@ -100,7 +112,7 @@ export default function CustomerSignupPage() {
       <div className="min-h-screen bg-gradient-to-br from-[#EFE3C2] to-white">
         <div className="flex flex-col lg:flex-row min-h-screen">
           {/* Left panel - Welcome section */}
-          <div className="hidden md:flex lg:w-2/5 xl:w-1/2 relative overflow-hidden">
+          <div className="hidden lg:flex lg:w-2/5 xl:w-1/2 relative overflow-hidden">
             <div className="absolute inset-0 bg-[#123524] opacity-90 z-10"></div>
             <img
               src="/images/g1.jpeg"
@@ -155,7 +167,7 @@ export default function CustomerSignupPage() {
           <div className="flex-1 lg:w-3/5 xl:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8">
             <div className="w-full max-w-sm sm:max-w-md">
               {/* Mobile/Tablet header - visible on smaller screens */}
-              <div className="md:hidden text-center mb-4 sm:mb-6">
+              <div className="lg:hidden text-center mb-4 sm:mb-6">
                 <div className="text-xl sm:text-2xl font-bold text-[#123524] mb-2">
                   Join Our Pet Family!
                 </div>
@@ -168,20 +180,46 @@ export default function CustomerSignupPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#123524]">
-                    Customer Signup
+                    Sign Up
                   </h2>
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#EFE3C2] rounded-full flex items-center justify-center">
                     <span className="text-lg sm:text-xl">🐾</span>
                   </div>
                 </div>
 
+                {/* Tabs */}
+                <div className="flex mb-6 border-b border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange("admin")}
+                    className={`flex-1 py-3 text-sm sm:text-base font-medium transition-all ${
+                      activeTab === "admin"
+                        ? "text-[#123524] border-b-2 border-[#85A947]"
+                        : "text-gray-500 hover:text-[#3E7B27]"
+                    }`}
+                  >
+                    Admin
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange("staff")}
+                    className={`flex-1 py-3 text-sm sm:text-base font-medium transition-all ${
+                      activeTab === "staff"
+                        ? "text-[#123524] border-b-2 border-[#85A947]"
+                        : "text-gray-500 hover:text-[#3E7B27]"
+                    }`}
+                  >
+                    Staff Member
+                  </button>
+                </div>
+
                 {/* Role indicator */}
                 <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-[#85A947] to-[#3E7B27] rounded-lg text-center">
                   <p className="text-white font-medium text-sm sm:text-base">
-                    Signing up as Pet Owner
+                    Signing up as {activeTab === "admin" ? "Admin" : "Staff Member"}
                   </p>
                   <p className="text-[#EFE3C2] text-xs sm:text-sm mt-1">
-                    Access all customer features
+                    {activeTab === "admin" ? "Full system access & management" : "Manage pet care services"}
                   </p>
                 </div>
 

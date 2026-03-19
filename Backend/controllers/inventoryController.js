@@ -11,6 +11,7 @@ exports.addinventory = async (req, res) => {
       unitCostPrice,
       unitMinRetailPriceNGO,
       unitMaxRetailPriceCustomer,
+      expiryDate,
     } = req.body;
 
     // Validate all required fields
@@ -74,14 +75,21 @@ exports.addinventory = async (req, res) => {
     }
 
   
+    // Generate custom itemId: first letter of itemName (uppercase) + sequential number
+    const prefix = itemName.trim()[0].toUpperCase();
+    const count = await Inventory.countDocuments({ itemId: { $regex: `^${prefix}-` } });
+    const itemId = `${prefix}-${String(count + 1).padStart(2, "0")}`;
+
     const newItem = new Inventory({
+      itemId,
       itemName,
-      stock: stock?Number(stock):0,
+      stock: stock ? Number(stock) : 0,
       stockUnit,
       itemType,
       unitCostPrice: Number(unitCostPrice),
       unitMinRetailPriceNGO: Number(unitMinRetailPriceNGO),
       unitMaxRetailPriceCustomer: Number(unitMaxRetailPriceCustomer),
+      expiryDate: expiryDate ? new Date(expiryDate) : null,
     });
 
     const savedItem = await newItem.save();
@@ -368,7 +376,7 @@ exports.getInventoryItemDetails = async (req, res) => {
 
 exports.getAlertListOfInventory = async (req, res) => {
   try {
-    const items = await Inventory.find({ stock: { $lte: 50 } }).sort({
+    const items = await Inventory.find({ stock: { $lt: 10 } }).sort({
       itemName: 1,
     });
     return res.status(200).json({
@@ -384,4 +392,25 @@ exports.getAlertListOfInventory = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+exports.lowStockAlertsSSE = async (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  const sendAlerts = async () => {
+    try {
+      const items = await Inventory.find({ stock: { $lt: 10 } }).sort({ itemName: 1 });
+      res.write(`data: ${JSON.stringify(items)}\n\n`);
+    } catch (e) {
+      res.write(`data: []\n\n`);
+    }
+  };
+
+  await sendAlerts();
+  const interval = setInterval(sendAlerts, 10000);
+
+  req.on("close", () => clearInterval(interval));
 };

@@ -13,6 +13,10 @@ import SalesSection from "./component/salesSection";
 import Reminders from "./component/Reminders/Reminders";
 import Attendance from "./component/Reminders/Attendance";
 import AlertList from "./component/Inventory/AlertList";
+import UsageLogs from "./component/Inventory/Usagelogs";
+import StockHistory from "./component/Inventory/Stockhistory";
+import Revenue from "./component/Inventory/Revenue";
+import ViewInventory from "./component/Inventory/Viewinventory";
 import PetByDate from "./component/SalesSection/PetByDate";
 import UserLoginPage from "./pages/UserLogin";
 import CheckAuth from "./component/CheckAuth";
@@ -65,6 +69,10 @@ function App() {
  
             <Route path="/staff/editinventory" element={<EditInventory />} />
             <Route path="/staff/alertlist" element={<AlertList />} />
+            <Route path="/staff/usagelogs" element={<UsageLogs />} />
+            <Route path="/staff/revenue" element={<Revenue />} />
+            <Route path="/staff/stockhistory" element={<StockHistory />} />
+            <Route path="/staff/viewinventory/:id" element={<ViewInventory />} />
             <Route path="/staff/BreedManagement" element={<BreedManagement />} />
  
             <Route path="/staff/salesSection" element={<SalesSection />} />

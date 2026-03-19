@@ -15,13 +15,15 @@ exports.signUp = async (req, res) => {
       });
     }
 
-    // Only allow customer role for registration
-    if (role !== 'customer') {
+    // Validate role
+    if (role && role !== 'admin' && role !== 'staff') {
       return res.status(400).json({
         success: false,
-        message: "Only customer registration is allowed"
+        message: "Invalid role. Must be 'admin' or 'staff'"
       });
     }
+
+    const userRole = role || 'staff';
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -58,7 +60,7 @@ exports.signUp = async (req, res) => {
       fullName: fullName.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: 'customer', // Fixed role
+      role: userRole,
       isActive: true,
       createdAt: new Date()
     });
@@ -72,7 +74,7 @@ exports.signUp = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Customer account created successfully",
+      message: `${userRole === 'staff' ? 'Staff' : 'Admin'} account created successfully`,
       user: {
         id: user._id,
         fullName: user.fullName,
@@ -110,6 +112,51 @@ exports.signUp = async (req, res) => {
 };
 
 
+exports.adminSignUp = async (req, res) => {
+  try {
+    const { fullName, email, password } = req.body;
+
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ success: false, message: "Full name, email, and password are required" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "User with this email already exists" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: "Please provide a valid email address" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const user = await User.create({
+      fullName: fullName.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashedPassword,
+      role: 'admin',
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Admin account created successfully",
+      user: { id: user._id, fullName: user.fullName, email: user.email, role: user.role }
+    });
+
+  } catch (error) {
+    console.log("Error in admin register controller:", error.message);
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, message: "Email already exists" });
+    }
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
 exports.login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -148,11 +195,6 @@ exports.login = async (req, res) => {
       role: user.role,
       id: user._id
     };
-
-    // If user is customer, add customer_id
-    if (user.role === 'customer') {
-      responseData.customer_id = user.customer_id || user._id; 
-    }
 
     return res.status(200).json({
       success: true,

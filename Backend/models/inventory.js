@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const inventorySchema = new mongoose.Schema({
+  itemId: {
+    type: String,
+    unique: true,
+  },
   
   itemName: {
     type: String,
@@ -30,6 +34,9 @@ const inventorySchema = new mongoose.Schema({
   unitMaxRetailPriceCustomer: {
     type: Number,
     required: true
+  },
+  expiryDate: {
+    type: Date,
   },
 }, {
   timestamps: true 
