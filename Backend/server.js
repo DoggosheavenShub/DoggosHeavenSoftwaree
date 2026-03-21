@@ -26,52 +26,31 @@ const useMedicineRoutes=require("./routes/useMedicineRoutes")
 
 const app = express();
 
-app.use('/api/v1/customer-webhook', express.raw({ type: 'application/json' }), customerWebhookRoutes);
-
 const allowedOrigins = [
   "https://doggosheaven.com",
   "https://www.doggosheaven.com",
   "http://localhost:5173",
   "http://localhost:3000",
-  process.env.FRONTEND_URL,
-].filter(Boolean);
+];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Accept-Type"],
-};
-
-app.options("*", cors(corsOptions));
-app.use(cors(corsOptions));
-
-// Always attach CORS headers even on errors
-app.use((err, req, res, next) => {
+// Always set CORS headers first — before anything else
+app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
   res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.status(err.status || 500).json({ success: false, message: err.message || "Internal Server Error" });
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,Accept-Type");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
 });
 
+app.use('/api/v1/customer-webhook', express.raw({ type: 'application/json' }), customerWebhookRoutes);
 app.use(express.json());
 
-
 const dbConnect = require("./config/db");
-dbConnect();
-agenda.start().then(() => {
-  console.log("Agenda is working");
-}).catch((err) => {
-  console.error("Agenda failed to start:", err.message);
-});
+dbConnect().catch((err) => console.error("DB connection failed:", err.message));
 
 
 
@@ -94,14 +73,31 @@ app.use("/api/v1/customer/payment",customerPaymentRoutes)
 app.use("/api/v1/customer/pet",customerPetRoutes);
 app.use("/api/v1/medicine",useMedicineRoutes);
 
-// Start Server
-const PORT = process.env.PORT || 5000;
-
 app.get("/",(req,res)=>{
   res.send(process.env.FRONTEND_URL)
 })
 
+app.get("/debug", (req, res) => {
+  res.json({
+    MONGO_URI: process.env.MONGO_URI ? "SET" : "MISSING",
+    JWT_SECRET_KEY: process.env.JWT_SECRET_KEY ? "SET" : "MISSING",
+    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID ? "SET" : "MISSING",
+    RAZORPAY_SECRET: process.env.RAZORPAY_SECRET ? "SET" : "MISSING",
+    FRONTEND_URL: process.env.FRONTEND_URL ? "SET" : "MISSING",
+  });
+})
 
+// Global error handler - must be last
+app.use((err, req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.status(err.status || 500).json({ success: false, message: err.message || "Internal Server Error" });
+});
+
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 
