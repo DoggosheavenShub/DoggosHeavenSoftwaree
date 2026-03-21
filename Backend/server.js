@@ -52,6 +52,16 @@ const corsOptions = {
 app.options("*", cors(corsOptions));
 app.use(cors(corsOptions));
 
+// Always attach CORS headers even on errors
+app.use((err, req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.status(err.status || 500).json({ success: false, message: err.message || "Internal Server Error" });
+});
+
 app.use(express.json());
 
 
@@ -59,7 +69,8 @@ const dbConnect = require("./config/db");
 dbConnect();
 agenda.start().then(() => {
   console.log("Agenda is working");
-  
+}).catch((err) => {
+  console.error("Agenda failed to start:", err.message);
 });
 
 
