@@ -31,6 +31,8 @@ app.use('/api/v1/customer-webhook', express.raw({ type: 'application/json' }), c
 const allowedOrigins = [
   "https://doggosheaven.com",
   "https://www.doggosheaven.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
