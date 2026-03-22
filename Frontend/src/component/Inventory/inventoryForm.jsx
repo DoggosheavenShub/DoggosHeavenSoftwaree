@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { addInventoryItem } from "../../store/slices/inventorySlice";
+import { addInventoryItem, getAllInventory } from "../../store/slices/inventorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../navbar";
@@ -36,20 +36,26 @@ const InventoryForm = () => {
     dispatch(addInventoryItem(formData))
       .then((data) => {
         if (data?.payload?.success) {
+          dispatch(getAllInventory());
           alert("Inventory item added successfully!");
           setFormData({
             itemName: "",
             stock: 0,
+            stockUnit: "ml",
             itemType: "disposable",
             unitCostPrice: 0,
             unitMinRetailPriceNGO: 0,
             unitMaxRetailPriceCustomer: 0,
             expiryDate: "",
           });
-          navigate("/staff/inventoryList")
-        } else alert(data?.payload?.message);
+          navigate("/staff/inventoryList");
+        } else {
+          console.error("Add inventory failed:", data?.payload);
+          alert(data?.payload?.message || "Failed to add inventory item");
+        }
       })
       .catch((err) => {
+        console.error("Add inventory error:", err);
         alert("Failed to add inventory item");
       });
   };
@@ -197,7 +203,7 @@ const InventoryForm = () => {
                         <option value="disposable">Disposable</option>
                         <option value="syringe">Syringe</option>
                         <option value="medicine">Medicine</option>
-                        <option value="medicine">Vaccine</option>
+                        <option value="vaccine">Vaccine</option>
                       </select>
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                         <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#3E7B27]"></div>

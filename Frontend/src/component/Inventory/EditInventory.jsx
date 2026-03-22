@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   editInventoryItem,
   getInventoryItemDetails,
+  getAllInventory,
 } from "../../store/slices/inventorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import Navbar from "../navbar";
@@ -51,8 +52,9 @@ const EditInventory = () => {
     dispatch(editInventoryItem(formData))
       .then((data) => {
         if (data?.payload?.success) {
+          dispatch(getAllInventory());
           alert("Inventory item edited successfully!");
-          navigate("/inventoryList");
+          navigate("/staff/inventoryList");
         } else alert(data?.payload?.message);
       })
       .catch((err) => {

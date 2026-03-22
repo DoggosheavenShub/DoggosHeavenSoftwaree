@@ -265,8 +265,6 @@ const InventoryList = () => {
   const { getAllInventoryLoading, deleteInventoryLoading } = useSelector(
     (state) => state.inventory
   );
-  const { user } = useSelector((state) => state.auth);
-  const isAdmin = user?.role === 'admin';
 
   const [inventory, setInventory] = useState([]);
   const [initialInventory, setInitialInventory] = useState([]);
@@ -389,12 +387,9 @@ const InventoryList = () => {
             <MenuItem onClick={() => { handleView(params.row._id); setMenuAnchor(null); setMenuRowId(null); }}>
               <VisibilityIcon fontSize="small" sx={{ mr: 1 }} /> View
             </MenuItem>
-            {isAdmin && (
             <MenuItem onClick={() => { handleEdit(params.row._id); setMenuAnchor(null); setMenuRowId(null); }}>
               <EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit
             </MenuItem>
-            )}
-            {isAdmin && (
             <MenuItem
               onClick={() => { handleDelete(params.row._id); setMenuAnchor(null); setMenuRowId(null); }}
               disabled={deleteInventoryLoading && deleteItemId === params.row._id}
@@ -403,7 +398,6 @@ const InventoryList = () => {
               <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
               {deleteInventoryLoading && deleteItemId === params.row._id ? "Deleting..." : "Delete"}
             </MenuItem>
-            )}
           </Menu>
         </>
       ),
@@ -430,27 +424,17 @@ const InventoryList = () => {
             <h2 className="text-3xl font-bold text-[#123524]">Inventory List</h2>
 
             <div className="flex gap-3 flex-wrap justify-end">
-              {/* Add Inventory - Admin only */}
-              {isAdmin && (
               <Link to="/staff/inventory">
-                <Button
-                  variant="contained"
-                  color="success"
-                  startIcon={<EditIcon />}
-                >
+                <Button variant="contained" color="success" startIcon={<EditIcon />}>
                   Add Inventory
                 </Button>
               </Link>
-              )}
 
-              {/* Alert List - Admin only */}
-              {isAdmin && (
               <Link to="/staff/alertlist">
                 <Button variant="outlined" color="warning">
                   Alert List
                 </Button>
               </Link>
-              )}
 
               <Link to="/staff/usagelogs">
                 <Button variant="outlined" color="success">
@@ -458,20 +442,11 @@ const InventoryList = () => {
                 </Button>
               </Link>
 
-              {/* Stock History - Admin only */}
-              {isAdmin && (
               <Link to="/staff/stockhistory">
                 <Button variant="outlined" color="success">
                   Stock History
                 </Button>
               </Link>
-              )}
-
-              {/* Stock History Dialog - Admin only */}
-              
-
-              {/* Usage Logs */}
-             
             </div>
           </div>
 

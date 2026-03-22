@@ -83,6 +83,7 @@ export const addInventoryItem = createAsyncThunk(
       dispatch(logout());
     }
     const data = await response.json();
+    console.log("addInventoryItem response:", response.status, data);
     return data;
   }
 );

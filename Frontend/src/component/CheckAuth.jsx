@@ -2,12 +2,7 @@ import React from 'react';
 import { useLocation, Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const ADMIN_ONLY_PATHS = [
-  '/staff/inventory',
-  '/staff/editinventory',
-  '/staff/alertlist',
-  '/staff/stockhistory',
-];
+const ADMIN_ONLY_PATHS = [];
 
 const CheckAuth = ({ isAuthenticated }) => {
   const location = useLocation().pathname;

@@ -4,16 +4,15 @@ const { protectedRoute, authorizeRole } = require("../middlewares/protectedRoute
 
 const router = express.Router();
 
-const adminOnly = authorizeRole(["admin"]);
-const anyRole   = authorizeRole(["admin", "staff"]);
+const adminOrStaff = authorizeRole(["admin", "staff"]);
 
-router.post("/addinventory",          protectedRoute, adminOnly, addinventory);
-router.post("/editinventory",         protectedRoute, adminOnly, editInventory);
-router.delete('/deleteinventory/:id', protectedRoute, adminOnly, deleteInventory);
+router.post("/addinventory",          protectedRoute, adminOrStaff, addinventory);
+router.post("/editinventory",         protectedRoute, adminOrStaff, editInventory);
+router.delete('/deleteinventory/:id', protectedRoute, adminOrStaff, deleteInventory);
 
-router.get("/getallinventory",           protectedRoute, anyRole, getInventoryList);
-router.get("/getinventoryitemdetails/:id", protectedRoute, anyRole, getInventoryItemDetails);
-router.get("/getalertlist",              protectedRoute, anyRole, getAlertListOfInventory);
-router.get("/lowstockalerts-sse",        protectedRoute, anyRole, lowStockAlertsSSE);
+router.get("/getallinventory",             protectedRoute, adminOrStaff, getInventoryList);
+router.get("/getinventoryitemdetails/:id", protectedRoute, adminOrStaff, getInventoryItemDetails);
+router.get("/getalertlist",                protectedRoute, adminOrStaff, getAlertListOfInventory);
+router.get("/lowstockalerts-sse",          protectedRoute, adminOrStaff, lowStockAlertsSSE);
 
 module.exports = router;
