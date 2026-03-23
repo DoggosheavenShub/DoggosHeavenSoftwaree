@@ -18,16 +18,19 @@ const InventoryForm = () => {
     unitMinRetailPriceNGO: 0,
     unitMaxRetailPriceCustomer: 0,
     expiryDate: "",
+    supplier: { name: "", contact: "", email: "" },
   });
 
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name.startsWith("supplier.")) {
+      const key = name.split(".")[1];
+      setFormData((prev) => ({ ...prev, supplier: { ...prev.supplier, [key]: value } }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -47,6 +50,7 @@ const InventoryForm = () => {
             unitMinRetailPriceNGO: 0,
             unitMaxRetailPriceCustomer: 0,
             expiryDate: "",
+            supplier: { name: "", contact: "", email: "" },
           });
           navigate("/staff/inventoryList");
         } else {
@@ -270,6 +274,48 @@ const InventoryForm = () => {
                         />
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#85A947]/10 rounded-xl p-6 border border-[#85A947]/20">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-3 h-3 bg-[#3E7B27] rounded-full"></div>
+                    <h3 className="text-lg font-bold text-[#123524]">Supplier Information</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">Supplier Name</label>
+                      <input
+                        type="text"
+                        name="supplier.name"
+                        value={formData.supplier.name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+                        placeholder="Enter supplier name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">Supplier Contact</label>
+                      <input
+                        type="text"
+                        name="supplier.contact"
+                        value={formData.supplier.contact}
+                        onChange={handleChange}
+                        className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+                        placeholder="Enter contact number"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">Supplier Email</label>
+                      <input
+                        type="email"
+                        name="supplier.email"
+                        value={formData.supplier.email}
+                        onChange={handleChange}
+                        className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+                        placeholder="Enter supplier email"
+                      />
                     </div>
                   </div>
                 </div>

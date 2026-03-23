@@ -12,6 +12,7 @@ exports.addinventory = async (req, res) => {
       unitMinRetailPriceNGO,
       unitMaxRetailPriceCustomer,
       expiryDate,
+      supplier,
     } = req.body;
 
     // Validate all required fields
@@ -90,6 +91,7 @@ exports.addinventory = async (req, res) => {
       unitMinRetailPriceNGO: Number(unitMinRetailPriceNGO),
       unitMaxRetailPriceCustomer: Number(unitMaxRetailPriceCustomer),
       expiryDate: expiryDate ? new Date(expiryDate) : null,
+      supplier: supplier || { name: "", contact: "", email: "" },
     });
 
     const savedItem = await newItem.save();
@@ -159,6 +161,7 @@ exports.editInventory = async (req, res) => {
       unitCostPrice,
       unitMinRetailPriceNGO,
       unitMaxRetailPriceCustomer,
+      supplier,
     } = req.body;
 
     // Validate required fields
@@ -244,6 +247,7 @@ exports.editInventory = async (req, res) => {
       itemName,
       stockUnit,
       itemType,
+      supplier: supplier || { name: "", contact: "", email: "" },
     };
 
     // Only add numeric fields if they are provided

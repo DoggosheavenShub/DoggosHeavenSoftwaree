@@ -173,6 +173,9 @@ const ViewDialog = ({ open, onClose, item }) => {
     { label: "Cost Price", value: `₹${item.unitCostPrice}` },
     { label: "NGO Price", value: `₹${item.unitMinRetailPriceNGO}` },
     { label: "Customer Price", value: `₹${item.unitMaxRetailPriceCustomer}` },
+    { label: "Supplier", value: item.supplier?.name || "—" },
+    { label: "Supplier Contact", value: item.supplier?.contact || "—" },
+    { label: "Supplier Email", value: item.supplier?.email || "—" },
     { label: "Created", value: new Date(item.createdAt).toLocaleDateString() },
   ];
 
@@ -364,6 +367,12 @@ const InventoryList = () => {
       minWidth: 110,
       renderCell: (params) =>
         new Date(params.row.createdAt).toLocaleDateString(),
+    },
+    {
+      field: "supplier",
+      headerName: "Supplier",
+      minWidth: 150,
+      renderCell: (params) => params.row.supplier?.name || "—",
     },
     {
       field: "actions",

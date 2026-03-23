@@ -38,6 +38,11 @@ const inventorySchema = new mongoose.Schema({
   expiryDate: {
     type: Date,
   },
+  supplier: {
+    name:    { type: String, default: "" },
+    contact: { type: String, default: "" },
+    email:   { type: String, default: "" },
+  },
 }, {
   timestamps: true 
 });
