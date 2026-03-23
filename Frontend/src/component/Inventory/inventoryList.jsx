@@ -167,15 +167,15 @@ const UsageLogsDialog = ({ open, onClose }) => (
 const ViewDialog = ({ open, onClose, item }) => {
   if (!item) return null;
   const fields = [
-    { label: "Item Name", value: item.itemName },
-    { label: "Item Type", value: item.itemType },
+    { label: "Item Name", value: String(item.itemName ?? "—") },
+    { label: "Item Type", value: String(item.itemType ?? "—") },
     { label: "Stock", value: `${item.stock} ${item.stockUnit}` },
     { label: "Cost Price", value: `₹${item.unitCostPrice}` },
     { label: "NGO Price", value: `₹${item.unitMinRetailPriceNGO}` },
     { label: "Customer Price", value: `₹${item.unitMaxRetailPriceCustomer}` },
-    { label: "Supplier", value: item.supplier?.name || "—" },
-    { label: "Supplier Contact", value: item.supplier?.contact || "—" },
-    { label: "Supplier Email", value: item.supplier?.email || "—" },
+    { label: "Supplier", value: typeof item.supplier === "object" ? (item.supplier?.name || "—") : (item.supplier || "—") },
+    { label: "Supplier Contact", value: typeof item.supplier === "object" ? (item.supplier?.contact || "—") : "—" },
+    { label: "Supplier Email", value: typeof item.supplier === "object" ? (item.supplier?.email || "—") : "—" },
     { label: "Created", value: new Date(item.createdAt).toLocaleDateString() },
   ];
 
@@ -312,7 +312,7 @@ const InventoryList = () => {
   }, [searchTerm, initialInventory]);
 
   const handleEdit = (id) => navigate(`/staff/editInventory`, { state: { id } });
-  const handleView = (id) => navigate(`/staff/viewinventory/${id}`);
+  const handleView = (item) => { setViewItem(item); setViewOpen(true); };
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
@@ -393,7 +393,7 @@ const InventoryList = () => {
             open={menuRowId === params.row._id && Boolean(menuAnchor)}
             onClose={() => { setMenuAnchor(null); setMenuRowId(null); }}
           >
-            <MenuItem onClick={() => { handleView(params.row._id); setMenuAnchor(null); setMenuRowId(null); }}>
+            <MenuItem onClick={() => { handleView(params.row); setMenuAnchor(null); setMenuRowId(null); }}>
               <VisibilityIcon fontSize="small" sx={{ mr: 1 }} /> View
             </MenuItem>
             <MenuItem onClick={() => { handleEdit(params.row._id); setMenuAnchor(null); setMenuRowId(null); }}>
