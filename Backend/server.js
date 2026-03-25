@@ -31,13 +31,16 @@ const allowedOrigins = [
   "https://www.doggosheaven.com",
   "http://localhost:5173",
   "http://localhost:3000",
+  "http://localhost:8081",
+  "http://localhost:19006",
+  "exp://localhost:8081",
 ];
 
 // Always set CORS headers first — before anything else
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
   }
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");

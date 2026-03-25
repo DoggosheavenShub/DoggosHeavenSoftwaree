@@ -10,6 +10,9 @@ const inventorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  medicineName: { type: String, default: "" },
+  brandName:    { type: String, default: "" },
+  saltName:     { type: String, default: "" },
   stock: {
     type: Number,
   },
@@ -20,8 +23,18 @@ const inventorySchema = new mongoose.Schema({
   },
   itemType: {
     type: String,
-    enum: ["disposable", "syringe", "medicine", "vaccine"], 
+    enum: ["disposable", "injection", "medicine", "vaccine"],
     required: true,
+  },
+  disposableSubType: {
+    type: String,
+    enum: ["", "Gloves", "Cotton", "Mask", "Bandage", "Butterfly Needle", "IV Set", "DNS", "NS", "RL", "Metrogyl", "Micropore Tape", "Hydrogen Peroxide", "Spirit", "Savlon", "Sanitizer", "Garbage Bag", "Pet Wipes", "Feeding Tube"],
+    default: "",
+  },
+  injectionSubType: {
+    type: String,
+    enum: ["", "1 ml", "2 ml", "3 ml", "5 ml"],
+    default: "",
   },
   unitCostPrice: {
     type: Number,

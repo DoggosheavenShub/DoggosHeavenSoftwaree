@@ -13,9 +13,12 @@ exports.addinventory = async (req, res) => {
       unitMaxRetailPriceCustomer,
       expiryDate,
       supplier,
+      disposableSubType,
+      injectionSubType,
+      medicineName,
+      brandName,
+      saltName,
     } = req.body;
-
-    // Validate all required fields
     if (
       !itemName ||
       !stockUnit ||
@@ -47,7 +50,7 @@ exports.addinventory = async (req, res) => {
 
     // Validate enum values
     const validStockUnits = ["ml", "item", "tablet", "mg"];
-    const validItemTypes = ["disposable", "syringe", "medicine", "vaccine"];
+    const validItemTypes = ["disposable", "injection", "medicine", "vaccine"];
 
     if (!validStockUnits.includes(stockUnit)) {
       return res.status(400).json({
@@ -60,7 +63,7 @@ exports.addinventory = async (req, res) => {
       return res.status(400).json({
         success: false,
         message:
-          "Invalid item type. Must be one of: disposable, syringe, medicine, vaccine",
+          "Invalid item type. Must be one of: disposable, injection, medicine, vaccine",
       });
     }
 
@@ -77,13 +80,13 @@ exports.addinventory = async (req, res) => {
 
   
     // Generate custom itemId: first letter of itemName (uppercase) + sequential number
-    const prefix = itemName.trim()[0].toUpperCase();
+    const prefix = (medicineName || itemName || "X").trim()[0].toUpperCase();
     const count = await Inventory.countDocuments({ itemId: { $regex: `^${prefix}-` } });
     const itemId = `${prefix}-${String(count + 1).padStart(2, "0")}`;
 
     const newItem = new Inventory({
       itemId,
-      itemName,
+      itemName: medicineName || itemName || "",
       stock: stock ? Number(stock) : 0,
       stockUnit,
       itemType,
@@ -92,6 +95,11 @@ exports.addinventory = async (req, res) => {
       unitMaxRetailPriceCustomer: Number(unitMaxRetailPriceCustomer),
       expiryDate: expiryDate ? new Date(expiryDate) : null,
       supplier: supplier || { name: "", contact: "", email: "" },
+      disposableSubType: itemType === "disposable" ? (disposableSubType || "") : "",
+      injectionSubType: itemType === "injection" ? (injectionSubType || "") : "",
+      medicineName: medicineName || "",
+      brandName: brandName || "",
+      saltName: saltName || "",
     });
 
     const savedItem = await newItem.save();
@@ -162,10 +170,12 @@ exports.editInventory = async (req, res) => {
       unitMinRetailPriceNGO,
       unitMaxRetailPriceCustomer,
       supplier,
-    } = req.body;
-
-    // Validate required fields
-    if (!_id) {
+      disposableSubType,
+      injectionSubType,
+      medicineName,
+      brandName,
+      saltName,
+    } = req.body; {
       return res.status(400).json({
         success: false,
         message: "Item ID is required",
@@ -181,7 +191,7 @@ exports.editInventory = async (req, res) => {
 
     // Validate enum values
     const validStockUnits = ["ml", "item", "tablet", "mg"];
-    const validItemTypes = ["disposable", "syringe", "medicine", "vaccine"];
+    const validItemTypes = ["disposable", "injection", "medicine", "vaccine"];
 
     if (!validStockUnits.includes(stockUnit)) {
       return res.status(400).json({
@@ -194,7 +204,7 @@ exports.editInventory = async (req, res) => {
       return res.status(400).json({
         success: false,
         message:
-          "Invalid item type. Must be one of: disposable, syringe, medicine, vaccine",
+          "Invalid item type. Must be one of: disposable, injection, medicine, vaccine",
       });
     }
 
@@ -248,6 +258,11 @@ exports.editInventory = async (req, res) => {
       stockUnit,
       itemType,
       supplier: supplier || { name: "", contact: "", email: "" },
+      disposableSubType: itemType === "disposable" ? (disposableSubType || "") : "",
+      injectionSubType: itemType === "injection" ? (injectionSubType || "") : "",
+      medicineName: medicineName || "",
+      brandName: brandName || "",
+      saltName: saltName || "",
     };
 
     // Only add numeric fields if they are provided
