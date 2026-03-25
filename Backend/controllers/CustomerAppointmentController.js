@@ -319,6 +319,57 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
+const getNotifications = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+
+    const customer = await User.findById(customerId);
+    if (!customer) return res.status(404).json({ success: false, message: "Customer not found" });
+
+    const appointments = await Appointment.find({ customerId }).sort({ createdAt: -1 }).limit(20);
+
+    const notifications = appointments.map((appt) => {
+      const date = new Date(appt.appointmentDate).toDateString();
+      let title, body, type;
+
+      switch (appt.status) {
+        case "confirmed":
+          title = "Booking Confirmed! ✅";
+          body = `Your ${appt.serviceName} appointment for ${appt.petName} on ${date} at ${appt.appointmentTime} is confirmed.`;
+          type = "confirmed";
+          break;
+        case "completed":
+          title = "Service Completed 🎉";
+          body = `${appt.serviceName} for ${appt.petName} has been completed successfully on ${date}.`;
+          type = "completed";
+          break;
+        case "cancelled":
+          title = "Booking Cancelled";
+          body = `Your ${appt.serviceName} appointment for ${appt.petName} on ${date} was cancelled.`;
+          type = "cancelled";
+          break;
+        default:
+          title = "Booking Received 📋";
+          body = `Your ${appt.serviceName} appointment for ${appt.petName} on ${date} at ${appt.appointmentTime} is pending confirmation.`;
+          type = "pending";
+      }
+
+      return {
+        id: appt._id,
+        title,
+        body,
+        type,
+        time: appt.createdAt,
+        read: false,
+      };
+    });
+
+    res.status(200).json({ success: true, notifications });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching notifications", error: error.message });
+  }
+};
+
 module.exports = {
   createAppointment,
   getCustomerAppointments,
@@ -326,5 +377,6 @@ module.exports = {
   updateAppointmentStatus,
   cancelAppointment,
   getAppointmentById,
-  getCustomerPetss
+  getCustomerPetss,
+  getNotifications,
 };

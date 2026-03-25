@@ -52,7 +52,7 @@ exports.protectedRoute = async (req, res, next) => {
     req.userRole = user.role; // Add role for easy access
     req.userId = user._id;
 
-    if(user.role!=="cutomer"){
+    if(user.role!=="customer"){
         return res.status(401).json({
         success: false,
         message: "unauthorized access",
