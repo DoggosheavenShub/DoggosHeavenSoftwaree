@@ -16,10 +16,10 @@ exports.signUp = async (req, res) => {
     }
 
     // Validate role
-    if (role && role !== 'admin' && role !== 'staff') {
+    if (role && role !== 'admin' && role !== 'staff' && role !== 'customer') {
       return res.status(400).json({
         success: false,
-        message: "Invalid role. Must be 'admin' or 'staff'"
+        message: "Invalid role. Must be 'admin', 'staff' or 'customer'"
       });
     }
 
