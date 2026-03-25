@@ -18,7 +18,7 @@ router.post("/adddaycarevisit",protectedRoute,addDayCareVisit);
 router.post("/addgroomingvisit",protectedRoute,addGroomingVisit);
 router.post("/addshoppingvisit",protectedRoute,addShoppingVisit);
 router.post("/getvisitlist",protectedRoute,getVisitList);
-router.get("/getallvisittypes",protectedRoute,getAllVisitType);
+router.get("/getallvisittypes", getAllVisitType);
 router.get("/getboardingcategories",protectedRoute,getBoardingCategoryList);
 router.post("/updatehostelvisit",protectedRoute,updateHostelVisit);
 router.get("/getvisitdetails/:id",protectedRoute,getVisitDetails);
