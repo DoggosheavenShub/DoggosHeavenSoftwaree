@@ -1,31 +1,11 @@
 require("dotenv").config();
 
-
 const express = require("express");
 const cors = require("cors");
-const agenda = require("./config/agenda");
-
-
-const authRoutes = require("./routes/authRoutes");
-const inventoryRoutes = require("./routes/inventoryRoutes");
-const petRoutes = require("./routes/petRoutes");
-const visitRoutes = require("./routes/visitRoutes");
-const reminderRoutes = require("./routes/reminderRoutes");
-const attendanceRoutes = require("./routes/attendanceRoutes");
-const subscriptionRoutes=require("./routes/subscriptionRoutes");
-const boardingRoutes=require("./routes/boardingRoutes")
-const paymentRoutes=require("./routes/paaymentroutes")
-const customerServicesRoutes=require("./routes/CustomerServiceRoutes")
-const customerAppointment = require("./routes/CustomerAppointmentroutes")
-const onlineCustomer = require("./routes/OnlineCustomerRoutes");
-const prescription=require("./routes/Prescription")
-const customerPaymentRoutes=require("./routes/customerRoutes/checkoutRoutes")
-const customerWebhookRoutes=require("./routes/customerRoutes/customerWebhookRoutes")
-const customerPetRoutes=require("./routes/customerRoutes/CustomerPetRoute")
-const useMedicineRoutes=require("./routes/useMedicineRoutes")
 
 const app = express();
 
+// CORS — must be first
 const allowedOrigins = [
   "https://doggosheaven.com",
   "https://www.doggosheaven.com",
@@ -36,7 +16,6 @@ const allowedOrigins = [
   "exp://localhost:8081",
 ];
 
-// Always set CORS headers first — before anything else
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (!origin || allowedOrigins.includes(origin)) {
@@ -49,36 +28,53 @@ app.use((req, res, next) => {
   next();
 });
 
+// Routes imports
+const authRoutes = require("./routes/authRoutes");
+const inventoryRoutes = require("./routes/inventoryRoutes");
+const petRoutes = require("./routes/petRoutes");
+const visitRoutes = require("./routes/visitRoutes");
+const reminderRoutes = require("./routes/reminderRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const boardingRoutes = require("./routes/boardingRoutes");
+const paymentRoutes = require("./routes/paaymentroutes");
+const customerServicesRoutes = require("./routes/CustomerServiceRoutes");
+const customerAppointment = require("./routes/CustomerAppointmentroutes");
+const onlineCustomer = require("./routes/OnlineCustomerRoutes");
+const prescription = require("./routes/Prescription");
+const customerPaymentRoutes = require("./routes/customerRoutes/checkoutRoutes");
+const customerWebhookRoutes = require("./routes/customerRoutes/customerWebhookRoutes");
+const customerPetRoutes = require("./routes/customerRoutes/CustomerPetRoute");
+const useMedicineRoutes = require("./routes/useMedicineRoutes");
+
 app.use('/api/v1/customer-webhook', express.raw({ type: 'application/json' }), customerWebhookRoutes);
 app.use(express.json());
 
+// DB connect
 const dbConnect = require("./config/db");
 dbConnect().catch((err) => console.error("DB connection failed:", err.message));
 
-
-
-
-//routes
+// Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/pet", petRoutes);
 app.use("/api/v1/inventory", inventoryRoutes);
 app.use("/api/v1/visit", visitRoutes);
 app.use("/api/v1/reminders", reminderRoutes);
 app.use("/api/v1/attendance", attendanceRoutes);
-app.use("/api/v1/subscription",subscriptionRoutes);
-app.use("/api/v1/boarding",boardingRoutes);
-app.use("/api/v1/payments",paymentRoutes);
-app.use("/api/v1/customerservices",customerServicesRoutes);
-app.use("/api/v1/customerappointment",customerAppointment);
-app.use("/api/v1/appointment",onlineCustomer);
-app.use("/api/v1/prescription",prescription);
-app.use("/api/v1/customer/payment",customerPaymentRoutes)
-app.use("/api/v1/customer/pet",customerPetRoutes);
-app.use("/api/v1/medicine",useMedicineRoutes);
+app.use("/api/v1/subscription", subscriptionRoutes);
+app.use("/api/v1/boarding", boardingRoutes);
+app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1/customerservices", customerServicesRoutes);
+app.use("/api/v1/customerappointment", customerAppointment);
+app.use("/api/v1/appointment", onlineCustomer);
+app.use("/api/v1/prescription", prescription);
+app.use("/api/v1/customer/payment", customerPaymentRoutes);
+app.use("/api/v1/customer/pet", customerPetRoutes);
+app.use("/api/v1/medicine", useMedicineRoutes);
 
-app.get("/",(req,res)=>{
-  res.send(process.env.FRONTEND_URL)
-})
+app.get("/", (req, res) => {
+  res.send(process.env.FRONTEND_URL);
+});
 
 app.get("/debug", (req, res) => {
   res.json({
@@ -88,13 +84,13 @@ app.get("/debug", (req, res) => {
     RAZORPAY_SECRET: process.env.RAZORPAY_SECRET ? "SET" : "MISSING",
     FRONTEND_URL: process.env.FRONTEND_URL ? "SET" : "MISSING",
   });
-})
+});
 
-// Global error handler - must be last
+// Global error handler
 app.use((err, req, res, next) => {
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
   }
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.status(err.status || 500).json({ success: false, message: err.message || "Internal Server Error" });
@@ -102,5 +98,3 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
