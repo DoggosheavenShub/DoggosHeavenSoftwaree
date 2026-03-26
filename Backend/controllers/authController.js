@@ -157,6 +157,43 @@ exports.adminSignUp = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+exports.updateProfile = async (req, res) => {
+  try {
+    const token = req?.headers["authorization"]?.trim();
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    const jwt = require("jsonwebtoken");
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    } catch {
+      return res.status(401).json({ success: false, message: "Invalid or expired token" });
+    }
+
+    const { fullName, phone } = req.body;
+    if (!fullName || !fullName.trim()) {
+      return res.status(400).json({ success: false, message: "Full name is required" });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email: decoded.userEmail || decoded.email },
+      { fullName: fullName.trim(), phone: phone?.trim() || "" },
+      { new: true }
+    ).select("-password");
+
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: { id: user._id, fullName: user.fullName, email: user.email, phone: user.phone, role: user.role },
+    });
+  } catch (error) {
+    console.log("Error in updateProfile:", error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 exports.changePassword = async (req, res) => {
   try {
     const token = req?.headers["authorization"]?.trim();
