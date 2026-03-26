@@ -174,6 +174,9 @@ exports.updateProfile = async (req, res) => {
     if (!fullName || !fullName.trim()) {
       return res.status(400).json({ success: false, message: "Full name is required" });
     }
+    if (phone && !/^[0-9]{10}$/.test(phone.trim())) {
+      return res.status(400).json({ success: false, message: "Phone number must be exactly 10 digits" });
+    }
 
     const user = await User.findOneAndUpdate(
       { email: decoded.userEmail || decoded.email },
