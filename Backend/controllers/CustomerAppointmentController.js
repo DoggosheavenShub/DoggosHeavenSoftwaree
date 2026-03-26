@@ -3,7 +3,13 @@ const Service = require('../models/customerservice');
 const User = require('../models/user');
 const Pet = require('../models/pet');
 const Owner = require('../models/Owner');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
 
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY,
+  key_secret: process.env.RAZORPAY_SECRET,
+});
 
 
 const getCustomerPetss = async (req, res) => {
@@ -360,6 +366,8 @@ const getNotifications = async (req, res) => {
         body,
         type,
         time: appt.createdAt,
+        amount: appt.totalAmount,
+        paymentStatus: appt.paymentStatus,
         read: false,
       };
     });
@@ -367,6 +375,70 @@ const getNotifications = async (req, res) => {
     res.status(200).json({ success: true, notifications });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error fetching notifications", error: error.message });
+  }
+};
+
+// Confirm appointment by admin + create Razorpay order
+const confirmAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const appointment = await Appointment.findById(id);
+    if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
+    if (appointment.status !== 'pending') {
+      return res.status(400).json({ success: false, message: `Appointment is already ${appointment.status}` });
+    }
+
+    appointment.status = 'confirmed';
+    await appointment.save();
+
+    // Create Razorpay order
+    const order = await razorpay.orders.create({
+      amount: appointment.totalAmount * 100,
+      currency: 'INR',
+      receipt: `appt_${appointment._id}`,
+      notes: { appointmentId: appointment._id.toString(), serviceName: appointment.serviceName },
+      payment_capture: 1,
+    });
+
+    appointment.razorpayOrderId = order.id;
+    await appointment.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Appointment confirmed',
+      data: appointment,
+      order,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error confirming appointment', error: error.message });
+  }
+};
+
+// Verify payment after user pays
+const verifyAppointmentPayment = async (req, res) => {
+  try {
+    const { appointmentId, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    const body = razorpay_order_id + '|' + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_SECRET)
+      .update(body)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: 'Invalid payment signature' });
+    }
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { paymentStatus: 'paid', razorpayPaymentId: razorpay_payment_id },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, message: 'Payment verified successfully', data: appointment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error verifying payment', error: error.message });
   }
 };
 
@@ -379,4 +451,6 @@ module.exports = {
   getAppointmentById,
   getCustomerPetss,
   getNotifications,
+  confirmAppointment,
+  verifyAppointmentPayment,
 };

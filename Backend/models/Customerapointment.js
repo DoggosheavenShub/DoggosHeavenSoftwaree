@@ -88,7 +88,15 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     trim: true,
     maxlength: [200, 'Cancel reason cannot exceed 200 characters']
-  }
+  },
+  razorpayOrderId: {
+    type: String,
+    default: null,
+  },
+  razorpayPaymentId: {
+    type: String,
+    default: null,
+  },
 }, {
   timestamps: true
 });

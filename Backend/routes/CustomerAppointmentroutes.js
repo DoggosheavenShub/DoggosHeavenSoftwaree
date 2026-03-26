@@ -9,7 +9,10 @@ const {
   getAppointmentById,
   getCustomerPetss,
   getNotifications,
+  confirmAppointment,
+  verifyAppointmentPayment,
 } = require('../controllers/CustomerAppointmentController');
+const { customerProtectedRoute } = require('../middlewares/customerProtectedRoute');
 
 router.get('/getcustomerpets', getCustomerPetss);
 router.post('/createappoint', createAppointment);
@@ -19,5 +22,7 @@ router.get('/getaappointbyid/:id', getAppointmentById);
 router.patch('/updateappoint/:id/status', updateAppointmentStatus);
 router.delete('/cancelappoint/:id', cancelAppointment);
 router.get('/notifications/:customerId', getNotifications);
+router.patch('/confirmappoint/:id', confirmAppointment);
+router.post('/verifypayment', verifyAppointmentPayment);
 
 module.exports = router;
