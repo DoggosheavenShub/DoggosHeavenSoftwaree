@@ -4,7 +4,7 @@ const Service = require('../models/customerservice');
 // Get all services
 const getAllServices = async (req, res) => {
   try {
-    const services = await Service.find({ isActive: true });
+    const services = await Service.find({ isActive: { $ne: false } });
     res.status(200).json({
       success: true,
       data: services,
