@@ -435,9 +435,16 @@ const verifyAppointmentPayment = async (req, res) => {
 const createPaymentOrder = async (req, res) => {
   try {
     const { appointmentId, amount } = req.body;
+    console.log('createPaymentOrder called:', { appointmentId, amount });
+    console.log('Razorpay Key:', process.env.RAZORPAY_KEY_ID ? 'SET' : 'NOT SET');
+    console.log('Razorpay Secret:', process.env.RAZORPAY_SECRET ? 'SET' : 'NOT SET');
 
     if (!appointmentId || !amount) {
       return res.status(400).json({ success: false, message: 'appointmentId and amount are required' });
+    }
+
+    if (Number(amount) <= 0) {
+      return res.status(400).json({ success: false, message: 'Amount must be greater than 0' });
     }
 
     const appointment = await Appointment.findById(appointmentId);
@@ -459,7 +466,7 @@ const createPaymentOrder = async (req, res) => {
       amount: Math.round(amount) * 100,
       currency: 'INR',
       receipt: `appt_${appointmentId}`,
-      notes: { appointmentId: appointmentId.toString() },
+      notes: { appointmentId: appointmentId.toString(), purpose: 'appointment' },
       payment_capture: 1,
     });
 
@@ -472,7 +479,7 @@ const createPaymentOrder = async (req, res) => {
       key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
-    console.error('Error in createPaymentOrder:', error);
+    console.error('Error in createPaymentOrder:', error.message, error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

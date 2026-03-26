@@ -1,10 +1,23 @@
-
 const SubscriptionPlan = require("../../models/subscriptionPlan");
 const Subscription = require("../../models/subscription");
-const crypto=require("crypto")
+const Appointment = require("../../models/Customerapointment");
+const crypto = require("crypto");
 
 const Pet = require('../../models/pet');
 
+
+async function handleAppointmentPayment(payment) {
+    try {
+        const appointmentId = payment?.notes?.appointmentId;
+        if (!appointmentId) return;
+        await Appointment.findByIdAndUpdate(appointmentId, {
+            paymentStatus: "paid",
+            razorpayPaymentId: payment.id,
+        });
+    } catch (error) {
+        console.log("Error in handleAppointmentPayment", error.message);
+    }
+}
 
 async function handleSubscriptionPayment(planId, petId) {
     try {
