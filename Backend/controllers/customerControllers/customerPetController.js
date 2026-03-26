@@ -75,8 +75,56 @@ exports.registerPet = async (req, res) => {
 
     return res.status(201).json({ success: true, message: "Pet registered successfully", pet });
   } catch (error) {
-    console.log("Error in registerPet:", error.message);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    console.log("Error in registerPet:", error.message, error);
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
+  }
+};
+
+exports.updatePet = async (req, res) => {
+  try {
+    const { petId } = req.params;
+    const { name, species, breed, sex, color, dob, neutered, vaccinations } = req.body;
+    const token = req?.headers["authorization"]?.trim();
+
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    const jwt = require("jsonwebtoken");
+    let decoded;
+    try { decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); }
+    catch { return res.status(401).json({ success: false, message: "Invalid or expired token" }); }
+
+    const parsedVaccinations = (typeof vaccinations === "string"
+      ? JSON.parse(vaccinations)
+      : (vaccinations || []))
+      .filter(v => v.name?.trim())
+      .map(v => ({
+        name: v.name.trim(),
+        serialNumber: v.serialNumber?.trim() || "",
+        date: parseDMY(v.date),
+        nextDueDate: parseDMY(v.nextDueDate),
+      }));
+
+    const imageUrl = req.file?.path || undefined;
+
+    const updateData = {
+      ...(name && { name: name.trim() }),
+      ...(species && { species }),
+      ...(breed !== undefined && { breed }),
+      ...(sex && { sex }),
+      ...(color !== undefined && { color }),
+      ...(dob && { dob: new Date(dob) }),
+      ...(neutered !== undefined && { neutered: neutered === "true" || neutered === true }),
+      vaccinations: parsedVaccinations,
+      ...(imageUrl && { image: imageUrl }),
+    };
+
+    const pet = await Pet.findByIdAndUpdate(petId, updateData, { new: true });
+    if (!pet) return res.status(404).json({ success: false, message: "Pet not found" });
+
+    return res.status(200).json({ success: true, message: "Pet updated successfully", pet });
+  } catch (error) {
+    console.log("Error in updatePet:", error.message);
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 

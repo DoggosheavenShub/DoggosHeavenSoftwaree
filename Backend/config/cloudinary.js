@@ -8,15 +8,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "doggosheaven/pets",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [{ width: 400, height: 400, crop: "fill" }],
-  },
-});
+let upload;
 
-const upload = multer({ storage });
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_CLOUD_NAME !== "your_cloud_name") {
+  const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "doggosheaven/pets",
+      allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      transformation: [{ width: 400, height: 400, crop: "fill" }],
+    },
+  });
+  upload = multer({ storage });
+} else {
+  // Cloudinary not configured — skip image upload
+  upload = multer({ storage: multer.memoryStorage() });
+}
 
 module.exports = { cloudinary, upload };
