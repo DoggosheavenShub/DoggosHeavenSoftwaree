@@ -332,16 +332,18 @@ const getNotifications = async (req, res) => {
     const customer = await User.findById(customerId);
     if (!customer) return res.status(404).json({ success: false, message: "Customer not found" });
 
-    const appointments = await Appointment.find({ customerId }).sort({ createdAt: -1 }).limit(20);
+    const appointments = await Appointment.find({ customerId }).sort({ updatedAt: -1 }).limit(20);
 
     const notifications = appointments.map((appt) => {
-      const date = new Date(appt.appointmentDate).toDateString();
+      const date = new Date(appt.appointmentDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
       let title, body, type;
 
       switch (appt.status) {
         case "confirmed":
           title = "Booking Confirmed! ✅";
-          body = `Your ${appt.serviceName} appointment for ${appt.petName} on ${date} at ${appt.appointmentTime} is confirmed.`;
+          body = appt.paymentStatus === "paid"
+            ? `Your ${appt.serviceName} for ${appt.petName} on ${date} is confirmed & paid.`
+            : `Your ${appt.serviceName} for ${appt.petName} on ${date} is confirmed. Please complete the payment of ₹${appt.totalAmount} to secure your booking.`;
           type = "confirmed";
           break;
         case "completed":
@@ -356,7 +358,7 @@ const getNotifications = async (req, res) => {
           break;
         default:
           title = "Booking Received 📋";
-          body = `Your ${appt.serviceName} appointment for ${appt.petName} on ${date} at ${appt.appointmentTime} is pending confirmation.`;
+          body = `Your ${appt.serviceName} request for ${appt.petName} on ${date} is pending confirmation from our team.`;
           type = "pending";
       }
 
@@ -365,7 +367,7 @@ const getNotifications = async (req, res) => {
         title,
         body,
         type,
-        time: appt.createdAt,
+        time: appt.updatedAt,
         amount: appt.totalAmount,
         paymentStatus: appt.paymentStatus,
         read: false,
@@ -442,6 +444,52 @@ const verifyAppointmentPayment = async (req, res) => {
   }
 };
 
+// Create Razorpay order for customer payment
+const createPaymentOrder = async (req, res) => {
+  try {
+    const { appointmentId, amount } = req.body;
+
+    if (!appointmentId || !amount) {
+      return res.status(400).json({ success: false, message: 'appointmentId and amount are required' });
+    }
+
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
+    if (appointment.paymentStatus === 'paid') {
+      return res.status(400).json({ success: false, message: 'Already paid' });
+    }
+
+    // Reuse existing order if available
+    if (appointment.razorpayOrderId) {
+      return res.status(200).json({
+        success: true,
+        order: { id: appointment.razorpayOrderId },
+        key: process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY,
+      });
+    }
+
+    const order = await razorpay.orders.create({
+      amount: Math.round(amount) * 100,
+      currency: 'INR',
+      receipt: `appt_${appointmentId}`,
+      notes: { appointmentId: appointmentId.toString() },
+      payment_capture: 1,
+    });
+
+    appointment.razorpayOrderId = order.id;
+    await appointment.save();
+
+    return res.status(200).json({
+      success: true,
+      order,
+      key: process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY,
+    });
+  } catch (error) {
+    console.error('Error in createPaymentOrder:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createAppointment,
   getCustomerAppointments,
@@ -453,4 +501,5 @@ module.exports = {
   getNotifications,
   confirmAppointment,
   verifyAppointmentPayment,
+  createPaymentOrder,
 };

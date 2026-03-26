@@ -11,6 +11,7 @@ const {
   getNotifications,
   confirmAppointment,
   verifyAppointmentPayment,
+  createPaymentOrder,
 } = require('../controllers/CustomerAppointmentController');
 const { customerProtectedRoute } = require('../middlewares/customerProtectedRoute');
 
@@ -24,5 +25,6 @@ router.delete('/cancelappoint/:id', cancelAppointment);
 router.get('/notifications/:customerId', getNotifications);
 router.patch('/confirmappoint/:id', confirmAppointment);
 router.post('/verifypayment', verifyAppointmentPayment);
+router.post('/createpaymentorder', createPaymentOrder);
 
 module.exports = router;
