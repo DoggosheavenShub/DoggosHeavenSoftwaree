@@ -7,7 +7,7 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY,
+  key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_SECRET,
 });
 
@@ -394,23 +394,10 @@ const confirmAppointment = async (req, res) => {
     appointment.status = 'confirmed';
     await appointment.save();
 
-    // Create Razorpay order
-    const order = await razorpay.orders.create({
-      amount: appointment.totalAmount * 100,
-      currency: 'INR',
-      receipt: `appt_${appointment._id}`,
-      notes: { appointmentId: appointment._id.toString(), serviceName: appointment.serviceName },
-      payment_capture: 1,
-    });
-
-    appointment.razorpayOrderId = order.id;
-    await appointment.save();
-
     res.status(200).json({
       success: true,
       message: 'Appointment confirmed',
       data: appointment,
-      order,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error confirming appointment', error: error.message });
@@ -464,7 +451,7 @@ const createPaymentOrder = async (req, res) => {
       return res.status(200).json({
         success: true,
         order: { id: appointment.razorpayOrderId },
-        key: process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY,
+        key: process.env.RAZORPAY_KEY_ID,
       });
     }
 
@@ -482,7 +469,7 @@ const createPaymentOrder = async (req, res) => {
     return res.status(200).json({
       success: true,
       order,
-      key: process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY,
+      key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
     console.error('Error in createPaymentOrder:', error);
