@@ -16,10 +16,10 @@ exports.signUp = async (req, res) => {
     }
 
     // Validate role
-    if (role && role !== 'admin' && role !== 'staff') {
+    if (role && role !== 'admin' && role !== 'staff' && role !== 'customer') {
       return res.status(400).json({
         success: false,
-        message: "Invalid role. Must be 'admin' or 'staff'"
+        message: "Invalid role. Must be 'admin', 'staff' or 'customer'"
       });
     }
 
@@ -157,6 +157,42 @@ exports.adminSignUp = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+exports.changePassword = async (req, res) => {
+  try {
+    const token = req?.headers["authorization"]?.trim();
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    const jwt = require("jsonwebtoken");
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    } catch {
+      return res.status(401).json({ success: false, message: "Invalid or expired token" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword)
+      return res.status(400).json({ success: false, message: "Both current and new password are required" });
+
+    if (newPassword.length < 6)
+      return res.status(400).json({ success: false, message: "New password must be at least 6 characters" });
+
+    const user = await User.findOne({ email: decoded.userEmail || decoded.email });
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ success: false, message: "Current password is incorrect" });
+
+    user.password = await bcrypt.hash(newPassword, 12);
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    console.log("Error in changePassword:", error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
     const { email, password, role } = req.body;

@@ -47,6 +47,10 @@ const petSchema = new mongoose.Schema(
       required: true,
       default: Date.now,
     },
+    image: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

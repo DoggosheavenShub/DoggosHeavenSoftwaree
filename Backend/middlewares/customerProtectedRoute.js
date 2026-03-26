@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
-exports.protectedRoute = async (req, res, next) => {
+exports.customerProtectedRoute = async (req, res, next) => {
   try {
     const token = req?.headers["authorization"]?.trim() || null;
 
@@ -52,7 +52,7 @@ exports.protectedRoute = async (req, res, next) => {
     req.userRole = user.role; // Add role for easy access
     req.userId = user._id;
 
-    if(user.role!=="cutomer"){
+    if(user.role!=="customer"){
         return res.status(401).json({
         success: false,
         message: "unauthorized access",

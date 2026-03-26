@@ -1,7 +1,67 @@
 const Visit=require("./../../models/Visit");
-const Pet=require("./../../models/Visit");
+const Pet=require("../../models/pet");
 const Owner=require("../../models/Owner");
 
+exports.registerPet = async (req, res) => {
+  try {
+    const { name, species, breed, sex, color, dob, neutered, vaccinations, registrationDate } = req.body;
+    const token = req?.headers["authorization"]?.trim();
+
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    const jwt = require("jsonwebtoken");
+    let decoded;
+    try { decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); }
+    catch { return res.status(401).json({ success: false, message: "Invalid or expired token" }); }
+
+    const userEmail = decoded.userEmail || decoded.email;
+
+    if (!name || !sex || !dob) {
+      return res.status(400).json({ success: false, message: "Name, sex, and date of birth are required" });
+    }
+
+    let owner = await Owner.findOne({ email: userEmail });
+    if (!owner) {
+      const User = require("../../models/user");
+      const user = await User.findOne({ email: userEmail });
+      owner = await Owner.create({
+        name: user?.fullName || "Customer",
+        email: userEmail,
+        phone: user?.phone || "",
+        pets: [],
+      });
+    }
+
+    // image URL from cloudinary (set by multer middleware) or null
+    const imageUrl = req.file?.path || null;
+
+    const parsedVaccinations = typeof vaccinations === "string"
+      ? JSON.parse(vaccinations)
+      : (vaccinations || []);
+
+    const pet = await Pet.create({
+      name: name.trim(),
+      species: species || "dog",
+      breed: breed || "",
+      sex,
+      color: color || "",
+      dob: new Date(dob),
+      neutered: neutered === "true" || neutered === true,
+      vaccinations: parsedVaccinations.filter(v => v.name?.trim()),
+      registrationDate: registrationDate ? new Date(registrationDate) : new Date(),
+      owner: owner._id,
+      image: imageUrl,
+    });
+
+    owner.pets.push(pet._id);
+    await owner.save();
+
+    return res.status(201).json({ success: true, message: "Pet registered successfully", pet });
+  } catch (error) {
+    console.log("Error in registerPet:", error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
 
 exports.getAllVisitByPetId=async(req,res)=>{
      try {

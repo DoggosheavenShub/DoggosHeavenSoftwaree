@@ -37,7 +37,11 @@ const visitTypeSchema = new mongoose.Schema(
     isBoardingAvailable: {
       type: Boolean,
       default: false,
-    }, 
+    },
+    subscriptionPrice: {
+      type: Number,
+      default: null,
+    },
   },
   { timestamps: true }
 );
