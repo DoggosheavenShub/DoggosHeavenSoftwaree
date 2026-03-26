@@ -1,6 +1,16 @@
-const Visit=require("./../../models/Visit");
-const Pet=require("../../models/pet");
-const Owner=require("../../models/Owner");
+const Visit = require("./../../models/Visit");
+const Pet = require("../../models/pet");
+const Owner = require("../../models/Owner");
+
+// Parse DD/MM/YYYY → Date or null
+const parseDMY = (str) => {
+  if (!str || !str.trim()) return null;
+  const parts = str.trim().split("/");
+  if (parts.length !== 3) return null;
+  const [d, m, y] = parts;
+  const date = new Date(`${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`);
+  return isNaN(date.getTime()) ? null : date;
+};
 
 exports.registerPet = async (req, res) => {
   try {
@@ -35,9 +45,16 @@ exports.registerPet = async (req, res) => {
     // image URL from cloudinary (set by multer middleware) or null
     const imageUrl = req.file?.path || null;
 
-    const parsedVaccinations = typeof vaccinations === "string"
+    const parsedVaccinations = (typeof vaccinations === "string"
       ? JSON.parse(vaccinations)
-      : (vaccinations || []);
+      : (vaccinations || []))
+      .filter(v => v.name?.trim())
+      .map(v => ({
+        name: v.name.trim(),
+        serialNumber: v.serialNumber?.trim() || "",
+        date: parseDMY(v.date),
+        nextDueDate: parseDMY(v.nextDueDate),
+      }));
 
     const pet = await Pet.create({
       name: name.trim(),
@@ -47,7 +64,7 @@ exports.registerPet = async (req, res) => {
       color: color || "",
       dob: new Date(dob),
       neutered: neutered === "true" || neutered === true,
-      vaccinations: parsedVaccinations.filter(v => v.name?.trim()),
+      vaccinations: parsedVaccinations,
       registrationDate: registrationDate ? new Date(registrationDate) : new Date(),
       owner: owner._id,
       image: imageUrl,
