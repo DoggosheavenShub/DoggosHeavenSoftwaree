@@ -43,6 +43,7 @@ import CustomerService from "./CustomerComponent/Services/ServicePage"
 import AppointmentBooking from "./CustomerComponent/Appointment/BookingForm";
 import AppointmentsPage from "./CustomerComponent/Appointment/AppointmentPage";
 import StaffAppointmentsPage from "./component/OnlineCustomerAppointment";
+import BookingRevenue from "./component/BookingRevenue";
 import BuySubcriptionCustomer from './CustomerComponent/subscription/BuySubscription'
 import CustomerPetForm from './CustomerComponent/CustomerPetRegistration'
 import CustomerSubcription from './CustomerComponent/subscription/SubcriptionsAvailable'
@@ -88,6 +89,7 @@ function App() {
             <Route path="/staff/nvisit2" element={<NewVisitForm2/>}/>
             <Route path="/staff/prescription" element={<PrescriptionForm/>}/>
             <Route path="/staff/onlinecustomerappointment" element={<StaffAppointmentsPage/>} />
+            <Route path="/staff/bookingreveue" element={<BookingRevenue/>} />
             
             <Route path="/customer/dashboard" element={<CustomerDashboard />} />
             <Route path="/customer/bookservice" element={<CustomerService />} />

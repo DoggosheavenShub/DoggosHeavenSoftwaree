@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const getUserPets = createAsyncThunk(
   'pets/getUserPets',
@@ -42,6 +42,30 @@ export const fetchCustomerAppointments = createAsyncThunk(
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch appointments');
+    }
+  }
+);
+
+export const getBookingRevenue = createAsyncThunk(
+  'appointments/getBookingRevenue',
+  async ({ year, month, day, page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('authtoken') || '';
+      const params = new URLSearchParams();
+      if (year)  params.append('year',  year);
+      if (month) params.append('month', month);
+      if (day)   params.append('day',   day);
+      params.append('page',  page);
+      params.append('limit', limit);
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/appointment/bookingrevenuedata?${params.toString()}`,
+        { headers: { 'Content-Type': 'application/json', Authorization: token } }
+      );
+      const data = await response.json();
+      if (!data.success) return rejectWithValue(data.message);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to fetch booking revenue');
     }
   }
 );

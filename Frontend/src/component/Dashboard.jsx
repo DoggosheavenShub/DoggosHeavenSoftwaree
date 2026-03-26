@@ -1,9 +1,11 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Navbar from "./navbar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
   const addpet = () => navigate("/staff/pet");
   const addinventory = () => navigate("/staff/inventory");
@@ -155,6 +157,30 @@ const Dashboard = () => {
 
         {/* Right Column */}
         <div className="space-y-6">
+          {/* Online Bookings - prominent card */}
+          <div className="bg-[#123524] rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+            <h2 className="text-xl font-bold mb-2 text-[#EFE3C2]">
+              E. Online Bookings
+            </h2>
+            <p className="text-[#85A947] text-sm mb-4">View and manage appointments booked by pet parents online.</p>
+            <div className="flex gap-3 flex-wrap">
+              <Link
+                to="/staff/onlinecustomerappointment"
+                className="inline-block bg-[#85A947] text-[#123524] font-semibold px-5 py-2 rounded-lg hover:bg-[#EFE3C2] transition-colors duration-200"
+              >
+                View All Bookings
+              </Link>
+              {user?.role === "admin" && (
+                <Link
+                  to="/staff/bookingreveue"
+                  className="inline-block bg-[#EFE3C2] text-[#123524] font-semibold px-5 py-2 rounded-lg hover:bg-[#85A947] transition-colors duration-200"
+                >
+                  Revenue
+                </Link>
+              )}
+            </div>
+          </div>
+
           {/* SMS Reminders Panel */}
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
             <h2 className="text-xl font-bold mb-4 text-[#123524]">
@@ -170,7 +196,6 @@ const Dashboard = () => {
                 },
                 { name: "Birthday Reminders", path: "/staff/reminders" },
                 { name: "Attendance", path: "/staff/attendance" },
-                 { name: "Online customer appointments", path: "/staff/onlinecustomerappointment" },
               ].map((item, index) => (
                 <li key={index}>
                   <Link

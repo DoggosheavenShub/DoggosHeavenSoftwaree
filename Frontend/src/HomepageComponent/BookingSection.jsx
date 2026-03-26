@@ -471,10 +471,12 @@ const ServicesPage = () => {
   ];
 
  const handleBookService = (service) => {
-  if (!user || user.role!=="customer") {
-    navigate('/login');
+  if (!user) {
+    navigate('/login', { state: { redirectTo: '/customer/bookservice', service } });
+  } else if (user.role !== 'customer') {
+    alert('Please log in with a customer account to book a service.');
   } else {
-    navigate('/customerservice', { state: { service } });
+    navigate('/customer/bookservice', { state: { service } });
   }
 };
 

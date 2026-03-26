@@ -30,7 +30,10 @@ export default function UserLoginPage() {
 
         setFormData({ email: "", password: "", role: "" });
 
-        if (data?.payload?.user?.role === "staff" || data?.payload?.user?.role === "admin") {
+        const role = data?.payload?.user?.role;
+        if (role === "customer") {
+          window.location.href = "/customer/dashboard";
+        } else {
           window.location.href = "/staff/dashboard";
         }
       } else {
@@ -40,6 +43,7 @@ export default function UserLoginPage() {
   };
 
   const roleOptions = [
+    { value: "customer", label: "Pet Parent", icon: "🐾" },
     { value: "staff", label: "Staff Member", icon: "👨‍⚕️" },
     { value: "admin", label: "Admin", icon: "🛡️" },
   ];
@@ -132,7 +136,7 @@ export default function UserLoginPage() {
                     <label className="block text-xs sm:text-sm font-medium text-[#3E7B27] mb-2 sm:mb-3">
                       Login As
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
                       {roleOptions.map((option) => (
                         <label
                           key={option.value}

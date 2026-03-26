@@ -11,9 +11,14 @@ const InventoryForm = () => {
 
   const [formData, setFormData] = useState({
     itemName: "",
+    medicineName: "",
+    brandName: "",
+    saltName: "",
     stock: 0,
     stockUnit: "ml",
     itemType: "disposable",
+    disposableSubType: "",
+    injectionSubType: "",
     unitCostPrice: 0,
     unitMinRetailPriceNGO: 0,
     unitMaxRetailPriceCustomer: 0,
@@ -43,9 +48,14 @@ const InventoryForm = () => {
           alert("Inventory item added successfully!");
           setFormData({
             itemName: "",
+            medicineName: "",
+            brandName: "",
+            saltName: "",
             stock: 0,
             stockUnit: "ml",
             itemType: "disposable",
+            disposableSubType: "",
+            injectionSubType: "",
             unitCostPrice: 0,
             unitMinRetailPriceNGO: 0,
             unitMaxRetailPriceCustomer: 0,
@@ -91,21 +101,42 @@ const InventoryForm = () => {
 
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-bold text-[#3E7B27] mb-2">
-                      Item Name
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        name="itemName"
-                        value={formData.itemName}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
-                        placeholder="Enter item name"
-                      />
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-[#85A947] rounded-full"></div>
+                  <div className="space-y-4 md:col-span-2">
+                    <h3 className="text-sm font-bold text-[#123524] uppercase tracking-widest border-b-2 border-[#85A947]/30 pb-2">Item Name</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-bold text-[#3E7B27] mb-2">Medicine Name</label>
+                        <input
+                          type="text"
+                          name="medicineName"
+                          value={formData.medicineName}
+                          onChange={handleChange}
+                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+                          placeholder="Enter medicine name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-bold text-[#3E7B27] mb-2">Brand Name</label>
+                        <input
+                          type="text"
+                          name="brandName"
+                          value={formData.brandName}
+                          onChange={handleChange}
+                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+                          placeholder="Enter brand name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-bold text-[#3E7B27] mb-2">Salt Name</label>
+                        <input
+                          type="text"
+                          name="saltName"
+                          value={formData.saltName}
+                          onChange={handleChange}
+                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 text-[#123524] font-medium placeholder-[#123524]/50 transition-all duration-200"
+                          placeholder="Enter salt name"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -200,12 +231,15 @@ const InventoryForm = () => {
                       <select
                         name="itemType"
                         value={formData.itemType}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          handleChange(e);
+                          setFormData((prev) => ({ ...prev, disposableSubType: "", injectionSubType: "" }));
+                        }}
                         required
                         className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200 appearance-none cursor-pointer"
                       >
                         <option value="disposable">Disposable</option>
-                        <option value="syringe">Syringe</option>
+                        <option value="injection">Injection</option>
                         <option value="medicine">Medicine</option>
                         <option value="vaccine">Vaccine</option>
                       </select>
@@ -214,6 +248,56 @@ const InventoryForm = () => {
                       </div>
                     </div>
                   </div>
+
+                  {formData.itemType === "disposable" && (
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
+                        Disposable Sub-Type
+                      </label>
+                      <div className="relative">
+                        <select
+                          name="disposableSubType"
+                          value={formData.disposableSubType}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200 appearance-none cursor-pointer"
+                        >
+                          <option value="">-- Select Disposable Type --</option>
+                          {["Gloves","Cotton","Mask","Bandage","Butterfly Needle","IV Set","DNS","NS","RL","Metrogyl","Micropore Tape","Hydrogen Peroxide","Spirit","Savlon","Sanitizer","Garbage Bag","Pet Wipes","Feeding Tube"].map((sub) => (
+                            <option key={sub} value={sub}>{sub}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#3E7B27]"></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.itemType === "injection" && (
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="block text-sm font-bold text-[#3E7B27] mb-2">
+                        Injection Size
+                      </label>
+                      <div className="relative">
+                        <select
+                          name="injectionSubType"
+                          value={formData.injectionSubType}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-4 border-2 border-[#85A947]/30 rounded-xl shadow-sm focus:border-[#3E7B27] focus:ring-4 focus:ring-[#85A947]/20 bg-white/90 backdrop-blur-sm text-[#123524] font-medium transition-all duration-200 appearance-none cursor-pointer"
+                        >
+                          <option value="">-- Select Injection Size --</option>
+                          {["1 ml", "2 ml", "3 ml", "5 ml"].map((size) => (
+                            <option key={size} value={size}>{size}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#3E7B27]"></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-[#85A947]/10 rounded-xl p-6 border border-[#85A947]/20">

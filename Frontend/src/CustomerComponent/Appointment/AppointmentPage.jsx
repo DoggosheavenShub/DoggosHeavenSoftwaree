@@ -74,7 +74,7 @@ const AppointmentsPage = () => {
             <p className="text-gray-600">Manage your pet service appointments</p>
           </div>
           <button
-            onClick={() => navigate('/customerservice')}
+            onClick={() => navigate('/customer/bookservice')}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
           >
             Book New Appointment
@@ -97,7 +97,7 @@ const AppointmentsPage = () => {
                 You haven't booked any appointments yet. Let's get your pet the care they deserve!
               </p>
               <button
-                onClick={() => navigate('/customerservice')}
+                onClick={() => navigate('/customer/bookservice')}
                 className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700"
               >
                 Book Your First Appointment

@@ -10,6 +10,9 @@ const CheckAuth = ({ isAuthenticated }) => {
 
   if (isAuthenticated) {
     if (location.includes('login')) {
+      if (user?.role === 'customer') {
+        return <Navigate to="/customer/dashboard" />;
+      }
       return <Navigate to="/staff/dashboard" />;
     }
 
