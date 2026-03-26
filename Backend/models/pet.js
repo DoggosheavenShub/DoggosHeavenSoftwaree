@@ -36,10 +36,10 @@ const petSchema = new mongoose.Schema(
     },
     vaccinations: [
       {
-        name: {
-          type: String,
-          required: true,
-        }
+        name: { type: String, required: true },
+        date: { type: Date, default: null },
+        serialNumber: { type: String, default: "" },
+        nextDueDate: { type: Date, default: null },
       },
     ],
     registrationDate: {
