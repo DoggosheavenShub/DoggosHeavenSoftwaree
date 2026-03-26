@@ -32,6 +32,13 @@ exports.registerPet = async (req, res) => {
       });
     }
 
+    // image URL from cloudinary (set by multer middleware) or null
+    const imageUrl = req.file?.path || null;
+
+    const parsedVaccinations = typeof vaccinations === "string"
+      ? JSON.parse(vaccinations)
+      : (vaccinations || []);
+
     const pet = await Pet.create({
       name: name.trim(),
       species: species || "dog",
@@ -39,10 +46,11 @@ exports.registerPet = async (req, res) => {
       sex,
       color: color || "",
       dob: new Date(dob),
-      neutered: neutered || false,
-      vaccinations: (vaccinations || []).filter(v => v.name?.trim()),
+      neutered: neutered === "true" || neutered === true,
+      vaccinations: parsedVaccinations.filter(v => v.name?.trim()),
       registrationDate: registrationDate ? new Date(registrationDate) : new Date(),
       owner: owner._id,
+      image: imageUrl,
     });
 
     owner.pets.push(pet._id);
