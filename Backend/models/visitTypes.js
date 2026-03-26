@@ -6,6 +6,10 @@ const visitTypeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    emoji: {
+      type: String,
+      default: "🐾",
+    },
     price: {
       type: Number,
       default: null,

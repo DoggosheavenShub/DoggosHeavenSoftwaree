@@ -22,17 +22,17 @@ router.get("/getallvisittypes", getAllVisitType);
 router.post("/addvisittype", protectedRoute, async (req, res) => {
   try {
     const VisitType = require('../models/visitTypes');
-    const { purpose, price, halfdayprice } = req.body;
+    const { purpose, price, halfdayprice, emoji } = req.body;
     if (!purpose) return res.status(400).json({ success: false, message: "Purpose is required" });
-    const vt = await VisitType.create({ purpose, price, halfdayprice });
+    const vt = await VisitType.create({ purpose, price, halfdayprice, emoji: emoji || "🐾" });
     res.status(201).json({ success: true, data: vt, message: "Service created successfully" });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 router.put("/updatevisittype/:id", protectedRoute, async (req, res) => {
   try {
     const VisitType = require('../models/visitTypes');
-    const { purpose, price, halfdayprice } = req.body;
-    const vt = await VisitType.findByIdAndUpdate(req.params.id, { purpose, price, halfdayprice }, { new: true });
+    const { purpose, price, halfdayprice, emoji } = req.body;
+    const vt = await VisitType.findByIdAndUpdate(req.params.id, { purpose, price, halfdayprice, emoji }, { new: true });
     if (!vt) return res.status(404).json({ success: false, message: "Service not found" });
     res.json({ success: true, data: vt, message: "Service updated successfully" });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
