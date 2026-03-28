@@ -44,4 +44,80 @@ router.delete("/deletestaff/:id", async (req, res) => {
   }
 });
 
+router.get("/staffdetails/:id", async (req, res) => {
+  try {
+    const User = require('../models/user');
+    const Visit = require('../models/Visit');
+    const Boarding = require('../models/boarding');
+    const VisitType = require('../models/visitTypes');
+
+    const staff = await User.findById(req.params.id).select('-password');
+    if (!staff) return res.status(404).json({ success: false, message: "Staff not found" });
+
+    const staffVisits = await Visit.find({ createdBy: staff._id })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate({ path: 'pet', select: 'name', populate: { path: 'owner', select: 'name' } })
+      .populate({ path: 'visitType', select: 'purpose emoji' });
+
+    const totalVisits = await Visit.countDocuments({ createdBy: staff._id });
+    const visitIds = await Visit.find({ createdBy: staff._id }).distinct('_id');
+    const totalBoardings = await Boarding.countDocuments({ visitId: { $in: visitIds } });
+
+    // Services staff has provided (distinct visitTypes)
+    const providedTypeIds = await Visit.find({ createdBy: staff._id }).distinct('visitType');
+
+    // All services
+    const allServices = await VisitType.find({});
+
+    res.status(200).json({
+      success: true,
+      staff,
+      stats: { totalVisits, totalBoardings },
+      recentVisits: staffVisits,
+      allServices,
+      providedServiceIds: providedTypeIds.map(id => id.toString()),
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+router.get("/mystats", async (req, res) => {
+  try {
+    const jwt = require('jsonwebtoken');
+    const token = req?.headers["authorization"]?.trim();
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const User = require('../models/user');
+    const Visit = require('../models/Visit');
+    const Boarding = require('../models/boarding');
+    const VisitType = require('../models/visitTypes');
+
+    const staff = await User.findOne({ email: decoded.userEmail || decoded.email }).select('-password');
+    if (!staff) return res.status(404).json({ success: false, message: "User not found" });
+
+    const totalVisits = await Visit.countDocuments({ createdBy: staff._id });
+    const visitIds = await Visit.find({ createdBy: staff._id }).distinct('_id');
+    const totalBoardings = await Boarding.countDocuments({ visitId: { $in: visitIds } });
+    const providedTypeIds = await Visit.find({ createdBy: staff._id }).distinct('visitType');
+    const allServices = await VisitType.find({});
+    const recentVisits = await Visit.find({ createdBy: staff._id })
+      .sort({ createdAt: -1 }).limit(10)
+      .populate({ path: 'pet', select: 'name', populate: { path: 'owner', select: 'name' } })
+      .populate({ path: 'visitType', select: 'purpose emoji' });
+
+    res.status(200).json({
+      success: true,
+      staff,
+      stats: { totalVisits, totalBoardings },
+      recentVisits,
+      allServices,
+      providedServiceIds: providedTypeIds.map(id => id.toString()),
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;

@@ -91,6 +91,7 @@ exports.addVisit = async (req, res) => {
       followUpPurpose,
       customerType,
       price: totalPrice,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -529,6 +530,7 @@ exports.addInquiryVisit = async (req, res) => {
         nextFollowUp && followUpTime
           ? new Date(`${nextFollowUp}T${followUpTime}`)
           : null,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -592,6 +594,7 @@ exports.addDogParkVisit = async (req, res) => {
       pet: petId,
       visitType,
       details:details_new,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -648,6 +651,7 @@ exports.addVeterinaryVisit = async (req, res) => {
       pet: petId,
       visitType,
       details,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -720,6 +724,7 @@ exports.addHostelVisit = async (req, res) => {
       pet: petId,
       visitType,
       details:details_new,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -800,6 +805,7 @@ exports.addDayCareVisit = async (req, res) => {
       pet: petId,
       visitType,
       details,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -884,6 +890,7 @@ exports.addDaySchoolVisit = async (req, res) => {
       pet: petId,
       visitType,
       details,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -969,6 +976,7 @@ exports.addPlaySchoolVisit = async (req, res) => {
       pet: petId,
       visitType,
       details,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -1233,6 +1241,7 @@ exports.addGroomingVisit = async (req, res) => {
       pet: petId,
       visitType,
       details,
+      createdBy: req.userId || null,
     });
 
     await visit.save({ session });
@@ -1335,11 +1344,11 @@ exports.addShoppingVisit = async (req, res) => {
     details.price = price;
     details.items = items;
 
-
     const newVisit = new Visit({
       visitType,
       details,
       pet: petId,
+      createdBy: req.userId || null,
     });
 
     await newVisit.save();

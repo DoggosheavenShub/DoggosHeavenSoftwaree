@@ -15,6 +15,11 @@ const visitSchema = new mongoose.Schema(
     details: {
       type: mongoose.Schema.Types.Mixed,
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   { timestamps: true }
 );

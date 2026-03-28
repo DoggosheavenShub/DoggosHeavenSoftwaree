@@ -10,6 +10,10 @@ const visitTypeSchema = new mongoose.Schema(
       type: String,
       default: "🐾",
     },
+    description: {
+      type: String,
+      default: "",
+    },
     price: {
       type: Number,
       default: null,
@@ -46,6 +50,12 @@ const visitTypeSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    customFields: [
+      {
+        label: { type: String, required: true },
+        value: { type: String, default: "" },
+      },
+    ],
   },
   { timestamps: true }
 );
