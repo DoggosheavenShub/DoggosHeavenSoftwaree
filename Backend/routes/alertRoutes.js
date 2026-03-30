@@ -7,23 +7,44 @@ const { protectedRoute } = require("../middlewares/protectedRoute");
 router.get("/getall", protectedRoute, async (req, res) => {
   try {
     const role = req.user?.role || "admin";
-    const filter = role === "admin"
-      ? { $or: [{ forRole: "admin" }, { forRole: "both" }, { forRole: { $exists: false } }] }
-      : { forRole: "staff" };
 
-    const alerts = await Alert.find(filter).sort({ alertDate: -1 }).limit(100);
+    let filter;
+    if (role === "staff") {
+      filter = { forRole: "staff" };
+    } else {
+      // admin sees: forRole=admin, forRole=both, or forRole missing (old alerts)
+      filter = { $or: [{ forRole: "admin" }, { forRole: "both" }, { forRole: { $exists: false } }, { forRole: null }] };
+    }
+
+    const alerts = await Alert.find(filter)
+      .populate("appointmentId")
+      .sort({ alertDate: -1 })
+      .limit(100);
+
     const unreadCount = await Alert.countDocuments({ ...filter, isRead: false });
+
     res.json({ success: true, alerts, unreadCount });
-  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+  } catch (e) {
+    console.log("alertRoutes getall error:", e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
 });
 
 // Mark all as read (role-based)
 router.put("/markallread", protectedRoute, async (req, res) => {
   try {
     const role = req.user?.role || "admin";
-    const filter = role === "admin"
-      ? { $or: [{ forRole: "admin" }, { forRole: "both" }, { forRole: { $exists: false } }], isRead: false }
-      : { forRole: "staff", isRead: false };
+
+    let filter;
+    if (role === "staff") {
+      filter = { forRole: "staff", isRead: false };
+    } else {
+      filter = {
+        $or: [{ forRole: "admin" }, { forRole: "both" }, { forRole: { $exists: false } }, { forRole: null }],
+        isRead: false,
+      };
+    }
+
     await Alert.updateMany(filter, { isRead: true });
     res.json({ success: true });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }

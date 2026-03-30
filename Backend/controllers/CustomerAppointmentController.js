@@ -134,6 +134,7 @@ const createAppointment = async (req, res) => {
         serviceName: `${serviceName || 'Service'} for ${petName}`,
         performedBy: customer.name || customer.fullName || 'Customer',
         forRole: 'staff',
+        appointmentId: appointment._id,
       });
     } catch (_) {}
 

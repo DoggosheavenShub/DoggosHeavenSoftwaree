@@ -31,6 +31,11 @@ const alertSchema = new mongoose.Schema({
   performedBy: {
     type: String,
   },
+  appointmentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Customerapointment',
+    default: null,
+  },
   isRead: {
     type: Boolean,
     default: false,
