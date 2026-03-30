@@ -136,7 +136,10 @@ const createAppointment = async (req, res) => {
         forRole: 'staff',
         appointmentId: appointment._id,
       });
-    } catch (_) {}
+      console.log('newBooking alert created for appointment:', appointment._id);
+    } catch (alertErr) {
+      console.log('Alert create error:', alertErr.message);
+    }
 
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate('customerId', 'name email phone')
