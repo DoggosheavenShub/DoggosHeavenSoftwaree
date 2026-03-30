@@ -126,7 +126,16 @@ const createAppointment = async (req, res) => {
 
     await appointment.save();
 
-    
+    // Alert for admin — new booking
+    try {
+      const Alert = require('../models/alert');
+      await Alert.create({
+        alertType: 'newBooking',
+        serviceName: `${serviceName || 'Service'} for ${petName}`,
+        performedBy: customer.name || customer.fullName || 'Customer',
+      });
+    } catch (_) {}
+
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate('customerId', 'name email phone')
       .populate('serviceId', 'name price duration category');

@@ -57,6 +57,17 @@ exports.addPet = async (req, res) => {
     // Commit the transaction
     await session.commitTransaction();
 
+    // Alert for admin — new pet registered
+    try {
+      const Alert = require('../models/alert');
+      const petNames = pets.map(p => p.name).join(', ');
+      await Alert.create({
+        alertType: 'newPet',
+        serviceName: petNames,
+        performedBy: ownerName || 'Staff',
+      });
+    } catch (_) {}
+
     // Fetch the complete owner data with populated pets
     const populatedOwner = await Owner.findById(owner._id).populate("pets");
 
