@@ -126,20 +126,19 @@ const createAppointment = async (req, res) => {
 
     await appointment.save();
 
-    // Alert for admin — new booking
-    try {
-      const Alert = require('../models/alert');
-      await Alert.create({
-        alertType: 'newBooking',
-        serviceName: `${serviceName || 'Service'} for ${petName}`,
-        performedBy: customer.name || customer.fullName || 'Customer',
-        forRole: 'staff',
-        appointmentId: appointment._id,
-      });
-      console.log('newBooking alert created for appointment:', appointment._id);
-    } catch (alertErr) {
-      console.log('Alert create error:', alertErr.message);
-    }
+    // Alert for staff — new booking (fire and forget)
+    const Alert = require('../models/alert');
+    Alert.create({
+      alertType: 'newBooking',
+      serviceName: `${serviceName || 'Service'} for ${petName}`,
+      performedBy: customer?.fullName || customer?.name || 'Customer',
+      forRole: 'staff',
+      appointmentId: appointment._id,
+    }).then(() => {
+      console.log('newBooking alert created:', appointment._id);
+    }).catch((err) => {
+      console.log('Alert create failed:', err.message);
+    });
 
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate('customerId', 'name email phone')
