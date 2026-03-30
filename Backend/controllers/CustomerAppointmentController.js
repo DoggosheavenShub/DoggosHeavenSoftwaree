@@ -126,16 +126,19 @@ const createAppointment = async (req, res) => {
 
     await appointment.save();
 
-    // Alert for staff — new booking (fire and forget)
+    // Alert for both admin and staff — new booking (fire and forget)
     const Alert = require('../models/alert');
-    Alert.create({
+    const alertPayload = {
       alertType: 'newBooking',
       serviceName: `${serviceName || 'Service'} for ${petName}`,
       performedBy: customer?.fullName || customer?.name || 'Customer',
-      forRole: 'staff',
       appointmentId: appointment._id,
-    }).then(() => {
-      console.log('newBooking alert created:', appointment._id);
+    };
+    Promise.all([
+      Alert.create({ ...alertPayload, forRole: 'staff' }),
+      Alert.create({ ...alertPayload, forRole: 'admin' }),
+    ]).then(() => {
+      console.log('newBooking alerts created:', appointment._id);
     }).catch((err) => {
       console.log('Alert create failed:', err.message);
     });
