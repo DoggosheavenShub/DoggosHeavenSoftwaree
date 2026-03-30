@@ -1,224 +1,78 @@
-const Visit = require("../models/Visit");
-const agenda = require("../config/agenda");
 const Pet = require("../models/pet");
-const { DateTime } = require("luxon");
 const nodemailer = require("nodemailer");
 const ScheduledVisit = require("../models/scheduledVisit");
 
-agenda.define("send email", async (job) => {
-  const details = job.attrs.data;
-
-  var subject = "Reminder for Visit";
-
-  var message = `Hii ${
-    details?.ownerName
-  } This is reminder for the visit scheduled for your pet.Details of the visit are -\n
-               Pet name : ${details?.petName || ""}\n
-               Species :${details?.species || ""}\n
-               Breed :${details?.breed || ""}\n
-               Date :${details?.date || ""}\n
-               Time :${details?.time}`;
-
-  const auth = nodemailer.createTransport({
-    service: "gmail",
-    secure: true,
-    port: 465,
-    auth: {
-      user: process.env.GMAIL_ACCOUNT,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
-  const receiver = {
-    from: process.env.GMAIL_ACCOUNT,
-    to: details?.email,
-    subject: subject,
-    text: message,
-  };
-
-  auth.sendMail(receiver, (err, emailResponse) => {
-    if (err) console.log(err);
-    console.log(emailResponse);
-    job.remove();
-  });
+const createTransport = () => nodemailer.createTransport({
+  service: "gmail",
+  secure: true,
+  port: 465,
+  auth: {
+    user: process.env.GMAIL_ACCOUNT,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
 });
 
-agenda.define("birthday email", async (job) => {
-  const details = job.attrs.data;
-
-  var subject = `Happy Birthday to ${details?.petName}`;
-
-  var message = `Hii ${details?.ownerName}\n
-   Just wanted to take a moment to wish a very happy birthday to ${details?.petName} 🎂🐾 We hope today is filled with all the things ${details?.petName}
-   loves most — whether it's extra treats, fun playtime, or some special pampering.\n
-   Once again a very happy birthday to ${details?.petName} 🐾🎉
-   `;
-
-  const auth = nodemailer.createTransport({
-    service: "gmail",
-    secure: true,
-    port: 465,
-    auth: {
-      user: process.env.GMAIL_ACCOUNT,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
-  const receiver = {
-    from: process.env.GMAIL_ACCOUNT,
-    to: details?.email,
-    subject: subject,
-    text: message,
-  };
-
-  auth.sendMail(receiver, (err, emailResponse) => {
-    if (err) console.log(err);
-    console.log(emailResponse);
-    job.remove();
-  });
-});
-
-agenda.define("send overdue email", async (job) => {
-  const details = job.attrs.data;
-
-  var subject = `Missed followup`;
-  var message = `
-  <html>
-    <body style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
-      <p>Hii ${details?.ownerName}</p>
-      <p>You missed the followup scheduled for your pet ${details?.name} on ${details?.date}.</p>
-      <p><strong>Purpose:</strong> ${details?.purpose}</p>
-      <p>Please contact the staff for any further communication.</p>
-    </body>
-  </html>
-`;
-
-  const auth = nodemailer.createTransport({
-    service: "gmail",
-    secure: true,
-    port: 465,
-    auth: {
-      user: process.env.GMAIL_ACCOUNT,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
-  const receiver = {
-    from: process.env.GMAIL_ACCOUNT,
-    to: details?.email,
-    subject: subject,
-    html: message,
-    headers: {
-      "Content-Type": "text/html; charset=UTF-8", // Ensure it's sent as HTML
-    },
-  };
-
-  auth.sendMail(receiver, (err, emailResponse) => {
-    if (err) console.log(err);
-    console.log(emailResponse);
-    job.remove();
-  });
-});
+const sendMail = (to, subject, text, html) => {
+  const auth = createTransport();
+  return auth.sendMail({ from: process.env.GMAIL_ACCOUNT, to, subject, text, html });
+};
 
 exports.sendReminders = async (req, res) => {
   try {
     const { List } = req.body;
-    List.forEach((item, index) => {
-      agenda.schedule(`in ${index * 5} seconds`, "send email", { item });
-    });
-    return res.status(200).json({
-      success: true,
-      message: "Emails will be sent successfully",
-    });
+    for (const item of List) {
+      const subject = "Reminder for Visit";
+      const text = `Hii ${item?.ownerName} This is reminder for the visit scheduled for your pet.\nPet name: ${item?.petName || ""}\nSpecies: ${item?.species || ""}\nBreed: ${item?.breed || ""}\nDate: ${item?.date || ""}\nTime: ${item?.time}`;
+      await sendMail(item?.email, subject, text).catch(console.log);
+    }
+    return res.status(200).json({ success: true, message: "Emails sent successfully" });
   } catch (error) {
-    console.log("Error in getVisitController", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
 exports.sendBirthdayReminders = async (req, res) => {
   try {
     const { list } = req.body;
-    list.forEach((item, index) => {
-      agenda.schedule(`in ${index * 5} seconds`, "birthday email", { item });
-    });
-    return res.status(200).json({
-      success: true,
-      message: "Emails will be sent successfully",
-    });
+    for (const item of list) {
+      const subject = `Happy Birthday to ${item?.petName}`;
+      const text = `Hii ${item?.ownerName}\nJust wanted to wish a very happy birthday to ${item?.petName} 🎂🐾`;
+      await sendMail(item?.email, subject, text).catch(console.log);
+    }
+    return res.status(200).json({ success: true, message: "Birthday emails sent successfully" });
   } catch (error) {
-    console.log("Error in sendBirthdayReminder Controller", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
 exports.sendOverdueReminders = async (req, res) => {
   try {
     const { date } = req.body;
-
-    if (!date) {
-      return res.json({
-        success: false,
-        message: "Reminders can't be send without choosing a date",
-      });
-    }
+    if (!date) return res.json({ success: false, message: "Date is required" });
 
     const Attendance = require("../models/attendance");
-    const TempDate = new Date(date);
+    const attendanceRecord = await Attendance.findOne({ date: new Date(date) }).populate({
+      path: "List.petId",
+      populate: { path: "owner", select: "name email phone" },
+    });
 
-    // Get attendance record for this date
-    const attendanceRecord = await Attendance.findOne({ date: TempDate })
-      .populate({
-        path: "List.petId",
-        populate: { path: "owner", select: "name email phone" },
-      });
+    if (!attendanceRecord || attendanceRecord.List.length === 0)
+      return res.status(200).json({ success: true, message: "No scheduled pets found" });
 
-    if (!attendanceRecord || attendanceRecord.List.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: "No scheduled pets found for this date",
-      });
-    }
-
-    // Only send to absent pets
     const absentPets = attendanceRecord.List.filter((item) => item.present === false);
+    if (absentPets.length === 0)
+      return res.status(200).json({ success: true, message: "All pets are present" });
 
-    if (absentPets.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: "All pets are present — no reminders needed",
-      });
+    for (const item of absentPets) {
+      const pet = item.petId;
+      if (!pet?.owner?.email) continue;
+      const html = `<html><body><p>Hii ${pet?.owner?.name}</p><p>You missed the followup for ${pet?.name} on ${date}.</p><p><strong>Purpose:</strong> ${item?.purpose || "Scheduled Visit"}</p></body></html>`;
+      await sendMail(pet.owner.email, "Missed followup", null, html).catch(console.log);
     }
 
-    absentPets.forEach((item, index) => {
-      const pet = item.petId;
-      if (!pet?.owner?.email) return;
-      const obj = {
-        name: pet?.name,
-        ownerName: pet?.owner?.name,
-        purpose: item?.purpose || "Scheduled Visit",
-        date,
-        email: pet?.owner?.email,
-      };
-      agenda.schedule(`in ${index * 5} seconds`, "send overdue email", obj);
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: `Reminders sent to ${absentPets.length} absent pet(s)`,
-    });
+    return res.status(200).json({ success: true, message: `Reminders sent to ${absentPets.length} pet(s)` });
   } catch (error) {
-    console.log("Error in sendoverduereminders Controller", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -227,64 +81,40 @@ exports.getRemindersList = async (req, res) => {
     const { date } = req.params;
     const TempDate = new Date(date);
 
-    const FollowUpList = await ScheduledVisit.find({
-      date: TempDate,
-    }).populate({
+    const FollowUpList = await ScheduledVisit.find({ date: TempDate }).populate({
       path: "petId",
-      populate: {
-        path: "owner",
-      },
+      populate: { path: "owner" },
     });
 
-    let birthdayDate = new Date(date);
-
-    let month = birthdayDate.getMonth() + 1;
-    let day = birthdayDate.getDate();
-
+    const birthdayDate = new Date(date);
     const BirthdayList = await Pet.find({
       $expr: {
         $and: [
-          { $eq: [{ $month: "$dob" }, month] },
-          { $eq: [{ $dayOfMonth: "$dob" }, day] },
+          { $eq: [{ $month: "$dob" }, birthdayDate.getMonth() + 1] },
+          { $eq: [{ $dayOfMonth: "$dob" }, birthdayDate.getDate()] },
         ],
       },
-    }).populate({
-      path: "owner",
-      select: "name phone",
-    });
+    }).populate({ path: "owner", select: "name phone" });
 
-    const combinedList = [];
-    FollowUpList.forEach((item) => {
-      const obj = {};
-      obj["petName"] = item?.petId?.name;
-      obj["ownerName"] = item?.petId?.owner?.name;
-      obj["contact"] = item?.petId?.owner?.phone;
-      obj["purpose"] = item?.purpose;
-      obj["scheduledDate"] = item?.date;
+    const combinedList = [
+      ...FollowUpList.map((item) => ({
+        petName: item?.petId?.name,
+        ownerName: item?.petId?.owner?.name,
+        contact: item?.petId?.owner?.phone,
+        purpose: item?.purpose,
+        scheduledDate: item?.date,
+      })),
+      ...BirthdayList.map((item) => ({
+        petName: item?.name,
+        ownerName: item?.owner?.name,
+        contact: item?.owner?.phone,
+        purpose: "Birthday",
+      })),
+    ];
 
-      combinedList.push(obj);
-    });
-
-    BirthdayList.forEach((item) => {
-      const obj = {};
-      obj["petName"] = item?.name;
-      obj["ownerName"] = item?.owner?.name;
-      obj["contact"] = item?.owner?.phone;
-      obj["purpose"] = "Birthday";
-      combinedList.push(obj);
-    });
-
-    return res.status(200).json({
-      success: true,
-      List: combinedList,
-      message: "List fetched successfully",
-    });
+    return res.status(200).json({ success: true, List: combinedList, message: "List fetched successfully" });
   } catch (error) {
-    console.log("Error in getRemindersList Controller", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -293,63 +123,33 @@ exports.sendRemindersNew = async (req, res) => {
     const { date } = req.params;
     const TempDate = new Date(date);
 
-    const FollowUpList = await ScheduledVisit.find({
-      date: TempDate,
-    }).populate({
+    const FollowUpList = await ScheduledVisit.find({ date: TempDate }).populate({
       path: "petId",
-      populate: {
-        path: "owner",
-        select: "email name",
-      },
+      populate: { path: "owner", select: "email name" },
     });
 
-    FollowUpList.forEach((item, index) => {
-      const obj = {};
-      obj["petName"] = item?.petId?.name;
-      obj["ownerName"] = item?.petId?.owner?.name;
-      obj["email"] = item?.petId?.owner?.email;
-      obj["purpose"] = item?.purpose;
-      obj["date"] = date;
-      obj["time"] = item?.time;
-      obj["species"] = item?.petId?.species;
-      obj["breed"] = item?.petId?.breed;
-      agenda.schedule(`in ${index * 5} seconds`, "send email", obj);
-    });
+    for (const [index, item] of FollowUpList.entries()) {
+      const text = `Hii ${item?.petId?.owner?.name} This is reminder for the visit.\nPet: ${item?.petId?.name}\nDate: ${date}\nTime: ${item?.time}`;
+      await sendMail(item?.petId?.owner?.email, "Reminder for Visit", text).catch(console.log);
+    }
 
-    let birthdayDate = new Date(date);
-
-    let month = birthdayDate.getMonth() + 1;
-    let day = birthdayDate.getDate();
-
+    const birthdayDate = new Date(date);
     const BirthdayList = await Pet.find({
       $expr: {
         $and: [
-          { $eq: [{ $month: "$dob" }, month] },
-          { $eq: [{ $dayOfMonth: "$dob" }, day] },
+          { $eq: [{ $month: "$dob" }, birthdayDate.getMonth() + 1] },
+          { $eq: [{ $dayOfMonth: "$dob" }, birthdayDate.getDate()] },
         ],
       },
-    }).populate({
-      path: "owner",
-      select: "name email",
-    });
+    }).populate({ path: "owner", select: "name email" });
 
-    BirthdayList.forEach((item, index) => {
-      const obj = {};
-      obj["petName"] = item?.name;
-      obj["ownerName"] = item?.owner?.name;
-      obj["email"] = item?.owner?.email;
-      agenda.schedule(`in ${index * 5} seconds`, "birthday email", obj);
-    });
+    for (const item of BirthdayList) {
+      const text = `Hii ${item?.owner?.name}\nHappy Birthday to ${item?.name} 🎂🐾`;
+      await sendMail(item?.owner?.email, `Happy Birthday to ${item?.name}`, text).catch(console.log);
+    }
 
-    return res.status(200).json({
-      success: true,
-      message: "Emails will be sent successfully",
-    });
+    return res.status(200).json({ success: true, message: "Emails sent successfully" });
   } catch (error) {
-    console.log("Error in sendReminders Controller", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
