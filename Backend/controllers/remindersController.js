@@ -169,32 +169,49 @@ exports.sendOverdueReminders = async (req, res) => {
       });
     }
 
+    const Attendance = require("../models/attendance");
     const TempDate = new Date(date);
 
-    const FollowUpList = await ScheduledVisit.find({
-      date: TempDate,
-    }).populate({
-      path: "petId",
-      populate: {
-        path: "owner",
-      },
-    });
+    // Get attendance record for this date
+    const attendanceRecord = await Attendance.findOne({ date: TempDate })
+      .populate({
+        path: "List.petId",
+        populate: { path: "owner", select: "name email phone" },
+      });
 
-    FollowUpList.forEach((item,index) => {
-      if (item?.present === false) {
-        const obj = {};
-        obj["name"] = item?.petId?.name;
-        obj["ownerName"] = item?.petId?.owner?.name;
-        obj["purpose"] = item?.purpose;
-        obj["scheduledDate"] = item?.date;
-        obj["email"] = item?.petId?.owner?.email;
-        agenda.schedule(`in ${index * 5} seconds`, "send overdue email", obj);
-      }
+    if (!attendanceRecord || attendanceRecord.List.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No scheduled pets found for this date",
+      });
+    }
+
+    // Only send to absent pets
+    const absentPets = attendanceRecord.List.filter((item) => item.present === false);
+
+    if (absentPets.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "All pets are present — no reminders needed",
+      });
+    }
+
+    absentPets.forEach((item, index) => {
+      const pet = item.petId;
+      if (!pet?.owner?.email) return;
+      const obj = {
+        name: pet?.name,
+        ownerName: pet?.owner?.name,
+        purpose: item?.purpose || "Scheduled Visit",
+        date,
+        email: pet?.owner?.email,
+      };
+      agenda.schedule(`in ${index * 5} seconds`, "send overdue email", obj);
     });
 
     return res.status(200).json({
       success: true,
-      message: "Emails will be sent successfully",
+      message: `Reminders sent to ${absentPets.length} absent pet(s)`,
     });
   } catch (error) {
     console.log("Error in sendoverduereminders Controller", error);

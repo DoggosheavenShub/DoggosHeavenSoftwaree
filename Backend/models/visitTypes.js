@@ -56,6 +56,12 @@ const visitTypeSchema = new mongoose.Schema(
         value: { type: String, default: "" },
       },
     ],
+    priceTiers: [
+      {
+        label: { type: String, required: true },
+        price: { type: Number, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -120,4 +120,28 @@ router.get("/mystats", async (req, res) => {
   }
 });
 
+// Service action notifications for admin
+router.get("/servicenotifications", async (req, res) => {
+  try {
+    const Alert = require('../models/alert');
+    const alerts = await Alert.find({ alertType: 'serviceAction' })
+      .sort({ alertDate: -1 })
+      .limit(50);
+    const unreadCount = await Alert.countDocuments({ alertType: 'serviceAction', isRead: false });
+    res.status(200).json({ success: true, alerts, unreadCount });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+router.patch("/servicenotifications/markallread", async (req, res) => {
+  try {
+    const Alert = require('../models/alert');
+    await Alert.updateMany({ alertType: 'serviceAction', isRead: false }, { isRead: true });
+    res.status(200).json({ success: true, message: "All notifications marked as read" });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;

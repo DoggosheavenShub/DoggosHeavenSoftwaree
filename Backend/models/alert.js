@@ -3,22 +3,37 @@ const mongoose = require('mongoose');
 const alertSchema = new mongoose.Schema({
   alertType: {
     type: String,
-    enum: ['inventoryStock', 'vaccinationDue'],
+    enum: ['inventoryStock', 'vaccinationDue', 'serviceAction'],
     required: true,
   },
   itemName: {
-    type: String, 
+    type: String,
   },
   stockUnit: {
-    type: Number, 
+    type: Number,
   },
   threshold: {
-    type: Number, 
+    type: Number,
     default: 100,
   },
   petInfo: {
-    type: mongoose.Schema.Types.ObjectId, 
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Pet',
+  },
+  // service action fields
+  action: {
+    type: String,
+    enum: ['added', 'updated', 'deleted'],
+  },
+  serviceName: {
+    type: String,
+  },
+  performedBy: {
+    type: String,
+  },
+  isRead: {
+    type: Boolean,
+    default: false,
   },
   alertDate: {
     type: Date,

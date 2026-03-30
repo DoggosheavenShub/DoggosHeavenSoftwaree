@@ -9,20 +9,14 @@ exports.protectedRoute = async (req, res, next) => {
       return res.status(401).json({ success: false, status: 401, message: "Unauthorized - Access" });
     }
 
-    const decoded = jwt.decode(token);
-    if (!decoded) {
-      return res.status(401).json({ success: false, status: 401, message: "Invalid token format" });
-    }
-
-    const exp = decoded.exp;
-    if (exp && exp < Math.floor(Date.now() / 1000)) {
-      return res.status(401).json({ success: false, status: 401, message: "Session expired, please log in again" });
-    }
-
-    const verifiedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-    if (!verifiedToken) {
-      return res.status(401).json({ success: false, status: 401, message: "Unauthorized - Access" });
+    let verifiedToken;
+    try {
+      verifiedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({ success: false, status: 401, message: "Session expired, please log in again" });
+      }
+      return res.status(401).json({ success: false, status: 401, message: "Invalid token" });
     }
 
     const user = await User.findOne({
