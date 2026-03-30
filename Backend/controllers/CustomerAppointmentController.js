@@ -133,6 +133,7 @@ const createAppointment = async (req, res) => {
         alertType: 'newBooking',
         serviceName: `${serviceName || 'Service'} for ${petName}`,
         performedBy: customer.name || customer.fullName || 'Customer',
+        forRole: 'staff',
       });
     } catch (_) {}
 

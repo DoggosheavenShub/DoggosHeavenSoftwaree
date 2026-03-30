@@ -35,6 +35,11 @@ const alertSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  forRole: {
+    type: String,
+    enum: ['admin', 'staff', 'both'],
+    default: 'admin',
+  },
   alertDate: {
     type: Date,
     default: Date.now,

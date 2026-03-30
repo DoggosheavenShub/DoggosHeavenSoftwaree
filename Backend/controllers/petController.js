@@ -65,6 +65,7 @@ exports.addPet = async (req, res) => {
         alertType: 'newPet',
         serviceName: petNames,
         performedBy: ownerName || 'Staff',
+        forRole: 'admin',
       });
     } catch (_) {}
 
