@@ -222,7 +222,9 @@ exports.getFilteredPetsByNameAndPhone = async (req, res) => {
       {
         $project: {
           name: 1,
-          owner: { name: 1 }, // include owner name only
+          species: 1,
+          breed: 1,
+          owner: { name: 1, phone: 1, email: 1 },
         },
       },
     ];

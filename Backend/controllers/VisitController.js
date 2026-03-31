@@ -13,9 +13,46 @@ const utc = require("dayjs/plugin/utc");
 const timezone = require("dayjs/plugin/timezone");
 const VisitType = require("../models/visitTypes");
 const SubscriptionPlan = require("../models/subscriptionPlan");
+const nodemailer = require("nodemailer");
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+const sendVisitNotification = async (petId, purpose) => {
+  try {
+    const pet = await Pet.findById(petId).populate("owner", "name email phone");
+    if (!pet?.owner?.email) return;
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      secure: true,
+      port: 465,
+      auth: { user: process.env.GMAIL_ACCOUNT, pass: process.env.GMAIL_APP_PASSWORD },
+    });
+    const date = dayjs().tz("Asia/Kolkata").format("DD MMM YYYY, hh:mm A");
+    await transporter.sendMail({
+      from: process.env.GMAIL_ACCOUNT,
+      to: pet.owner.email,
+      subject: `Visit Recorded — ${pet.name} at Doggos Heaven`,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden">
+        <div style="background:#0B3D2E;padding:20px 24px">
+          <h2 style="color:#A8D96C;margin:0">🐾 Doggos Heaven</h2>
+        </div>
+        <div style="padding:24px">
+          <p style="font-size:16px">Hi <strong>${pet.owner.name}</strong>,</p>
+          <p>A visit has been recorded for your pet <strong>${pet.name}</strong>.</p>
+          <table style="width:100%;border-collapse:collapse;margin-top:12px">
+            <tr><td style="padding:8px;background:#f5f5f5;border-radius:6px"><strong>Pet</strong></td><td style="padding:8px">${pet.name}</td></tr>
+            <tr><td style="padding:8px;background:#f5f5f5;border-radius:6px"><strong>Purpose</strong></td><td style="padding:8px">${purpose}</td></tr>
+            <tr><td style="padding:8px;background:#f5f5f5;border-radius:6px"><strong>Date &amp; Time</strong></td><td style="padding:8px">${date}</td></tr>
+          </table>
+          <p style="margin-top:20px;color:#666;font-size:13px">If you have any questions, please contact us.</p>
+        </div>
+      </div>`,
+    });
+  } catch (e) {
+    console.log("Visit notification email error:", e.message);
+  }
+};
 
 exports.addVisit = async (req, res) => {
   const session = await mongoose.startSession();
@@ -537,6 +574,8 @@ exports.addInquiryVisit = async (req, res) => {
 
     await session.commitTransaction();
 
+    sendVisitNotification(petId, "Inquiry").catch(() => {});
+
     return res.json({
       success: true,
       message: "Inquiry visit saved successfully",
@@ -601,6 +640,8 @@ exports.addDogParkVisit = async (req, res) => {
 
     await session.commitTransaction();
 
+    sendVisitNotification(petId, "Dog Park").catch(() => {});
+
     return res.json({
       success: true,
       message: `Pet has been added in visits successfully`,
@@ -657,6 +698,9 @@ exports.addVeterinaryVisit = async (req, res) => {
     await visit.save({ session });
 
     await session.commitTransaction();
+
+    sendVisitNotification(petId, "Veterinary").catch(() => {});
+
     return res.json({
       success: true,
       message: "Veterinary visit saved successfully",
@@ -742,6 +786,8 @@ exports.addHostelVisit = async (req, res) => {
     await boarding.save({ session });
     await session.commitTransaction();
 
+    sendVisitNotification(petId, "Hostel").catch(() => {});
+
     const timeRightNow = dayjs(boarding.entryTime)
       .tz("Asia/Kolkata")
       .format("DD MM YYYY HH:mm:ss");
@@ -820,6 +866,8 @@ exports.addDayCareVisit = async (req, res) => {
     await boarding.save({ session });
 
     await session.commitTransaction();
+
+    sendVisitNotification(petId, "Day Care").catch(() => {});
 
     return res.json({
       success: true,
@@ -907,6 +955,8 @@ exports.addDaySchoolVisit = async (req, res) => {
     await boarding.save({ session });
     await session.commitTransaction();
 
+    sendVisitNotification(petId, "Day School").catch(() => {});
+
     return res.json({
       success: true,
       message: "Day School visit saved successfully",
@@ -992,6 +1042,8 @@ exports.addPlaySchoolVisit = async (req, res) => {
 
     await boarding.save({ session });
     await session.commitTransaction();
+
+    sendVisitNotification(petId, "Play School").catch(() => {});
 
     return res.json({
       success: true,
@@ -1247,6 +1299,9 @@ exports.addGroomingVisit = async (req, res) => {
     await visit.save({ session });
 
     await session.commitTransaction();
+
+    sendVisitNotification(petId, "Grooming").catch(() => {});
+
     return res.json({
       success: true,
       message: "Grooming visit saved successfully",
@@ -1352,6 +1407,8 @@ exports.addShoppingVisit = async (req, res) => {
     });
 
     await newVisit.save();
+
+    sendVisitNotification(petId, "Shop").catch(() => {});
 
     return res.json({
       success: true,
