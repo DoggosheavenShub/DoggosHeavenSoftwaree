@@ -511,6 +511,8 @@ exports.addInquiryVisit = async (req, res) => {
       followUpPurpose,
       nextFollowUp,
       followUpTime,
+      customerType,
+      details: incomingDetails,
     } = req.body;
 
     if (!petId) {
@@ -557,8 +559,12 @@ exports.addInquiryVisit = async (req, res) => {
 
     // Create a new visit record
     const details = {};
-    details.note = note;
-    details.price = 0;
+    details.note = note || incomingDetails?.note || "";
+    details.price = incomingDetails?.price || 0;
+    details.discount = incomingDetails?.discount || 0;
+    details.finalPrice = incomingDetails?.finalPrice || 0;
+    details.customerType = customerType || incomingDetails?.customerType || "";
+    details.selectedPayment = incomingDetails?.selectedPayment || "cash";
     const visit = new Visit({
       pet: petId,
       visitType,
@@ -598,7 +604,7 @@ exports.addDogParkVisit = async (req, res) => {
   try {
     const { petId, visitType, details: details_new } = req.body;
 
-    const {discount}=details_new
+    const { discount } = details_new;
 
     if (!petId) {
       return res.json({
@@ -1155,6 +1161,12 @@ exports.getVisitList = async (req, res) => {
         },
       },
       { $unwind: "$pet.owner" },
+      {
+        $addFields: {
+          "pet.owner.phone": "$pet.owner.phone",
+          "pet.owner.email": "$pet.owner.email",
+        },
+      },
       {
         $match: {
           ...query,
