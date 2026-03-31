@@ -175,7 +175,9 @@ exports.editInventory = async (req, res) => {
       medicineName,
       brandName,
       saltName,
-    } = req.body; {
+    } = req.body;
+
+    if (!_id) {
       return res.status(400).json({
         success: false,
         message: "Item ID is required",
