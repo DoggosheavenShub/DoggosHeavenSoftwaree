@@ -9,6 +9,7 @@ const {
   getAppointmentById,
   getCustomerPetss,
   getNotifications,
+  markVisitNotificationsRead,
   confirmAppointment,
   verifyAppointmentPayment,
   createPaymentOrder,
@@ -23,6 +24,7 @@ router.get('/getaappointbyid/:id', getAppointmentById);
 router.patch('/updateappoint/:id/status', updateAppointmentStatus);
 router.delete('/cancelappoint/:id', cancelAppointment);
 router.get('/notifications/:customerId', getNotifications);
+router.patch('/notifications/:customerId/markread', markVisitNotificationsRead);
 router.patch('/confirmappoint/:id', confirmAppointment);
 router.post('/verifypayment', verifyAppointmentPayment);
 router.post('/createpaymentorder', createPaymentOrder);

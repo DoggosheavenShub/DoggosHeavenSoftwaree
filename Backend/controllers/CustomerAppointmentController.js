@@ -5,6 +5,7 @@ const Pet = require('../models/pet');
 const Owner = require('../models/Owner');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const VisitNotification = require('../models/VisitNotification');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -348,12 +349,11 @@ const getNotifications = async (req, res) => {
     const customer = await User.findById(customerId);
     if (!customer) return res.status(404).json({ success: false, message: "Customer not found" });
 
+    // Appointment-based notifications
     const appointments = await Appointment.find({ customerId }).sort({ updatedAt: -1 }).limit(20);
-
-    const notifications = appointments.map((appt) => {
+    const apptNotifs = appointments.map((appt) => {
       const date = new Date(appt.appointmentDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
       let title, body, type;
-
       switch (appt.status) {
         case "confirmed":
           title = "Booking Confirmed! ✅";
@@ -377,22 +377,49 @@ const getNotifications = async (req, res) => {
           body = `Your ${appt.serviceName} request for ${appt.petName} on ${date} is pending confirmation from our team.`;
           type = "pending";
       }
-
       return {
         id: appt._id,
-        title,
-        body,
-        type,
+        title, body, type,
         time: appt.updatedAt,
         amount: appt.totalAmount,
         paymentStatus: appt.paymentStatus,
         read: false,
+        source: "appointment",
       };
     });
 
-    res.status(200).json({ success: true, notifications });
+    // Visit-based notifications
+    const visitNotifs = await VisitNotification.find({ userId: customerId }).sort({ createdAt: -1 }).limit(30);
+    const visitNotifsMapped = visitNotifs.map((vn) => ({
+      id: vn._id,
+      title: vn.title,
+      body: vn.body,
+      type: "visit",
+      time: vn.createdAt,
+      amount: 0,
+      paymentStatus: null,
+      read: vn.read,
+      source: "visit",
+    }));
+
+    // Merge and sort by time desc
+    const all = [...apptNotifs, ...visitNotifsMapped].sort(
+      (a, b) => new Date(b.time) - new Date(a.time)
+    );
+
+    res.status(200).json({ success: true, notifications: all });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error fetching notifications", error: error.message });
+  }
+};
+
+const markVisitNotificationsRead = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    await VisitNotification.updateMany({ userId: customerId, read: false }, { read: true });
+    res.status(200).json({ success: true, message: "Marked as read" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -509,6 +536,7 @@ module.exports = {
   getAppointmentById,
   getCustomerPetss,
   getNotifications,
+  markVisitNotificationsRead,
   confirmAppointment,
   verifyAppointmentPayment,
   createPaymentOrder,

@@ -18,10 +18,27 @@ const nodemailer = require("nodemailer");
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const VisitNotification = require("../models/VisitNotification");
+const User = require("../models/user");
+
 const sendVisitNotification = async (petId, purpose) => {
   try {
     const pet = await Pet.findById(petId).populate("owner", "name email phone");
     if (!pet?.owner?.email) return;
+
+    // Find the app User by owner email to save in-app notification
+    const appUser = await User.findOne({ email: pet.owner.email, role: "customer" });
+    if (appUser) {
+      await VisitNotification.create({
+        userId: appUser._id,
+        title: `Visit Recorded — ${pet.name} 🐾`,
+        body: `A ${purpose} visit has been recorded for ${pet.name}. Visit us again soon!`,
+        petName: pet.name,
+        purpose,
+      });
+    }
+
+    // Send email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       secure: true,
@@ -48,9 +65,9 @@ const sendVisitNotification = async (petId, purpose) => {
           <p style="margin-top:20px;color:#666;font-size:13px">If you have any questions, please contact us.</p>
         </div>
       </div>`,
-    });
+    }).catch((e) => console.log("Visit email error:", e.message));
   } catch (e) {
-    console.log("Visit notification email error:", e.message);
+    console.log("Visit notification error:", e.message);
   }
 };
 
