@@ -55,6 +55,7 @@ router.delete("/deletevisittype/:id", protectedRoute, async (req, res) => {
 router.get("/getboardingcategories",protectedRoute,getBoardingCategoryList);
 router.post("/updatehostelvisit",protectedRoute,updateHostelVisit);
 router.get("/getvisitdetails/:id",protectedRoute,getVisitDetails);
+router.get("/getvisitdetailspublic/:id", getVisitDetails);
 router.get("/buyy/:id",protectedRoute,buyy);
 router.get("/getparticularpetvisit",protectedRoute,getParticularPetVisit);
 

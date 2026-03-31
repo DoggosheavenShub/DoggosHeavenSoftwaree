@@ -21,20 +21,20 @@ dayjs.extend(timezone);
 const VisitNotification = require("../models/VisitNotification");
 const User = require("../models/user");
 
-const sendVisitNotification = async (petId, purpose) => {
+const sendVisitNotification = async (petId, purpose, visitId = null) => {
   try {
     const pet = await Pet.findById(petId).populate("owner", "name email phone");
     if (!pet?.owner?.email) return;
 
-    // Find the app User by owner email to save in-app notification
     const appUser = await User.findOne({ email: pet.owner.email, role: "customer" });
     if (appUser) {
       await VisitNotification.create({
         userId: appUser._id,
-        title: `Visit Recorded — ${pet.name} 🐾`,
-        body: `A ${purpose} visit has been recorded for ${pet.name}. Visit us again soon!`,
+        title: `${purpose} Visit Recorded — ${pet.name} 🐾`,
+        body: `A ${purpose} visit has been recorded for ${pet.name}. Tap to view details.`,
         petName: pet.name,
         purpose,
+        visitId: visitId || null,
       });
     }
 
@@ -597,7 +597,7 @@ exports.addInquiryVisit = async (req, res) => {
 
     await session.commitTransaction();
 
-    sendVisitNotification(petId, "Inquiry").catch(() => {});
+    sendVisitNotification(petId, "Inquiry", visit._id).catch(() => {});
 
     return res.json({
       success: true,
@@ -663,7 +663,7 @@ exports.addDogParkVisit = async (req, res) => {
 
     await session.commitTransaction();
 
-    sendVisitNotification(petId, "Dog Park").catch(() => {});
+    sendVisitNotification(petId, "Dog Park", visit._id).catch(() => {});
 
     return res.json({
       success: true,
@@ -722,7 +722,7 @@ exports.addVeterinaryVisit = async (req, res) => {
 
     await session.commitTransaction();
 
-    sendVisitNotification(petId, "Veterinary").catch(() => {});
+    sendVisitNotification(petId, "Veterinary", visit._id).catch(() => {});
 
     return res.json({
       success: true,
@@ -809,7 +809,7 @@ exports.addHostelVisit = async (req, res) => {
     await boarding.save({ session });
     await session.commitTransaction();
 
-    sendVisitNotification(petId, "Hostel").catch(() => {});
+    sendVisitNotification(petId, "Hostel", visit._id).catch(() => {});
 
     const timeRightNow = dayjs(boarding.entryTime)
       .tz("Asia/Kolkata")
@@ -890,7 +890,7 @@ exports.addDayCareVisit = async (req, res) => {
 
     await session.commitTransaction();
 
-    sendVisitNotification(petId, "Day Care").catch(() => {});
+    sendVisitNotification(petId, "Day Care", visit._id).catch(() => {});
 
     return res.json({
       success: true,
@@ -978,7 +978,7 @@ exports.addDaySchoolVisit = async (req, res) => {
     await boarding.save({ session });
     await session.commitTransaction();
 
-    sendVisitNotification(petId, "Day School").catch(() => {});
+    sendVisitNotification(petId, "Day School", visit._id).catch(() => {});
 
     return res.json({
       success: true,
@@ -1066,7 +1066,7 @@ exports.addPlaySchoolVisit = async (req, res) => {
     await boarding.save({ session });
     await session.commitTransaction();
 
-    sendVisitNotification(petId, "Play School").catch(() => {});
+    sendVisitNotification(petId, "Play School", visit._id).catch(() => {});
 
     return res.json({
       success: true,
@@ -1329,7 +1329,7 @@ exports.addGroomingVisit = async (req, res) => {
 
     await session.commitTransaction();
 
-    sendVisitNotification(petId, "Grooming").catch(() => {});
+    sendVisitNotification(petId, "Grooming", visit._id).catch(() => {});
 
     return res.json({
       success: true,
@@ -1437,7 +1437,7 @@ exports.addShoppingVisit = async (req, res) => {
 
     await newVisit.save();
 
-    sendVisitNotification(petId, "Shop").catch(() => {});
+    sendVisitNotification(petId, "Shop", newVisit._id).catch(() => {});
 
     return res.json({
       success: true,

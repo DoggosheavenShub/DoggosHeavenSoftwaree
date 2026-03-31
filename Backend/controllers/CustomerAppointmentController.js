@@ -400,6 +400,9 @@ const getNotifications = async (req, res) => {
       paymentStatus: null,
       read: vn.read,
       source: "visit",
+      visitId: vn.visitId || null,
+      purpose: vn.purpose || "",
+      petName: vn.petName || "",
     }));
 
     // Merge and sort by time desc
