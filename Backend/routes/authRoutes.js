@@ -5,30 +5,25 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
 
-// Load logo as Buffer once at startup (for CID embedding)
-let _logoBuffer = null;
-const getLogoBuffer = () => {
-  if (_logoBuffer) return _logoBuffer;
+// Upload logo to Cloudinary and cache the URL
+let _logoUrl = null;
+const getLogoUrl = async () => {
+  if (_logoUrl) return _logoUrl;
   try {
+    const { cloudinary } = require('../config/cloudinary');
     const logoPath = path.join(__dirname, '..', 'assets', 'doggoswhite.png');
     if (fs.existsSync(logoPath)) {
-      _logoBuffer = fs.readFileSync(logoPath);
+      const result = await cloudinary.uploader.upload(logoPath, {
+        public_id: 'doggosheaven/email_logo',
+        overwrite: true,
+        resource_type: 'image',
+      });
+      _logoUrl = result.secure_url;
     }
-  } catch (_) {}
-  return _logoBuffer;
-};
-
-// Load logo base64 once at startup
-let _logoBase64 = null;
-const getLogoBase64 = () => {
-  if (_logoBase64) return _logoBase64;
-  try {
-    const logoPath = path.join(__dirname, '..', 'assets', 'doggoswhite.png');
-    if (fs.existsSync(logoPath)) {
-      _logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
-    }
-  } catch (_) {}
-  return _logoBase64;
+  } catch (e) {
+    console.log('Logo upload to cloudinary failed:', e.message);
+  }
+  return _logoUrl;
 };
 
 const router = express.Router();
@@ -41,9 +36,9 @@ const transporter = nodemailer.createTransport({
   auth: { user: process.env.GMAIL_ACCOUNT, pass: process.env.GMAIL_APP_PASSWORD },
 });
 
-const buildOtpEmail = (otp, name, hasCid) => {
-  const logoHtml = hasCid
-    ? `<img src="cid:doggoslogo" width="72" height="72" style="border-radius:14px;display:block;margin:0 auto 12px auto;background:#0B3D2E;padding:8px" alt="Doggos Heaven" />`
+const buildOtpEmail = (otp, name, logoUrl) => {
+  const logoHtml = logoUrl
+    ? `<img src="${logoUrl}" width="72" height="72" style="border-radius:14px;display:block;margin:0 auto 12px auto;background:#0B3D2E;padding:8px" alt="Doggos Heaven" />`
     : `<div style="width:72px;height:72px;border-radius:14px;background:rgba(168,217,108,0.15);display:inline-block;text-align:center;line-height:72px;margin-bottom:12px"><span style="font-size:36px">🐾</span></div>`;
   return `
 <!DOCTYPE html>
@@ -142,21 +137,16 @@ router.post("/forgot-password/send-otp", async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const key = email.toLowerCase().trim();
     otpStore[key] = { otp, expiresAt: Date.now() + 10 * 60 * 1000, role };
+    console.log('OTP stored for key:', key, '| otp:', otp, '| store keys:', Object.keys(otpStore));
 
-    // Build email with CID logo if available
-    const logoBuffer = getLogoBuffer();
-    const attachments = logoBuffer ? [{
-      filename: 'logo.png',
-      content: logoBuffer,
-      cid: 'doggoslogo',
-    }] : [];
+    // Get logo URL from Cloudinary
+    const logoUrl = await getLogoUrl();
 
     await transporter.sendMail({
       from: `"Doggos Heaven" <${process.env.GMAIL_ACCOUNT}>`,
       to: email,
       subject: '🔐 Your Password Reset OTP — Doggos Heaven',
-      html: buildOtpEmail(otp, userName, !!logoBuffer),
-      attachments,
+      html: buildOtpEmail(otp, userName, logoUrl),
     });
 
     res.status(200).json({ success: true, message: 'OTP sent to your email.' });
@@ -170,6 +160,8 @@ router.post("/forgot-password/send-otp", async (req, res) => {
 router.post("/forgot-password/verify-otp", (req, res) => {
   const { email, otp } = req.body;
   const key = email?.toLowerCase().trim();
+  console.log('verify-otp called, key:', key, '| otp:', otp);
+  console.log('otpStore keys:', Object.keys(otpStore));
   const record = otpStore[key];
   if (!record) return res.status(400).json({ success: false, message: 'OTP not found. Please request a new one.' });
   if (Date.now() > record.expiresAt) {
