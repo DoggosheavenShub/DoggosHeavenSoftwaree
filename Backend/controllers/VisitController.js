@@ -38,6 +38,18 @@ const sendVisitNotification = async (petId, purpose, visitId = null) => {
       });
     }
 
+    // Admin alert
+    try {
+      const Alert = require("../models/alert");
+      await Alert.create({
+        alertType: "newVisit",
+        serviceName: `${purpose} visit for ${pet.name}`,
+        performedBy: "Staff",
+        visitId: visitId || null,
+        forRole: "admin",
+      });
+    } catch (_) {}
+
     // Send email
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -1474,5 +1486,37 @@ exports.getParticularPetVisit = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+exports.deleteVisit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const visit = await Visit.findByIdAndDelete(id);
+    if (!visit) return res.status(404).json({ success: false, message: "Visit not found" });
+    return res.json({ success: true, message: "Visit deleted successfully" });
+  } catch (error) {
+    console.log("error in deleteVisit", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.updateVisit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { details, note, nextFollowUp, followUpTime, followUpPurpose } = req.body;
+    const update = {};
+    if (details) update.details = details;
+    if (note) update["details.note"] = note;
+    if (nextFollowUp && followUpTime) update.nextFollowUp = new Date(`${nextFollowUp}T${followUpTime}`);
+    if (followUpPurpose) update.followUpPurpose = followUpPurpose;
+    const visit = await Visit.findByIdAndUpdate(id, { $set: update }, { new: true })
+      .populate({ path: "pet", populate: { path: "owner" } })
+      .populate("visitType");
+    if (!visit) return res.status(404).json({ success: false, message: "Visit not found" });
+    return res.json({ success: true, message: "Visit updated successfully", visit });
+  } catch (error) {
+    console.log("error in updateVisit", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

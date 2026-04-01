@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Visit = require("../models/Visit");
 const { DateTime } = require("luxon");
 const Boarding = require("../models/boarding");
+const { cloudinary } = require("../config/cloudinary");
 
 exports.addPet = async (req, res) => {
   
@@ -11,9 +12,9 @@ exports.addPet = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { pets, ownerName, phone, email, address } = req.body;
+    const { ownerName, phone, email, address } = req.body;
+    const pets = typeof req.body.pets === "string" ? JSON.parse(req.body.pets) : req.body.pets;
 
-    
     let owner = await Owner.findOne({ email });
 
     if (!owner) {
@@ -29,11 +30,29 @@ exports.addPet = async (req, res) => {
         ],
         { session }
       );
-      owner = owner[0]; 
+      owner = owner[0];
     }
 
+    // Upload pet photos to Cloudinary if provided
+    const photoUrls = {};
+    if (req.files) {
+      await Promise.all(
+        Object.entries(req.files).map(async ([key, fileArr]) => {
+          const match = key.match(/^photo_(\d+)$/);
+          if (!match) return;
+          const idx = parseInt(match[1]);
+          const file = Array.isArray(fileArr) ? fileArr[0] : fileArr;
+          const dataUri = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+          const result = await cloudinary.uploader.upload(dataUri, {
+            folder: "doggosheaven/pets",
+            transformation: [{ width: 400, height: 400, crop: "fill" }],
+          });
+          photoUrls[idx] = result.secure_url;
+        })
+      );
+    }
 
-    const petDocuments = pets.map((pet) => ({
+    const petDocuments = pets.map((pet, idx) => ({
       name: pet.name,
       species: pet.species,
       breed: pet.breed,
@@ -44,6 +63,7 @@ exports.addPet = async (req, res) => {
       vaccinations: pet.vaccinations || [],
       neutered: pet.neutered,
       registrationDate: pet.registrationDate,
+      image: photoUrls[idx] || null,
     }));
 
     console.log(petDocuments);

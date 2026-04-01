@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const alertSchema = new mongoose.Schema({
   alertType: {
     type: String,
-    enum: ['inventoryStock', 'vaccinationDue', 'serviceAction', 'newBooking', 'newPet'],
+    enum: ['inventoryStock', 'vaccinationDue', 'serviceAction', 'newBooking', 'newPet', 'newVisit'],
     required: true,
   },
   itemName: {
@@ -34,6 +34,11 @@ const alertSchema = new mongoose.Schema({
   appointmentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Appointment',
+    default: null,
+  },
+  visitId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Visit',
     default: null,
   },
   isRead: {
