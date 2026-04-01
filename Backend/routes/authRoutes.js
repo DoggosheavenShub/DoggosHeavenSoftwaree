@@ -2,6 +2,21 @@ const express = require('express');
 const { login, signUp, adminSignUp, changePassword, updateProfile } = require('../controllers/authController');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
+
+// Load logo base64 once at startup
+let _logoBase64 = null;
+const getLogoBase64 = () => {
+  if (_logoBase64) return _logoBase64;
+  try {
+    const logoPath = path.join(__dirname, '..', 'assets', 'doggoswhite.png');
+    if (fs.existsSync(logoPath)) {
+      _logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
+    }
+  } catch (_) {}
+  return _logoBase64;
+};
 
 const router = express.Router();
 
@@ -13,7 +28,12 @@ const transporter = nodemailer.createTransport({
   auth: { user: process.env.GMAIL_ACCOUNT, pass: process.env.GMAIL_APP_PASSWORD },
 });
 
-const buildOtpEmail = (otp, name) => `
+const buildOtpEmail = (otp, name) => {
+  const logoSrc = getLogoBase64();
+  const logoHtml = logoSrc
+    ? `<img src="${logoSrc}" width="64" height="64" style="border-radius:12px;display:block;object-fit:contain;background:#0B3D2E;padding:6px" alt="Doggos Heaven" />`
+    : `<div style="width:64px;height:64px;border-radius:16px;background:rgba(168,217,108,0.15);display:inline-flex;align-items:center;justify-content:center"><span style="font-size:36px">🐾</span></div>`;
+  return `
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -25,8 +45,8 @@ const buildOtpEmail = (otp, name) => `
         <!-- Header -->
         <tr>
           <td style="background:linear-gradient(135deg,#0B3D2E 0%,#1A5C3A 100%);padding:32px 32px 24px;text-align:center">
-            <div style="width:64px;height:64px;background:rgba(168,217,108,0.15);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
-              <span style="font-size:36px">🐾</span>
+            <div style="margin-bottom:12px;display:inline-block">
+              ${logoHtml}
             </div>
             <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:0.5px">Doggos Heaven</h1>
             <p style="margin:6px 0 0;color:#A8D96C;font-size:13px">Premium Pet Care Services</p>
@@ -76,6 +96,7 @@ const buildOtpEmail = (otp, name) => `
   </table>
 </body>
 </html>`;
+};
 
 // Send OTP
 router.post("/forgot-password/send-otp", async (req, res) => {
