@@ -51,6 +51,22 @@ const petSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    isBlacklisted: {
+      type: Boolean,
+      default: false,
+    },
+    blacklistReason: {
+      type: String,
+      default: "",
+    },
+    blacklistedAt: {
+      type: Date,
+      default: null,
+    },
+    blacklistedBy: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

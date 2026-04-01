@@ -244,6 +244,8 @@ exports.getFilteredPetsByNameAndPhone = async (req, res) => {
           name: 1,
           species: 1,
           breed: 1,
+          isBlacklisted: 1,
+          blacklistReason: 1,
           owner: { name: 1, phone: 1, email: 1 },
         },
       },
@@ -515,4 +517,58 @@ exports.editOwnerDetails = async (req, res) => {
       message: "Failed to save information",
     });
   } 
+};
+
+// ── Blacklist / Unblacklist a pet ─────────────────────────────────────────────
+exports.toggleBlacklist = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isBlacklisted, blacklistReason } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res.status(400).json({ success: false, message: "Invalid pet ID" });
+
+    const staffName = req.user?.fullName || req.user?.name || "Staff";
+
+    const pet = await Pet.findByIdAndUpdate(
+      id,
+      {
+        isBlacklisted,
+        blacklistReason: isBlacklisted ? blacklistReason || "" : "",
+        blacklistedAt: isBlacklisted ? new Date() : null,
+        blacklistedBy: isBlacklisted ? staffName : "",
+      },
+      { new: true }
+    ).populate("owner", "name phone email address");
+
+    if (!pet)
+      return res.status(404).json({ success: false, message: "Pet not found" });
+
+    return res.status(200).json({
+      success: true,
+      message: isBlacklisted ? "Pet blacklisted successfully" : "Pet removed from blacklist",
+      pet,
+    });
+  } catch (error) {
+    console.log("Error in toggleBlacklist:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ── Get all blacklisted pets ──────────────────────────────────────────────────
+exports.getBlacklistedPets = async (req, res) => {
+  try {
+    const pets = await Pet.find({ isBlacklisted: true })
+      .populate("owner", "name phone email address")
+      .sort({ blacklistedAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: pets.length,
+      pets,
+    });
+  } catch (error) {
+    console.log("Error in getBlacklistedPets:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
 };

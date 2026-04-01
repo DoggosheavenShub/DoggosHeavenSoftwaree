@@ -10,7 +10,9 @@ const {
   getPetByBirthday,
   getBoardedPetList,
   editPetDetails,
-  editOwnerDetails
+  editOwnerDetails,
+  toggleBlacklist,
+  getBlacklistedPets,
 } = require("../controllers/petController");
 const router = express.Router();
 const { protectedRoute } = require("../middlewares/protectedRoute");
@@ -25,6 +27,8 @@ router.get("/getfilteredpetsbynameandphone",protectedRoute, getFilteredPetsByNam
 router.get("/getpethistory/:petId",protectedRoute, getPetVisitHistory);
 router.get("/getpetsbybirthday",protectedRoute,getPetByBirthday);
 router.get("/getboardedpetslist",protectedRoute,getBoardedPetList);
+router.get("/blacklisted",protectedRoute, getBlacklistedPets);
 router.post("/editpetdetails",protectedRoute,editPetDetails);
-router.post("/editownerdetails",protectedRoute,editOwnerDetails)
+router.post("/editownerdetails",protectedRoute,editOwnerDetails);
+router.patch("/blacklist/:id",protectedRoute, toggleBlacklist);
 module.exports = router;
