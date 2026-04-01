@@ -145,7 +145,7 @@ const createAppointment = async (req, res) => {
     });
 
     const populatedAppointment = await Appointment.findById(appointment._id)
-      .populate('customerId', 'name email phone')
+      .populate('customerId', 'fullName email phone')
       .populate('serviceId', 'name price duration category');
 
     res.status(201).json({
@@ -183,7 +183,7 @@ const getCustomerAppointments = async (req, res) => {
 
     const appointments = await Appointment.find({ customerId })
       .populate('serviceId', 'name price duration category')
-      .populate('customerId', 'name email phone')
+      .populate('customerId', 'fullName email phone')
       .sort({ appointmentDate: -1, appointmentTime: -1 });
 
     res.status(200).json({
@@ -251,7 +251,7 @@ const updateAppointmentStatus = async (req, res) => {
       updateData,
       { new: true }
     ).populate('serviceId', 'name price duration category')
-     .populate('customerId', 'name email phone');
+     .populate('customerId', 'name fullName email phone');
 
     if (!appointment) {
       return res.status(404).json({
@@ -334,7 +334,7 @@ const cancelAppointment = async (req, res) => {
 
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate('serviceId', 'name price duration category')
-      .populate('customerId', 'name email phone');
+      .populate('customerId', 'fullName email phone');
 
     res.status(200).json({
       success: true,
@@ -357,7 +357,7 @@ const getAppointmentById = async (req, res) => {
 
     const appointment = await Appointment.findById(id)
       .populate('serviceId', 'name price duration category')
-      .populate('customerId', 'name email phone');
+      .populate('customerId', 'fullName email phone');
 
     if (!appointment) {
       return res.status(404).json({
