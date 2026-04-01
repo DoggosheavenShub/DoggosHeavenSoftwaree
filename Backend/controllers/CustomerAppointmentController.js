@@ -561,13 +561,10 @@ const createPaymentOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Already paid' });
     }
 
-    // Reuse existing order if available
+    // Clear old order if amount changed (GST recalculation)
     if (appointment.razorpayOrderId) {
-      return res.status(200).json({
-        success: true,
-        order: { id: appointment.razorpayOrderId },
-        key: process.env.RAZORPAY_KEY_ID,
-      });
+      // Always create fresh order to ensure correct GST-inclusive amount
+      appointment.razorpayOrderId = null;
     }
 
     const order = await razorpay.orders.create({

@@ -270,25 +270,43 @@ router.get("/staffdetails/:id", async (req, res) => {
     const Visit = require('../models/Visit');
     const Boarding = require('../models/boarding');
     const VisitType = require('../models/visitTypes');
+    const Appointment = require('../models/Customerapointment');
+    const Inventory = require('../models/inventory');
+    const Pet = require('../models/pet');
 
     const staff = await User.findById(req.params.id).select('-password');
     if (!staff) return res.status(404).json({ success: false, message: "Staff not found" });
 
     const staffVisits = await Visit.find({ createdBy: staff._id })
       .sort({ createdAt: -1 })
-      .limit(20)
+      .limit(50)
       .populate({ path: 'pet', select: 'name', populate: { path: 'owner', select: 'name' } })
       .populate({ path: 'visitType', select: 'purpose emoji' });
 
     const totalVisits = await Visit.countDocuments({ createdBy: staff._id });
     const visitIds = await Visit.find({ createdBy: staff._id }).distinct('_id');
     const totalBoardings = await Boarding.countDocuments({ visitId: { $in: visitIds } });
-
-    // Services staff has provided (distinct visitTypes)
     const providedTypeIds = await Visit.find({ createdBy: staff._id }).distinct('visitType');
-
-    // All services
     const allServices = await VisitType.find({});
+
+    // All appointments
+    const appointments = await Appointment.find({})
+      .populate('customerId', 'name fullName email phone')
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    // Inventory items (all — no createdBy field)
+    const inventoryItems = await Inventory.find({})
+      .select('itemName itemType stock createdAt updatedAt')
+      .sort({ updatedAt: -1 })
+      .limit(30);
+
+    // Recent pet registrations (all — no createdBy field)
+    const recentPets = await Pet.find({})
+      .select('name species breed createdAt')
+      .populate('owner', 'name')
+      .sort({ createdAt: -1 })
+      .limit(20);
 
     res.status(200).json({
       success: true,
@@ -297,6 +315,9 @@ router.get("/staffdetails/:id", async (req, res) => {
       recentVisits: staffVisits,
       allServices,
       providedServiceIds: providedTypeIds.map(id => id.toString()),
+      appointments,
+      inventoryItems,
+      recentPets,
     });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
