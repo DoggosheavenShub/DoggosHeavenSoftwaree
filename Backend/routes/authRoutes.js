@@ -28,8 +28,24 @@ const getLogoUrl = async () => {
 
 const router = express.Router();
 
+// Persistent OTP store using a temp file
+const OTP_FILE = path.join(__dirname, '..', '.otpstore.json');
+
+const loadOtpStore = () => {
+  try {
+    if (fs.existsSync(OTP_FILE)) {
+      return JSON.parse(fs.readFileSync(OTP_FILE, 'utf8'));
+    }
+  } catch (_) {}
+  return {};
+};
+
+const saveOtpStore = (store) => {
+  try { fs.writeFileSync(OTP_FILE, JSON.stringify(store)); } catch (_) {}
+};
+
 // In-memory OTP store { email: { otp, expiresAt } }
-const otpStore = {};
+const otpStore = loadOtpStore();
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -137,6 +153,7 @@ router.post("/forgot-password/send-otp", async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const key = email.toLowerCase().trim();
     otpStore[key] = { otp, expiresAt: Date.now() + 10 * 60 * 1000, role };
+    saveOtpStore(otpStore);
     console.log('OTP stored for key:', key, '| otp:', otp, '| store keys:', Object.keys(otpStore));
 
     // Get logo URL from Cloudinary
@@ -166,10 +183,12 @@ router.post("/forgot-password/verify-otp", (req, res) => {
   if (!record) return res.status(400).json({ success: false, message: 'OTP not found. Please request a new one.' });
   if (Date.now() > record.expiresAt) {
     delete otpStore[key];
+    saveOtpStore(otpStore);
     return res.status(400).json({ success: false, message: 'OTP expired. Please request a new one.' });
   }
   if (record.otp !== String(otp).trim()) return res.status(400).json({ success: false, message: 'Invalid OTP. Please try again.' });
   otpStore[key].verified = true;
+  saveOtpStore(otpStore);
   res.status(200).json({ success: true, message: 'OTP verified.' });
 });
 
@@ -197,6 +216,7 @@ router.post("/forgot-password/reset", async (req, res) => {
     }
 
     delete otpStore[key];
+    saveOtpStore(otpStore);
     res.status(200).json({ success: true, message: 'Password reset successfully.' });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
