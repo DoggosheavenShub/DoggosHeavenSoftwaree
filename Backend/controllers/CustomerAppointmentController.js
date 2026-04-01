@@ -482,6 +482,21 @@ const confirmAppointment = async (req, res) => {
     }
     await appointment.save();
 
+    // Customer ko notification bhejo
+    try {
+      const date = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const amt = appointment.totalAmount;
+      await VisitNotification.create({
+        userId: appointment.customerId,
+        title: 'Booking Confirmed! ✅',
+        body: amt > 0
+          ? `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed. Please complete the payment of ₹${amt} to secure your booking.`
+          : `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed.`,
+        petName: appointment.petName,
+        purpose: 'confirmed',
+      });
+    } catch (_) {}
+
     res.status(200).json({
       success: true,
       message: 'Appointment confirmed',
