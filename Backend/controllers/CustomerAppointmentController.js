@@ -284,6 +284,8 @@ const updateAppointmentStatus = async (req, res) => {
           body: `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed. Please complete the payment of ₹${updateData.totalAmount} to secure your booking.`,
           petName: appointment.petName,
           purpose: 'confirmed',
+          appointmentId: appointment._id,
+          amount: updateData.totalAmount,
         });
       } catch (_) {}
     }
