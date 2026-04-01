@@ -184,7 +184,7 @@ const getCustomerAppointments = async (req, res) => {
     const appointments = await Appointment.find({ customerId })
       .populate('serviceId', 'name price duration category')
       .populate('customerId', 'fullName email phone')
-      .sort({ appointmentDate: -1, appointmentTime: -1 });
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -206,7 +206,7 @@ const getAllAppointments = async (req, res) => {
     const appointments = await Appointment.find()
       .populate('serviceId', 'name price duration category')
       .populate('customerId', 'name fullName email phone')
-      .sort({ appointmentDate: -1, appointmentTime: -1 });
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
