@@ -205,7 +205,7 @@ const getAllAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find()
       .populate('serviceId', 'name price duration category')
-      .populate('customerId', 'name email phone')
+      .populate('customerId', 'name fullName email phone')
       .sort({ appointmentDate: -1, appointmentTime: -1 });
 
     res.status(200).json({
@@ -270,6 +270,20 @@ const updateAppointmentStatus = async (req, res) => {
           body: `${appointment.serviceName} for ${appointment.petName} has been completed on ${date}.${paymentMode && paymentMode !== 'online' ? ` Payment received via ${paymentMode}.` : ''}`,
           petName: appointment.petName,
           purpose: 'completed',
+        });
+      } catch (_) {}
+    }
+
+    // Notify customer when confirmed with a new amount (price-on-request services)
+    if (status === 'confirmed' && updateData.totalAmount) {
+      try {
+        const date = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        await VisitNotification.create({
+          userId: appointment.customerId._id || appointment.customerId,
+          title: 'Booking Confirmed! ✅',
+          body: `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed. Please complete the payment of ₹${updateData.totalAmount} to secure your booking.`,
+          petName: appointment.petName,
+          purpose: 'confirmed',
         });
       } catch (_) {}
     }
@@ -454,6 +468,7 @@ const markVisitNotificationsRead = async (req, res) => {
 const confirmAppointment = async (req, res) => {
   try {
     const { id } = req.params;
+    const { totalAmount } = req.body;
 
     const appointment = await Appointment.findById(id);
     if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
@@ -462,6 +477,9 @@ const confirmAppointment = async (req, res) => {
     }
 
     appointment.status = 'confirmed';
+    if (totalAmount && Number(totalAmount) > 0) {
+      appointment.totalAmount = Number(totalAmount);
+    }
     await appointment.save();
 
     res.status(200).json({

@@ -549,17 +549,20 @@ exports.toggleBlacklist = async (req, res) => {
       try {
         const VisitNotification = require("../models/VisitNotification");
         const User = require("../models/user");
-        const customerUser = await User.findOne({ email: pet.owner.email });
-        if (customerUser) {
+        // Customer User model me same email se dhundho
+        const customerUser = await User.findOne({ email: pet.owner.email, role: 'customer' });
+        // Agar customer role nahi mila to kisi bhi role se try karo
+        const targetUser = customerUser || await User.findOne({ email: pet.owner.email });
+        if (targetUser) {
           await VisitNotification.create({
-            userId: customerUser._id,
-            title: `🚫 ${pet.name} has been blacklisted`,
+            userId: targetUser._id,
+            title: `\uD83D\uDEAB ${pet.name} has been blacklisted`,
             body: `Your pet ${pet.name} has been blacklisted. Reason: ${blacklistReason || "Not specified"}. You can request an unblock from My Pets section.`,
             petName: pet.name,
             purpose: "blacklist",
           });
         }
-      } catch (_) {}
+      } catch (e) { console.log('blacklist notif error:', e.message); }
       try {
         const Alert = require("../models/alert");
         await Alert.create({
