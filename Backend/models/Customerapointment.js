@@ -97,6 +97,11 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  paymentMode: {
+    type: String,
+    enum: ['online', 'cash', 'card', 'upi', null],
+    default: null,
+  },
 }, {
   timestamps: true
 });

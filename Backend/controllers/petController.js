@@ -544,6 +544,35 @@ exports.toggleBlacklist = async (req, res) => {
     if (!pet)
       return res.status(404).json({ success: false, message: "Pet not found" });
 
+    // Blacklist hone par customer ko notification bhejo
+    if (isBlacklisted && pet.owner) {
+      try {
+        const VisitNotification = require("../models/VisitNotification");
+        const User = require("../models/user");
+        const customerUser = await User.findOne({ email: pet.owner.email });
+        if (customerUser) {
+          await VisitNotification.create({
+            userId: customerUser._id,
+            title: `🚫 ${pet.name} has been blacklisted`,
+            body: `Your pet ${pet.name} has been blacklisted. Reason: ${blacklistReason || "Not specified"}. You can request an unblock from My Pets section.`,
+            petName: pet.name,
+            purpose: "blacklist",
+          });
+        }
+      } catch (_) {}
+      try {
+        const Alert = require("../models/alert");
+        await Alert.create({
+          alertType: "serviceAction",
+          serviceName: `Blacklisted: ${pet.name}`,
+          performedBy: staffName,
+          action: "updated",
+          forRole: "admin",
+          petInfo: pet._id,
+        });
+      } catch (_) {}
+    }
+
     return res.status(200).json({
       success: true,
       message: isBlacklisted ? "Pet blacklisted successfully" : "Pet removed from blacklist",
@@ -569,6 +598,118 @@ exports.getBlacklistedPets = async (req, res) => {
     });
   } catch (error) {
     console.log("Error in getBlacklistedPets:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ── Customer: Submit unblock request ─────────────────────────────────────────
+exports.submitUnblockRequest = async (req, res) => {
+  try {
+    const { petId, reason } = req.body;
+    if (!petId || !reason?.trim())
+      return res.status(400).json({ success: false, message: "Pet ID and reason are required." });
+
+    const pet = await Pet.findById(petId).populate("owner");
+    if (!pet) return res.status(404).json({ success: false, message: "Pet not found." });
+    if (!pet.isBlacklisted)
+      return res.status(400).json({ success: false, message: "This pet is not blacklisted." });
+
+    const BlacklistRequest = require("../models/BlacklistRequest");
+    const existing = await BlacklistRequest.findOne({ pet: petId, status: "pending" });
+    if (existing)
+      return res.status(400).json({ success: false, message: "A request is already pending for this pet." });
+
+    const request = await BlacklistRequest.create({
+      pet: petId,
+      owner: pet.owner._id,
+      customerUserId: req.user?._id || null,
+      reason: reason.trim(),
+    });
+
+    try {
+      const Alert = require("../models/alert");
+      await Alert.create({
+        alertType: "serviceAction",
+        serviceName: `Unblock Request: ${pet.name}`,
+        performedBy: pet.owner?.name || "Customer",
+        action: "added",
+        forRole: "admin",
+        petInfo: pet._id,
+      });
+    } catch (_) {}
+
+    return res.status(200).json({ success: true, message: "Unblock request submitted successfully.", request });
+  } catch (error) {
+    console.log("Error in submitUnblockRequest:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ── Admin: Get all unblock requests ──────────────────────────────────────────
+exports.getUnblockRequests = async (req, res) => {
+  try {
+    const BlacklistRequest = require("../models/BlacklistRequest");
+    const requests = await BlacklistRequest.find()
+      .populate("pet", "name breed species isBlacklisted blacklistReason")
+      .populate("owner", "name phone email")
+      .sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, requests });
+  } catch (error) {
+    console.log("Error in getUnblockRequests:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ── Admin: Approve or Reject unblock request ──────────────────────────────────
+exports.resolveUnblockRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, adminNote } = req.body;
+
+    const BlacklistRequest = require("../models/BlacklistRequest");
+    const request = await BlacklistRequest.findById(id).populate("pet").populate("owner");
+    if (!request) return res.status(404).json({ success: false, message: "Request not found." });
+
+    const adminName = req.user?.fullName || req.user?.name || "Admin";
+    request.status = action;
+    request.adminNote = adminNote || "";
+    request.resolvedAt = new Date();
+    request.resolvedBy = adminName;
+    await request.save();
+
+    if (action === "approved") {
+      await Pet.findByIdAndUpdate(request.pet._id, {
+        isBlacklisted: false,
+        blacklistReason: "",
+        blacklistedAt: null,
+        blacklistedBy: "",
+      });
+    }
+
+    try {
+      const VisitNotification = require("../models/VisitNotification");
+      const User = require("../models/user");
+      const customerUser = await User.findOne({ email: request.owner?.email });
+      if (customerUser) {
+        const petName = request.pet?.name || "Your pet";
+        await VisitNotification.create({
+          userId: customerUser._id,
+          title: action === "approved" ? `✅ ${petName} has been unblocked!` : `❌ Unblock request for ${petName} was rejected`,
+          body: action === "approved"
+            ? `Your unblock request for ${petName} has been approved.${adminNote ? ` Note: ${adminNote}` : ""}`
+            : `Your unblock request for ${petName} was rejected.${adminNote ? ` Reason: ${adminNote}` : " Please contact us for more info."}`,
+          petName,
+          purpose: action === "approved" ? "unblocked" : "unblock_rejected",
+        });
+      }
+    } catch (_) {}
+
+    return res.status(200).json({
+      success: true,
+      message: action === "approved" ? "Pet unblocked successfully." : "Request rejected.",
+    });
+  } catch (error) {
+    console.log("Error in resolveUnblockRequest:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };

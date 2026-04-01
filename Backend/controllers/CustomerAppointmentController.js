@@ -226,7 +226,7 @@ const getAllAppointments = async (req, res) => {
 const updateAppointmentStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, paymentMode, paymentStatus, totalAmount } = req.body;
 
     const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
     if (!validStatuses.includes(status)) {
@@ -236,9 +236,19 @@ const updateAppointmentStatus = async (req, res) => {
       });
     }
 
+    const updateData = { status };
+    if (paymentMode) updateData.paymentMode = paymentMode;
+    if (paymentStatus) updateData.paymentStatus = paymentStatus;
+    if (totalAmount !== undefined && Number(totalAmount) > 0) updateData.totalAmount = Number(totalAmount);
+
+    // If completing with manual payment, ensure paid
+    if (status === 'completed' && paymentMode && paymentMode !== 'online') {
+      updateData.paymentStatus = 'paid';
+    }
+
     const appointment = await Appointment.findByIdAndUpdate(
       id,
-      { status },
+      updateData,
       { new: true }
     ).populate('serviceId', 'name price duration category')
      .populate('customerId', 'name email phone');
@@ -248,6 +258,20 @@ const updateAppointmentStatus = async (req, res) => {
         success: false,
         message: 'Appointment not found'
       });
+    }
+
+    // Notify customer when completed
+    if (status === 'completed') {
+      try {
+        const date = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        await VisitNotification.create({
+          userId: appointment.customerId._id || appointment.customerId,
+          title: 'Service Completed 🎉',
+          body: `${appointment.serviceName} for ${appointment.petName} has been completed on ${date}.${paymentMode && paymentMode !== 'online' ? ` Payment received via ${paymentMode}.` : ''}`,
+          petName: appointment.petName,
+          purpose: 'completed',
+        });
+      } catch (_) {}
     }
 
     res.status(200).json({
@@ -467,7 +491,7 @@ const verifyAppointmentPayment = async (req, res) => {
 
     const appointment = await Appointment.findByIdAndUpdate(
       appointmentId,
-      { paymentStatus: 'paid', razorpayPaymentId: razorpay_payment_id },
+      { paymentStatus: 'paid', paymentMode: 'online', razorpayPaymentId: razorpay_payment_id },
       { new: true }
     );
 
