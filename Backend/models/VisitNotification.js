@@ -8,6 +8,8 @@ const visitNotificationSchema = new mongoose.Schema(
     petName: { type: String, default: "" },
     purpose: { type: String, default: "" },
     visitId: { type: mongoose.Schema.Types.ObjectId, ref: "Visit", default: null },
+    appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointment", default: null },
+    amount: { type: Number, default: 0 },
     read: { type: Boolean, default: false },
   },
   { timestamps: true }

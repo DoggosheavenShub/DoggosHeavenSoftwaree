@@ -434,11 +434,12 @@ const getNotifications = async (req, res) => {
       body: vn.body,
       type: "visit",
       time: vn.createdAt,
-      amount: 0,
+      amount: vn.amount || 0,
       paymentStatus: null,
       read: vn.read,
       source: "visit",
       visitId: vn.visitId || null,
+      appointmentId: vn.appointmentId ? vn.appointmentId.toString() : null,
       purpose: vn.purpose || "",
       petName: vn.petName || "",
     }));
@@ -494,6 +495,8 @@ const confirmAppointment = async (req, res) => {
           : `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed.`,
         petName: appointment.petName,
         purpose: 'confirmed',
+        appointmentId: appointment._id,
+        amount: amt,
       });
     } catch (_) {}
 
