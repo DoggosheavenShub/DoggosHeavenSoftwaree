@@ -5,6 +5,19 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
 
+// Load logo as Buffer once at startup (for CID embedding)
+let _logoBuffer = null;
+const getLogoBuffer = () => {
+  if (_logoBuffer) return _logoBuffer;
+  try {
+    const logoPath = path.join(__dirname, '..', 'assets', 'doggoswhite.png');
+    if (fs.existsSync(logoPath)) {
+      _logoBuffer = fs.readFileSync(logoPath);
+    }
+  } catch (_) {}
+  return _logoBuffer;
+};
+
 // Load logo base64 once at startup
 let _logoBase64 = null;
 const getLogoBase64 = () => {
@@ -28,11 +41,10 @@ const transporter = nodemailer.createTransport({
   auth: { user: process.env.GMAIL_ACCOUNT, pass: process.env.GMAIL_APP_PASSWORD },
 });
 
-const buildOtpEmail = (otp, name) => {
-  const logoSrc = getLogoBase64();
-  const logoHtml = logoSrc
-    ? `<img src="${logoSrc}" width="64" height="64" style="border-radius:12px;display:block;object-fit:contain;background:#0B3D2E;padding:6px" alt="Doggos Heaven" />`
-    : `<div style="width:64px;height:64px;border-radius:16px;background:rgba(168,217,108,0.15);display:inline-flex;align-items:center;justify-content:center"><span style="font-size:36px">🐾</span></div>`;
+const buildOtpEmail = (otp, name, hasCid) => {
+  const logoHtml = hasCid
+    ? `<img src="cid:doggoslogo" width="72" height="72" style="border-radius:14px;display:block;margin:0 auto 12px auto;background:#0B3D2E;padding:8px" alt="Doggos Heaven" />`
+    : `<div style="width:72px;height:72px;border-radius:14px;background:rgba(168,217,108,0.15);display:inline-block;text-align:center;line-height:72px;margin-bottom:12px"><span style="font-size:36px">🐾</span></div>`;
   return `
 <!DOCTYPE html>
 <html>
@@ -111,22 +123,40 @@ router.post("/forgot-password/send-otp", async (req, res) => {
     let userName = '';
 
     if (role === 'customer') {
-      user = await User.findOne({ email: email.toLowerCase().trim(), role: 'customer' });
+      // Customer — check Owner model first, then User model
+      const owner = await Owner.findOne({ email: email.toLowerCase().trim() });
+      if (owner) {
+        userName = owner.name || owner.fullName || '';
+        user = owner; // just to confirm found
+      } else {
+        user = await User.findOne({ email: email.toLowerCase().trim(), role: 'customer' });
+        if (user) userName = user.fullName || user.name || '';
+      }
     } else {
       user = await User.findOne({ email: email.toLowerCase().trim(), role: { $in: ['staff', 'admin'] } });
+      if (user) userName = user.fullName || user.name || '';
     }
 
     if (!user) return res.status(404).json({ success: false, message: 'No account found with this email.' });
-    userName = user.fullName || user.name || '';
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email.toLowerCase()] = { otp, expiresAt: Date.now() + 10 * 60 * 1000, role };
+    const key = email.toLowerCase().trim();
+    otpStore[key] = { otp, expiresAt: Date.now() + 10 * 60 * 1000, role };
+
+    // Build email with CID logo if available
+    const logoBuffer = getLogoBuffer();
+    const attachments = logoBuffer ? [{
+      filename: 'logo.png',
+      content: logoBuffer,
+      cid: 'doggoslogo',
+    }] : [];
 
     await transporter.sendMail({
       from: `"Doggos Heaven" <${process.env.GMAIL_ACCOUNT}>`,
       to: email,
       subject: '🔐 Your Password Reset OTP — Doggos Heaven',
-      html: buildOtpEmail(otp, userName),
+      html: buildOtpEmail(otp, userName, !!logoBuffer),
+      attachments,
     });
 
     res.status(200).json({ success: true, message: 'OTP sent to your email.' });
@@ -139,15 +169,15 @@ router.post("/forgot-password/send-otp", async (req, res) => {
 // Verify OTP
 router.post("/forgot-password/verify-otp", (req, res) => {
   const { email, otp } = req.body;
-  const record = otpStore[email?.toLowerCase()];
-  if (!record) return res.status(400).json({ success: false, message: 'OTP not found. Please request again.' });
+  const key = email?.toLowerCase().trim();
+  const record = otpStore[key];
+  if (!record) return res.status(400).json({ success: false, message: 'OTP not found. Please request a new one.' });
   if (Date.now() > record.expiresAt) {
-    delete otpStore[email.toLowerCase()];
+    delete otpStore[key];
     return res.status(400).json({ success: false, message: 'OTP expired. Please request a new one.' });
   }
-  if (record.otp !== otp) return res.status(400).json({ success: false, message: 'Invalid OTP. Please try again.' });
-  // Mark as verified
-  otpStore[email.toLowerCase()].verified = true;
+  if (record.otp !== String(otp).trim()) return res.status(400).json({ success: false, message: 'Invalid OTP. Please try again.' });
+  otpStore[key].verified = true;
   res.status(200).json({ success: true, message: 'OTP verified.' });
 });
 
@@ -155,20 +185,26 @@ router.post("/forgot-password/verify-otp", (req, res) => {
 router.post("/forgot-password/reset", async (req, res) => {
   try {
     const { email, newPassword } = req.body;
-    const record = otpStore[email?.toLowerCase()];
+    const key = email?.toLowerCase().trim();
+    const record = otpStore[key];
     if (!record || !record.verified) return res.status(400).json({ success: false, message: 'Please verify OTP first.' });
     if (newPassword.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
 
     const User = require('../models/user');
+    const Owner = require('../models/Owner');
     const hashed = await bcrypt.hash(newPassword, 12);
-    const updated = await User.findOneAndUpdate(
-      { email: email.toLowerCase().trim() },
+
+    // Update in both User and Owner models
+    const updatedUser = await User.findOneAndUpdate(
+      { email: key },
       { password: hashed },
       { new: true }
     );
-    if (!updated) return res.status(404).json({ success: false, message: 'User not found.' });
+    if (!updatedUser) {
+      await Owner.findOneAndUpdate({ email: key }, { password: hashed });
+    }
 
-    delete otpStore[email.toLowerCase()];
+    delete otpStore[key];
     res.status(200).json({ success: true, message: 'Password reset successfully.' });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
