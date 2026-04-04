@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
             enum:["staff","admin","customer"],
             default:"staff"
         },
+		expoPushToken: {
+			type: String,
+			default: "",
+		},
 	},{timestamps:true}
 );
 

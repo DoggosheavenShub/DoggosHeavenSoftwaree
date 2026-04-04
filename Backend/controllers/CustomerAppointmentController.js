@@ -6,6 +6,7 @@ const Owner = require('../models/Owner');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const VisitNotification = require('../models/VisitNotification');
+const sendPushNotification = require('../utils/sendPushNotification');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -264,13 +265,17 @@ const updateAppointmentStatus = async (req, res) => {
     if (status === 'completed') {
       try {
         const date = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        const notifTitle = 'Service Completed 🎉';
+        const notifBody = `${appointment.serviceName} for ${appointment.petName} has been completed on ${date}.${paymentMode && paymentMode !== 'online' ? ` Payment received via ${paymentMode}.` : ''}`;
         await VisitNotification.create({
           userId: appointment.customerId._id || appointment.customerId,
-          title: 'Service Completed 🎉',
-          body: `${appointment.serviceName} for ${appointment.petName} has been completed on ${date}.${paymentMode && paymentMode !== 'online' ? ` Payment received via ${paymentMode}.` : ''}`,
+          title: notifTitle,
+          body: notifBody,
           petName: appointment.petName,
           purpose: 'completed',
         });
+        const cust = await User.findById(appointment.customerId._id || appointment.customerId).select('expoPushToken');
+        if (cust?.expoPushToken) sendPushNotification(cust.expoPushToken, notifTitle, notifBody, { type: 'completed' });
       } catch (_) {}
     }
 
@@ -278,15 +283,19 @@ const updateAppointmentStatus = async (req, res) => {
     if (status === 'confirmed' && updateData.totalAmount) {
       try {
         const date = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        const notifTitle = 'Booking Confirmed! ✅';
+        const notifBody = `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed. Please complete the payment of ₹${updateData.totalAmount} to secure your booking.`;
         await VisitNotification.create({
           userId: appointment.customerId._id || appointment.customerId,
-          title: 'Booking Confirmed! ✅',
-          body: `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed. Please complete the payment of ₹${updateData.totalAmount} to secure your booking.`,
+          title: notifTitle,
+          body: notifBody,
           petName: appointment.petName,
           purpose: 'confirmed',
           appointmentId: appointment._id,
           amount: updateData.totalAmount,
         });
+        const cust = await User.findById(appointment.customerId._id || appointment.customerId).select('expoPushToken');
+        if (cust?.expoPushToken) sendPushNotification(cust.expoPushToken, notifTitle, notifBody, { type: 'confirmed' });
       } catch (_) {}
     }
 
@@ -434,7 +443,7 @@ const getNotifications = async (req, res) => {
       id: vn._id,
       title: vn.title,
       body: vn.body,
-      type: "visit",
+      type: vn.purpose || "visit",
       time: vn.createdAt,
       amount: vn.amount || 0,
       paymentStatus: null,
@@ -446,8 +455,18 @@ const getNotifications = async (req, res) => {
       petName: vn.petName || "",
     }));
 
+    // Appointment IDs jinke liye VisitNotification already exist karti hai — unhe skip karo
+    const coveredApptIds = new Set(
+      visitNotifs
+        .filter((vn) => vn.appointmentId)
+        .map((vn) => vn.appointmentId.toString())
+    );
+    const filteredApptNotifs = apptNotifs.filter(
+      (n) => !coveredApptIds.has(n.id.toString())
+    );
+
     // Merge and sort by time desc
-    const all = [...apptNotifs, ...visitNotifsMapped].sort(
+    const all = [...filteredApptNotifs, ...visitNotifsMapped].sort(
       (a, b) => new Date(b.time) - new Date(a.time)
     );
 
@@ -489,17 +508,24 @@ const confirmAppointment = async (req, res) => {
     try {
       const date = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
       const amt = appointment.totalAmount;
+      const notifTitle = 'Booking Confirmed! ✅';
+      const notifBody = amt > 0
+        ? `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed. Please complete the payment of ₹${amt} to secure your booking.`
+        : `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed.`;
       await VisitNotification.create({
         userId: appointment.customerId,
-        title: 'Booking Confirmed! ✅',
-        body: amt > 0
-          ? `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed. Please complete the payment of ₹${amt} to secure your booking.`
-          : `Your ${appointment.serviceName} for ${appointment.petName} on ${date} is confirmed.`,
+        title: notifTitle,
+        body: notifBody,
         petName: appointment.petName,
         purpose: 'confirmed',
         appointmentId: appointment._id,
         amount: amt,
       });
+      // Push notification bhejo
+      const customer = await User.findById(appointment.customerId).select('expoPushToken');
+      if (customer?.expoPushToken) {
+        sendPushNotification(customer.expoPushToken, notifTitle, notifBody, { type: 'confirmed' });
+      }
     } catch (_) {}
 
     res.status(200).json({
@@ -589,6 +615,17 @@ const createPaymentOrder = async (req, res) => {
   }
 };
 
+const savePushToken = async (req, res) => {
+  try {
+    const { userId, expoPushToken } = req.body;
+    if (!userId || !expoPushToken) return res.status(400).json({ success: false, message: 'userId and expoPushToken required' });
+    await User.findByIdAndUpdate(userId, { expoPushToken });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createAppointment,
   getCustomerAppointments,
@@ -602,4 +639,5 @@ module.exports = {
   confirmAppointment,
   verifyAppointmentPayment,
   createPaymentOrder,
+  savePushToken,
 };
