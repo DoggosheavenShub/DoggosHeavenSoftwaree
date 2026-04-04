@@ -62,6 +62,14 @@ const visitTypeSchema = new mongoose.Schema(
         price: { type: Number, required: true },
       },
     ],
+    category: {
+      type: String,
+      default: "General",
+    },
+    bookingEnabled: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
