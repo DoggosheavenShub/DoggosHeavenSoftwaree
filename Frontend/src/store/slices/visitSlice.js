@@ -388,6 +388,23 @@ export const addShoppingVisit = createAsyncThunk(
   }
 );
 
+export const deleteVisit = createAsyncThunk(
+  "/visit/deletevisit",
+  async (id, { dispatch }) => {
+    const token = localStorage.getItem("authtoken") || "";
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/visit/deletevisit/${id}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: token },
+      }
+    );
+    if (response.status === 401) dispatch(logout());
+    const data = await response.json();
+    return data;
+  }
+);
+
 export const getParticularPetVisit = createAsyncThunk(
   "/visit/getparticularpetvisit",
 

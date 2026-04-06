@@ -12,6 +12,7 @@ import Veterinary from "./VisitPurpose/Veterinary";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllSubscription } from "../../store/slices/subscriptionSlice";
 import {getAllPrices} from "../../store/slices/visitSlice"
+import Navbar from "../navbar";
 
 const NewVisitForm = () => {
   const purposes = [

@@ -1,25 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
  
-import { Menu, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, LogOut, LayoutDashboard, Bell } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout} from "../store/slices/authSlice";
+
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Navbar = () => {
   const navigate=useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
+  const [unreadCount, setUnreadCount] = useState(0);
+  const toggleMenu = () => { setIsOpen(!isOpen); };
  
   const dispatch=useDispatch();
+  const {isAuthenticated, user}=useSelector((state)=>state.auth);
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== 'admin') return;
+    const fetchUnread = async () => {
+      try {
+        const token = localStorage.getItem("authtoken");
+        const res = await fetch(`${BASE_URL}/api/v1/auth/servicenotifications`, {
+          headers: { Authorization: token || "" },
+        });
+        const data = await res.json();
+        if (data.success) setUnreadCount(data.unreadCount || 0);
+      } catch (e) {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, user]);
  
-  const {isAuthenticated}=useSelector((state)=>state.auth)
- 
-  const handleLogout=()=>{
-    dispatch(logout())
-  }
+  const handleLogout=()=>{ dispatch(logout()); }
  
   return (
     <nav className="border w-screen text-[#EFE3C2] bg-[#3E7B27]">
@@ -76,6 +91,21 @@ const Navbar = () => {
                 </Link>
                
                 <div className="relative inline-block text-left">
+                  {/* Bell icon - only for admin */}
+                  {user?.role === 'admin' && (
+                    <button
+                      onClick={() => navigate("/staff/servicenotifications")}
+                      className="relative p-2 rounded-full bg-[#EFE3C2] hover:bg-[#85A947] mr-2"
+                      title="Service Notifications"
+                    >
+                      <Bell className="w-5 h-5 text-[#123524]" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
                   <button
                     onClick={() => setOpen(!open)}
                     className="p-2 rounded-full bg-[#85A947] hover:bg-[#EFE3C2]"

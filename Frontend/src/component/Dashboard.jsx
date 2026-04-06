@@ -13,6 +13,9 @@ const Dashboard = () => {
   const inventoryList = () => navigate("/staff/inventoryList");
   const BreedManagement = () => navigate("/staff/BreedManagement");
   const SalesSectionn = () => navigate("/staff/petByDate");
+  const goToTotalVisits = () => navigate("/staff/totalvisits");
+  const goToAdminVisits = () => navigate("/admin/totalvisits");
+  const goToRecordVisit = () => navigate("/staff/nvisit2");
   const AboutUs = () => navigate("/aboutus");
   const ContactUs = () => navigate("/contactus");
   const PrivacyPolicy = () => navigate("/privacypolicy");
@@ -120,7 +123,7 @@ const Dashboard = () => {
               </li> */}
               <li>
                 <a
-                  href="alertlist"
+                  href="/staff/alertlist"
                   className="flex items-center space-x-2 text-[#123524] hover:text-[#3E7B27] ml-4 font-medium"
                 >
                   <span>* Alert List</span>
@@ -180,6 +183,44 @@ const Dashboard = () => {
               )}
             </div>
           </div>
+
+          {/* Total Visits Card */}
+          <div
+            onClick={goToTotalVisits}
+            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#3E7B27] cursor-pointer"
+          >
+            <h2 className="text-xl font-bold mb-2 text-[#123524]">F. Total Visits</h2>
+            <p className="text-[#85A947] text-sm mb-3">View all visit records, filter by date/purpose, and add new visits.</p>
+            <span className="inline-block bg-[#85A947] text-white text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-[#3E7B27] transition-colors">
+              View Visits →
+            </span>
+          </div>
+
+          {/* Record a Visit Card */}
+          <div
+            onClick={goToRecordVisit}
+            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947] cursor-pointer"
+          >
+            <h2 className="text-xl font-bold mb-2 text-[#123524]">G. Record a Visit</h2>
+            <p className="text-[#85A947] text-sm mb-3">Add a new visit for any pet — select purpose and fill visit details.</p>
+            <span className="inline-block bg-[#123524] text-[#EFE3C2] text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-[#3E7B27] transition-colors">
+              Add Visit →
+            </span>
+          </div>
+
+          {/* Admin: All Visits with Delete */}
+          {user?.role === "admin" && (
+            <div
+              onClick={goToAdminVisits}
+              className="bg-[#123524] rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+            >
+              <h2 className="text-xl font-bold mb-2 text-[#EFE3C2]">H. All Visits (Admin)</h2>
+              <p className="text-[#85A947] text-sm mb-3">View, filter, add and delete all visit records. Admin-only access.</p>
+              <span className="inline-block bg-[#EFE3C2] text-[#123524] text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-[#85A947] transition-colors">
+                Manage Visits →
+              </span>
+            </div>
+          )}
 
           {/* SMS Reminders Panel */}
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border-l-4 border-[#85A947]">
