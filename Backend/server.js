@@ -49,7 +49,8 @@ const useMedicineRoutes = require("./routes/useMedicineRoutes");
 const alertRoutes = require("./routes/alertRoutes");
 const walletRoutes = require("./routes/walletRoutes");
 const boardingSubscriptionRoutes = require("./routes/boardingSubscriptionRoutes");
-require("./jobs/dailyBoardingDeduction");
+// node-cron doesn't work on Vercel serverless — only load in non-serverless environments
+if (!process.env.VERCEL) require("./jobs/dailyBoardingDeduction");
 
 app.use('/api/v1/customer-webhook', express.raw({ type: 'application/json' }), customerWebhookRoutes);
 app.use(express.json());

@@ -29,7 +29,7 @@ exports.createRechargeOrder = async (req, res) => {
       receipt: `wallet_${req.userId}_${Date.now()}`,
     });
 
-    res.json({ success: true, order, key: process.env.RAZORPAY_KEY });
+    res.json({ success: true, order, key: process.env.RAZORPAY_KEY_ID });
   } catch (e) {
     console.error("createRechargeOrder error", e);
     res.status(500).json({ success: false, message: "Could not create order" });
