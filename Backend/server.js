@@ -89,8 +89,10 @@ app.get("/debug", (req, res) => {
     MONGO_URI: process.env.MONGO_URI ? "SET" : "MISSING",
     JWT_SECRET_KEY: process.env.JWT_SECRET_KEY ? "SET" : "MISSING",
     RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID ? "SET" : "MISSING",
+    RAZORPAY_KEY_ID_VAL: process.env.RAZORPAY_KEY_ID?.slice(0, 10) + "...",
     RAZORPAY_SECRET: process.env.RAZORPAY_SECRET ? "SET" : "MISSING",
     FRONTEND_URL: process.env.FRONTEND_URL ? "SET" : "MISSING",
+    VERCEL: process.env.VERCEL || "not set",
   });
 });
 
