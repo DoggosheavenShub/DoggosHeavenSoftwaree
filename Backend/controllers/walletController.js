@@ -26,7 +26,7 @@ exports.createRechargeOrder = async (req, res) => {
     const order = await instance.orders.create({
       amount: Math.round(amount * 100),
       currency: "INR",
-      receipt: `wallet_${req.userId}_${Date.now()}`,
+      receipt: `w_${Date.now()}`,
     });
 
     res.json({ success: true, order, key: process.env.RAZORPAY_KEY_ID });

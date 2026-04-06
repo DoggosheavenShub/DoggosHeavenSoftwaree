@@ -19,7 +19,7 @@ exports.createBookingOrder = async (req, res) => {
     const order = await require("../config/razorpay").instance.orders.create({
       amount: totalAmount * 100,
       currency: "INR",
-      receipt: `boarding_${req.userId}_${Date.now()}`,
+      receipt: `b_${Date.now()}`,
     });
 
     res.json({ success: true, order, key: process.env.RAZORPAY_KEY_ID, totalAmount });
