@@ -24,8 +24,8 @@ exports.createBookingOrder = async (req, res) => {
 
     res.json({ success: true, order, key: process.env.RAZORPAY_KEY_ID, totalAmount });
   } catch (e) {
-    console.error("createBookingOrder error", e);
-    res.status(500).json({ success: false, message: "Could not create payment order" });
+    console.error("createBookingOrder error", e?.error || e?.message || e);
+    res.status(500).json({ success: false, message: e?.error?.description || e?.message || "Could not create payment order" });
   }
 };
 
