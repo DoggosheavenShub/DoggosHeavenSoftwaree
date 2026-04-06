@@ -1400,45 +1400,30 @@ exports.getBoardingCategoryList = async (req, res) => {
 exports.addShoppingVisit = async (req, res) => {
   try {
     const { items, petId, visitType, details: details_new } = req.body;
-  
 
-    if (!petId) {
-      return res.json({
-        success: false,
-        message: "A pet must be selected to save a visit",
-      });
-    }
-
-    if (!visitType) {
-      return res.json({
-        success: false,
-        message: "A visittype must be selected to save visit",
-      });
-    }
+    if (!petId) return res.json({ success: false, message: "A pet must be selected to save a visit" });
+    if (!visitType) return res.json({ success: false, message: "A visittype must be selected to save visit" });
 
     let price = 0;
+    const finalItems = items && items.length ? items : [];
 
-    for (let i = 0; i < items.length; i++) {
-    
-      if (!items[i].name) {
-        return res.json({
-          success: false,
-          message: "Enter valid item name",
-        });
-      }
-
-      if (!items[i].price || items[i]?.price <= 0) {
-        return res.json({
-          success: false,
-          message: "Enter valid item price",
-        });
-      }
-      price += items[i].price;
+    for (let i = 0; i < finalItems.length; i++) {
+      if (!finalItems[i].name) return res.json({ success: false, message: "Enter valid item name" });
+      if (!finalItems[i].price || finalItems[i]?.price <= 0) return res.json({ success: false, message: "Enter valid item price" });
+      price += finalItems[i].price;
     }
 
-    details = {};
-    details.price = price;
-    details.items = items;
+    // Agar items nahi hain to details se price lo
+    if (!finalItems.length) price = details_new?.price || 0;
+
+    const details = {
+      price: details_new?.price || price,
+      discount: details_new?.discount || 0,
+      finalPrice: details_new?.finalPrice || price,
+      note: details_new?.note || "",
+      selectedPayment: details_new?.selectedPayment || "cash",
+      items: finalItems,
+    };
 
     const newVisit = new Visit({
       visitType,
@@ -1448,20 +1433,12 @@ exports.addShoppingVisit = async (req, res) => {
     });
 
     await newVisit.save();
-
     sendVisitNotification(petId, "Shop", newVisit._id).catch(() => {});
 
-    return res.json({
-      success: true,
-      message: "Visit saved successfully",
-    });
+    return res.json({ success: true, message: "Visit saved successfully" });
   } catch (error) {
     console.log("error in addshoppingvisit controller", error);
-
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
