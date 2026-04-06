@@ -2,7 +2,8 @@ const express = require("express");
 const { customerProtectedRoute } = require("../middlewares/customerProtectedRoute");
 const { protectedRoute } = require("../middlewares/protectedRoute");
 const {
-  createBooking,
+  createBookingOrder,
+  verifyAndActivate,
   getUserDashboard,
   adminListBookings,
   adminUpdateBooking,
@@ -12,7 +13,8 @@ const {
 const router = express.Router();
 
 // User routes
-router.post("/book", customerProtectedRoute, createBooking);
+router.post("/create-order", customerProtectedRoute, createBookingOrder);
+router.post("/verify-activate", customerProtectedRoute, verifyAndActivate);
 router.get("/dashboard", customerProtectedRoute, getUserDashboard);
 router.get("/preview", customerProtectedRoute, getPlanPreview);
 

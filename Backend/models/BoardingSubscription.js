@@ -32,6 +32,8 @@ const boardingSubscriptionSchema = new mongoose.Schema(
     daysRemaining: { type: Number, default: 15 },
     adminNote: { type: String, default: "" },
     lastDeductionDate: { type: Date, default: null },
+    razorpayOrderId: { type: String, default: "" },
+    razorpayPaymentId: { type: String, default: "" },
   },
   { timestamps: true }
 );

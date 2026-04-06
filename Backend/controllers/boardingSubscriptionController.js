@@ -6,27 +6,68 @@ const User = require("../models/user");
 
 const PRICE_PER_DAY = BoardingSubscription.PRICE_PER_DAY;
 
-// ── User: create booking request ──────────────────────────────────────────────
-exports.createBooking = async (req, res) => {
+// ── User: create Razorpay order for boarding subscription ────────────────────
+exports.createBookingOrder = async (req, res) => {
   try {
     const { petIds } = req.body;
     if (!petIds || !petIds.length)
       return res.status(400).json({ success: false, message: "Select at least one pet" });
 
     const numberOfPets = petIds.length;
+    const totalAmount = 11500 * numberOfPets;
+
+    const order = await require("../config/razorpay").instance.orders.create({
+      amount: totalAmount * 100,
+      currency: "INR",
+      receipt: `boarding_${req.userId}_${Date.now()}`,
+    });
+
+    res.json({ success: true, order, key: process.env.RAZORPAY_KEY_ID, totalAmount });
+  } catch (e) {
+    console.error("createBookingOrder error", e);
+    res.status(500).json({ success: false, message: "Could not create payment order" });
+  }
+};
+
+// ── User: verify payment & activate subscription ──────────────────────────────
+exports.verifyAndActivate = async (req, res) => {
+  try {
+    const { petIds, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const crypto = require("crypto");
+
+    const expectedSig = crypto
+      .createHmac("sha256", process.env.RAZORPAY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (expectedSig !== razorpay_signature)
+      return res.status(400).json({ success: false, message: "Invalid payment signature" });
+
+    const numberOfPets = petIds.length;
     const dailyCharge = parseFloat((PRICE_PER_DAY * numberOfPets).toFixed(2));
+
+    // Deactivate any existing active subscription for this user
+    await BoardingSubscription.updateMany(
+      { userId: req.userId, status: "active" },
+      { status: "inactive" }
+    );
 
     const booking = await BoardingSubscription.create({
       userId: req.userId,
       petIds,
       numberOfPets,
       dailyCharge,
-      status: "pending",
+      status: "active",
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      daysRemaining: 15,
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
     });
 
-    res.status(201).json({ success: true, message: "Booking request submitted for admin approval", booking });
+    res.json({ success: true, message: "Boarding subscription activated!", booking });
   } catch (e) {
-    console.error("createBooking error", e);
+    console.error("verifyAndActivate error", e);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
