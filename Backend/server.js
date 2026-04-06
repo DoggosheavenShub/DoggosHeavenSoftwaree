@@ -47,6 +47,9 @@ const customerWebhookRoutes = require("./routes/customerRoutes/customerWebhookRo
 const customerPetRoutes = require("./routes/customerRoutes/CustomerPetRoute");
 const useMedicineRoutes = require("./routes/useMedicineRoutes");
 const alertRoutes = require("./routes/alertRoutes");
+const walletRoutes = require("./routes/walletRoutes");
+const boardingSubscriptionRoutes = require("./routes/boardingSubscriptionRoutes");
+require("./jobs/dailyBoardingDeduction");
 
 app.use('/api/v1/customer-webhook', express.raw({ type: 'application/json' }), customerWebhookRoutes);
 app.use(express.json());
@@ -73,6 +76,8 @@ app.use("/api/v1/customer/payment", customerPaymentRoutes);
 app.use("/api/v1/customer/pet", customerPetRoutes);
 app.use("/api/v1/medicine", useMedicineRoutes);
 app.use("/api/v1/alerts", alertRoutes);
+app.use("/api/v1/wallet", walletRoutes);
+app.use("/api/v1/boarding-subscription", boardingSubscriptionRoutes);
 
 app.get("/", (req, res) => {
   res.send(process.env.FRONTEND_URL);
