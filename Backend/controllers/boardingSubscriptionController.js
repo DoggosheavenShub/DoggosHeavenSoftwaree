@@ -72,6 +72,59 @@ exports.verifyAndActivate = async (req, res) => {
   }
 };
 
+// ── User: activate boarding (wallet-based, no payment needed here) ──────────
+exports.activateBoarding = async (req, res) => {
+  try {
+    const { petIds } = req.body;
+    if (!petIds || !petIds.length)
+      return res.status(400).json({ success: false, message: "Select at least one pet" });
+
+    const numberOfPets = petIds.length;
+    const dailyCharge = parseFloat((PRICE_PER_DAY * numberOfPets).toFixed(2));
+
+    const wallet = await Wallet.findOne({ userId: req.userId });
+    const balance = wallet?.balance || 0;
+
+    if (balance < dailyCharge)
+      return res.status(400).json({ success: false, message: `Insufficient wallet balance. Need ₹${dailyCharge}, have ₹${balance.toFixed(0)}` });
+
+    await BoardingSubscription.updateMany({ userId: req.userId, status: "active" }, { status: "inactive" });
+
+    const booking = await BoardingSubscription.create({
+      userId: req.userId,
+      petIds,
+      numberOfPets,
+      dailyCharge,
+      status: "active",
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      daysRemaining: 15,
+    });
+
+    res.json({ success: true, message: "Boarding activated!", booking });
+  } catch (e) {
+    console.error("activateBoarding error", e);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ── User: deboard ─────────────────────────────────────────────────────────────
+exports.deboardBoarding = async (req, res) => {
+  try {
+    const { boardingId } = req.body;
+    const booking = await BoardingSubscription.findOne({ _id: boardingId, userId: req.userId, status: "active" });
+    if (!booking) return res.status(404).json({ success: false, message: "No active boarding found" });
+
+    booking.status = "inactive";
+    await booking.save();
+
+    res.json({ success: true, message: "Deboarded successfully" });
+  } catch (e) {
+    console.error("deboardBoarding error", e);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 // ── User: dashboard ───────────────────────────────────────────────────────────
 exports.getUserDashboard = async (req, res) => {
   try {

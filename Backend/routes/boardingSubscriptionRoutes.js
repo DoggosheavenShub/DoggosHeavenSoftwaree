@@ -4,6 +4,8 @@ const { protectedRoute } = require("../middlewares/protectedRoute");
 const {
   createBookingOrder,
   verifyAndActivate,
+  activateBoarding,
+  deboardBoarding,
   getUserDashboard,
   adminListBookings,
   adminUpdateBooking,
@@ -15,6 +17,8 @@ const router = express.Router();
 // User routes
 router.post("/create-order", customerProtectedRoute, createBookingOrder);
 router.post("/verify-activate", customerProtectedRoute, verifyAndActivate);
+router.post("/activate", customerProtectedRoute, activateBoarding);
+router.post("/deboard", customerProtectedRoute, deboardBoarding);
 router.get("/dashboard", customerProtectedRoute, getUserDashboard);
 router.get("/preview", customerProtectedRoute, getPlanPreview);
 
