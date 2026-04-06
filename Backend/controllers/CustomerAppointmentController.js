@@ -7,6 +7,7 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const VisitNotification = require('../models/VisitNotification');
 const sendPushNotification = require('../utils/sendPushNotification');
+const { broadcastToStaff } = require('../utils/sendPushNotification');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -141,6 +142,12 @@ const createAppointment = async (req, res) => {
       Alert.create({ ...alertPayload, forRole: 'admin' }),
     ]).then(() => {
       console.log('newBooking alerts created:', appointment._id);
+      // Sabhi staff/admin ko buzzer notification bhejo
+      broadcastToStaff(
+        '🔔 New Booking!',
+        `${serviceName || 'Service'} for ${petName} — ${customer?.fullName || 'Customer'}`,
+        { type: 'newBooking', appointmentId: appointment._id.toString() }
+      );
     }).catch((err) => {
       console.log('Alert create failed:', err.message);
     });

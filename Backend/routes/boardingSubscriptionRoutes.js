@@ -10,6 +10,7 @@ const {
   adminListBookings,
   adminUpdateBooking,
   getPlanPreview,
+  staffDeboardWallet,
 } = require("../controllers/boardingSubscriptionController");
 
 const router = express.Router();
@@ -22,8 +23,10 @@ router.post("/deboard", customerProtectedRoute, deboardBoarding);
 router.get("/dashboard", customerProtectedRoute, getUserDashboard);
 router.get("/preview", customerProtectedRoute, getPlanPreview);
 
-// Admin routes
+// Admin + Staff routes
 router.get("/admin/list", protectedRoute, adminListBookings);
 router.patch("/admin/:bookingId", protectedRoute, adminUpdateBooking);
+// Staff: deboard wallet boarding
+router.post("/staff/deboard", protectedRoute, staffDeboardWallet);
 
 module.exports = router;

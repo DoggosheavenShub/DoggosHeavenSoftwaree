@@ -26,4 +26,24 @@ const sendPushNotification = async (expoPushToken, title, body, data = {}) => {
   }
 };
 
+// Sabhi staff/admin ko ek saath notification bhejo
+const broadcastToStaff = async (title, body, data = {}) => {
+  try {
+    const User = require("../models/user");
+    const staffUsers = await User.find(
+      { role: { $in: ["staff", "admin"] }, expoPushToken: { $regex: /^ExponentPushToken/ } },
+      "expoPushToken"
+    );
+    const tokens = staffUsers.map(u => u.expoPushToken).filter(Boolean);
+    if (!tokens.length) return;
+    await axios.post("https://exp.host/--/api/v2/push/send",
+      tokens.map(to => ({ to, sound: "default", title, body, data, priority: "high", channelId: "default" })),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    console.log("Broadcast notification failed:", err.message);
+  }
+};
+
 module.exports = sendPushNotification;
+module.exports.broadcastToStaff = broadcastToStaff;

@@ -223,6 +223,23 @@ exports.adminUpdateBooking = async (req, res) => {
   }
 };
 
+// ── Staff: deboard wallet boarding ──────────────────────────────────────────
+exports.staffDeboardWallet = async (req, res) => {
+  try {
+    const { boardingId } = req.body;
+    const booking = await BoardingSubscription.findOne({ _id: boardingId, status: "active" })
+      .populate("petIds", "name")
+      .populate("userId", "fullName");
+    if (!booking) return res.status(404).json({ success: false, message: "No active wallet boarding found" });
+    booking.status = "inactive";
+    await booking.save();
+    res.json({ success: true, message: "Wallet boarding deboarded successfully" });
+  } catch (e) {
+    console.error("staffDeboardWallet error", e);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 // ── Plan preview (cost calculator) ───────────────────────────────────────────
 exports.getPlanPreview = async (req, res) => {
   const { numberOfPets } = req.query;
