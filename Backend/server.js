@@ -49,6 +49,7 @@ const useMedicineRoutes = require("./routes/useMedicineRoutes");
 const alertRoutes = require("./routes/alertRoutes");
 const walletRoutes = require("./routes/walletRoutes");
 const boardingSubscriptionRoutes = require("./routes/boardingSubscriptionRoutes");
+const billRoutes = require("./routes/billRoutes");
 // node-cron doesn't work on Vercel serverless — only load in non-serverless environments
 if (!process.env.VERCEL) require("./jobs/dailyBoardingDeduction");
 
@@ -79,6 +80,7 @@ app.use("/api/v1/medicine", useMedicineRoutes);
 app.use("/api/v1/alerts", alertRoutes);
 app.use("/api/v1/wallet", walletRoutes);
 app.use("/api/v1/boarding-subscription", boardingSubscriptionRoutes);
+app.use("/api/v1/bills", billRoutes);
 
 app.get("/", (req, res) => {
   res.send(process.env.FRONTEND_URL);
