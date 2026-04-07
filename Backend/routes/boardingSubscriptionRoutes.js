@@ -11,6 +11,8 @@ const {
   adminUpdateBooking,
   getPlanPreview,
   staffDeboardWallet,
+  staffActivateBoarding,
+  staffUpdatePets,
 } = require("../controllers/boardingSubscriptionController");
 
 const router = express.Router();
@@ -28,5 +30,7 @@ router.get("/admin/list", protectedRoute, adminListBookings);
 router.patch("/admin/:bookingId", protectedRoute, adminUpdateBooking);
 // Staff: deboard wallet boarding
 router.post("/staff/deboard", protectedRoute, staffDeboardWallet);
+router.post("/staff/activate", protectedRoute, staffActivateBoarding);
+router.post("/staff/update-pets", protectedRoute, staffUpdatePets);
 
 module.exports = router;

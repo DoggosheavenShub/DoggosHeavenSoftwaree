@@ -240,6 +240,68 @@ exports.staffDeboardWallet = async (req, res) => {
   }
 };
 
+// ── Staff: activate boarding for any user ──────────────────────────────────
+exports.staffActivateBoarding = async (req, res) => {
+  try {
+    const { userId, petIds } = req.body;
+    if (!userId) return res.status(400).json({ success: false, message: "userId is required" });
+    if (!petIds || !petIds.length) return res.status(400).json({ success: false, message: "Select at least one pet" });
+
+    const numberOfPets = petIds.length;
+    const dailyCharge = parseFloat((PRICE_PER_DAY * numberOfPets).toFixed(2));
+
+    const wallet = await Wallet.findOne({ userId });
+    const balance = wallet?.balance || 0;
+    if (balance < dailyCharge)
+      return res.status(400).json({ success: false, message: `Insufficient wallet balance. Need ₹${dailyCharge}, have ₹${balance.toFixed(0)}` });
+
+    await BoardingSubscription.updateMany({ userId, status: "active" }, { status: "inactive" });
+
+    const booking = await BoardingSubscription.create({
+      userId, petIds, numberOfPets, dailyCharge,
+      status: "active",
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      daysRemaining: 15,
+    });
+
+    const user = await User.findById(userId).select("expoPushToken");
+    if (user?.expoPushToken) {
+      sendPushNotification(user.expoPushToken, "Boarding Started! 🐾", `Your ${numberOfPets} pet(s) boarding is now active. ₹${dailyCharge}/day will be deducted.`);
+    }
+
+    res.json({ success: true, message: "Boarding activated!", booking });
+  } catch (e) {
+    console.error("staffActivateBoarding error", e);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ── Staff: update pets on active boarding ────────────────────────────────────
+exports.staffUpdatePets = async (req, res) => {
+  try {
+    const { boardingId, petIds } = req.body;
+    if (!petIds || !petIds.length) return res.status(400).json({ success: false, message: "Select at least one pet" });
+
+    const booking = await BoardingSubscription.findOne({ _id: boardingId, status: "active" }).populate("userId", "expoPushToken");
+    if (!booking) return res.status(404).json({ success: false, message: "No active boarding found" });
+
+    booking.petIds = petIds;
+    booking.numberOfPets = petIds.length;
+    booking.dailyCharge = parseFloat((PRICE_PER_DAY * petIds.length).toFixed(2));
+    await booking.save();
+
+    if (booking.userId?.expoPushToken) {
+      sendPushNotification(booking.userId.expoPushToken, "Boarding Updated 🐾", `Boarding now has ${petIds.length} pet(s). New daily charge: ₹${booking.dailyCharge}`);
+    }
+
+    res.json({ success: true, message: "Boarding updated!", booking });
+  } catch (e) {
+    console.error("staffUpdatePets error", e);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 // ── Plan preview (cost calculator) ───────────────────────────────────────────
 exports.getPlanPreview = async (req, res) => {
   const { numberOfPets } = req.query;
