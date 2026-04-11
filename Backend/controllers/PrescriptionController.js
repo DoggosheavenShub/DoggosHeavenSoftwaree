@@ -3,7 +3,10 @@ const mongoose = require("mongoose");
 const Prescription = require("./../models/Prescription");
 const Inventory = require("./../models/inventory");
 const Pet = require("./../models/pet");
+const User = require("./../models/user");
+const Owner = require("./../models/Owner");
 const scheduledVisit = require("../models/scheduledVisit");
+const sendPushNotification = require("../utils/sendPushNotification");
 
 exports.addPrescription = async (req, res) => {
       const session = await mongoose.startSession();
@@ -291,7 +294,8 @@ exports.addPrescription = async (req, res) => {
       nextFollowUp,
       followUpTime,
       diagnosis,
-      price:totalPrice
+      price:totalPrice,
+      createdBy: req.userId,
     });
 
  console.log("hiii4");
@@ -337,6 +341,24 @@ exports.addPrescription = async (req, res) => {
     
     await session.commitTransaction();
 
+    // Owner ko push notification bhejo
+    try {
+      const petWithOwner = await Pet.findById(petId).populate("owner").lean();
+      if (petWithOwner?.owner?.email) {
+        const ownerUser = await User.findOne({ email: petWithOwner.owner.email, role: "customer" }).lean();
+        if (ownerUser?.expoPushToken) {
+          await sendPushNotification(
+            ownerUser.expoPushToken,
+            "💊 Prescription Ready",
+            `A new prescription has been added for ${petWithOwner.name}. Check your prescriptions for details.`,
+            { type: "prescription", petId: String(petId) }
+          );
+        }
+      }
+    } catch (notifErr) {
+      console.log("Notification error (non-fatal):", notifErr.message);
+    }
+
 console.log("hi5")
      return res.json({
       success: true,
@@ -352,10 +374,27 @@ console.log("hi5")
   }
 };
 
-exports.getPetPrescriptions=async(req,res)=>{
+exports.getMyPrescriptions = async (req, res) => {
+  try {
+    const prescriptions = await Prescription.find({ createdBy: req.userId })
+      .populate('petId', 'name breed species')
+      .populate('items.id', 'itemName')
+      .populate('tablets.id', 'itemName')
+      .populate('mg.id', 'itemName')
+      .populate('ml.id', 'itemName')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, data: prescriptions });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+exports.getPetPrescriptions = async (req, res) => {
 try {
   console.log("controller called");
-    const {petId}=req.params;
+    const { petId } = req.params;
+    const { staffOnly } = req.query; // staffOnly=true means filter by createdBy
 
       if (!petId) {
       return res.status(400).json({
@@ -364,17 +403,19 @@ try {
       });
     }
 
-       const prescriptions = await Prescription.find({ petId })
-      .populate('items.id', 'itemName') 
-      .populate('tablets.id', 'itemName') 
-      .populate('mg.id', 'itemName') 
-      .populate('ml.id', 'itemName') 
+    const filter = { petId };
+    if (staffOnly === 'true' && req.userId) {
+      filter.createdBy = req.userId;
+    }
+
+       const prescriptions = await Prescription.find(filter)
+      .populate('items.id', 'itemName')
+      .populate('tablets.id', 'itemName')
+      .populate('mg.id', 'itemName')
+      .populate('ml.id', 'itemName')
       .sort({ createdAt: -1 });
 
-
-     console.log(prescriptions);
-
-     if(!prescriptions){
+     if (!prescriptions) {
       return res.status(400).json({
         success: false,
         message: 'Pet has no prescriptions'
@@ -387,7 +428,6 @@ try {
       data: prescriptions,
       count: prescriptions.length
     });
-
 
 } catch (error) {
      console.error('Error fetching pet prescriptions:', error);
