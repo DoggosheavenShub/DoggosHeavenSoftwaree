@@ -240,7 +240,7 @@ exports.login = async (req, res) => {
 
 
     // Find user with email and role
-    const user = await User.findOne({ email, role });
+    const user = await User.findOne({ email: email.toLowerCase().trim(), role });
 
     // console.log(user);
 
