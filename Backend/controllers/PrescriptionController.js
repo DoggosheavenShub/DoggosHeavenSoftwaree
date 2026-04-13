@@ -376,7 +376,28 @@ console.log("hi5")
 
 exports.getMyPrescriptions = async (req, res) => {
   try {
-    const prescriptions = await Prescription.find({ createdBy: req.userId })
+    const user = await User.findById(req.userId).lean();
+
+    // Staff/admin: apni banai hui prescriptions
+    if (!user || user.role !== "customer") {
+      const prescriptions = await Prescription.find({ createdBy: req.userId })
+        .populate('petId', 'name breed species')
+        .populate('items.id', 'itemName')
+        .populate('tablets.id', 'itemName')
+        .populate('mg.id', 'itemName')
+        .populate('ml.id', 'itemName')
+        .sort({ createdAt: -1 });
+      return res.status(200).json({ success: true, data: prescriptions });
+    }
+
+    // Customer: apne pets ki saari prescriptions
+    const owner = await Owner.findOne({ email: user.email }).lean();
+    if (!owner) return res.status(200).json({ success: true, data: [] });
+
+    const pets = await Pet.find({ owner: owner._id }).select('_id').lean();
+    const petIds = pets.map(p => p._id);
+
+    const prescriptions = await Prescription.find({ petId: { $in: petIds } })
       .populate('petId', 'name breed species')
       .populate('items.id', 'itemName')
       .populate('tablets.id', 'itemName')
