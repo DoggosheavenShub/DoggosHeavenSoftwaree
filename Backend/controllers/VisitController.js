@@ -657,7 +657,7 @@ exports.addDogParkVisit = async (req, res) => {
         message: "Discount cannot be negative",
       });
 
-    if (discount >= visitDetails?.price) {
+    if (discount > 0 && visitDetails?.price > 0 && discount >= visitDetails?.price) {
       return res.json({
         success: false,
         message: "Discount must be less than original price",
@@ -874,7 +874,7 @@ exports.addDayCareVisit = async (req, res) => {
         message: "Discount cannot be negative",
       });
 
-    if (discount >= visitDetails?.price) {
+    if (discount > 0 && visitDetails?.price > 0 && discount >= visitDetails?.price) {
       return res.json({
         success: false,
         message: "Discount must be less than original price",
@@ -1319,13 +1319,13 @@ exports.addGroomingVisit = async (req, res) => {
       details.subscriptionAvailed = "Yes";
       price = 0;
     } else {
-      if (discount >= visitDetails?.price) {
+      if (discount > 0 && visitDetails?.price > 0 && discount >= visitDetails?.price) {
         return res.json({
           success: false,
           message: "Discount must be less than original price",
         });
       }
-      price = visitDetails?.price - discount;
+      price = (visitDetails?.price || 0) - (discount || 0);
     }
 
     details.price = price;
