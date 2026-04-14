@@ -102,6 +102,26 @@ const appointmentSchema = new mongoose.Schema({
     enum: ['online', 'cash', 'card', 'upi', null],
     default: null,
   },
+  gstAmount: {
+    type: Number,
+    default: 0,
+  },
+  ambulanceRequired: {
+    type: Boolean,
+    default: false,
+  },
+  ambulanceKm: {
+    type: Number,
+    default: 0,
+  },
+  ambulanceFare: {
+    type: Number,
+    default: 0,
+  },
+  pricingType: {
+    type: String,
+    default: null,
+  },
 }, {
   timestamps: true
 });

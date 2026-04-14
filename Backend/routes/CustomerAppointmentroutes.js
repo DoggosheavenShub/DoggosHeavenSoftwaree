@@ -14,6 +14,7 @@ const {
   verifyAppointmentPayment,
   createPaymentOrder,
   savePushToken,
+  checkVehicleAvailability,
 } = require('../controllers/CustomerAppointmentController');
 const { customerProtectedRoute } = require('../middlewares/customerProtectedRoute');
 
@@ -30,5 +31,6 @@ router.patch('/confirmappoint/:id', confirmAppointment);
 router.post('/verifypayment', verifyAppointmentPayment);
 router.post('/createpaymentorder', createPaymentOrder);
 router.post('/savepushtoken', savePushToken);
+router.get('/checkvehicle', checkVehicleAvailability);
 
 module.exports = router;

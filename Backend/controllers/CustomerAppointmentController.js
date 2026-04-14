@@ -79,7 +79,13 @@ const createAppointment = async (req, res) => {
       petBreed,
       petAge,
       notes,
-      totalAmount
+      totalAmount,
+      gstAmount,
+      paymentMode,
+      pricingType,
+      ambulanceRequired,
+      ambulanceKm,
+      ambulanceFare,
     } = req.body;
 
     
@@ -124,6 +130,12 @@ const createAppointment = async (req, res) => {
       petAge: petAge.trim(),
       notes: notes ? notes.trim() : '',
       totalAmount: totalAmount || servicePrice || 0,
+      gstAmount: gstAmount || 0,
+      paymentMode: paymentMode || 'online',
+      pricingType: pricingType || null,
+      ambulanceRequired: ambulanceRequired || false,
+      ambulanceKm: ambulanceKm || 0,
+      ambulanceFare: ambulanceFare || 0,
       status: 'pending'
     });
 
@@ -633,6 +645,26 @@ const savePushToken = async (req, res) => {
   }
 };
 
+// Check if vehicle (pickup & drop) is available for a given date+time slot
+// We have only 1 vehicle — if any active appointment on that slot has ambulanceRequired=true, it's unavailable
+const checkVehicleAvailability = async (req, res) => {
+  try {
+    const { date, time } = req.query;
+    if (!date || !time) return res.status(400).json({ success: false, message: 'date and time required' });
+
+    const existing = await Appointment.findOne({
+      appointmentDate: new Date(date),
+      appointmentTime: time,
+      ambulanceRequired: true,
+      status: { $nin: ['cancelled'] },
+    });
+
+    res.status(200).json({ success: true, available: !existing });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createAppointment,
   getCustomerAppointments,
@@ -647,4 +679,5 @@ module.exports = {
   verifyAppointmentPayment,
   createPaymentOrder,
   savePushToken,
+  checkVehicleAvailability,
 };

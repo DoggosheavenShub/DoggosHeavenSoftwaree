@@ -45,5 +45,5 @@ const broadcastToStaff = async (title, body, data = {}) => {
   }
 };
 
+sendPushNotification.broadcastToStaff = broadcastToStaff;
 module.exports = sendPushNotification;
-module.exports.broadcastToStaff = broadcastToStaff;
