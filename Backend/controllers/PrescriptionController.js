@@ -411,6 +411,45 @@ exports.getMyPrescriptions = async (req, res) => {
   }
 };
 
+exports.deletePrescription = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const prescription = await Prescription.findByIdAndDelete(id);
+    if (!prescription) return res.status(404).json({ success: false, message: "Prescription not found" });
+    return res.json({ success: true, message: "Prescription deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.getAllPrescriptions = async (req, res) => {
+  try {
+    const { petName, ownerPhone, from, to } = req.query;
+    let filter = {};
+    if (from || to) {
+      filter.createdAt = {};
+      if (from) filter.createdAt.$gte = new Date(from);
+      if (to) filter.createdAt.$lte = new Date(to);
+    }
+    const prescriptions = await Prescription.find(filter)
+      .populate('petId', 'name breed species')
+      .populate('items.id', 'itemName')
+      .populate('tablets.id', 'itemName')
+      .populate('mg.id', 'itemName')
+      .populate('ml.id', 'itemName')
+      .populate('createdBy', 'fullName email')
+      .sort({ createdAt: -1 });
+
+    let result = prescriptions;
+    if (petName) result = result.filter(p => p.petId?.name?.toLowerCase().includes(petName.toLowerCase()));
+    if (ownerPhone) result = result.filter(p => p.petId?.owner?.phone?.includes(ownerPhone));
+
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 exports.getPetPrescriptions = async (req, res) => {
 try {
   console.log("controller called");
