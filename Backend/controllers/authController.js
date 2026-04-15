@@ -269,7 +269,9 @@ exports.login = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      id: user._id
+      id: user._id,
+      phone: user.phone || "",
+      profilePhoto: user.profilePhoto || null,
     };
 
     return res.status(200).json({

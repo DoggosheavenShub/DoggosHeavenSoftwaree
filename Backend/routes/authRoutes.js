@@ -228,6 +228,44 @@ router.post("/signup", signUp);
 router.post("/admin-signup", adminSignUp);
 router.put("/changepassword", changePassword);
 router.put("/updateprofile", updateProfile);
+
+router.put("/updateprofilephoto", async (req, res) => {
+  try {
+    const jwt = require('jsonwebtoken');
+    const multer = require('multer');
+    const { cloudinary } = require('../config/cloudinary');
+    const User = require('../models/user');
+
+    const token = req?.headers["authorization"]?.trim();
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    // multer memory storage for this route
+    const storage = multer.memoryStorage();
+    const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } }).single('profilePhoto');
+
+    upload(req, res, async (err) => {
+      if (err) return res.status(400).json({ success: false, message: err.message });
+      if (!req.file) return res.status(400).json({ success: false, message: "No photo provided" });
+
+      const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      const result = await cloudinary.uploader.upload(dataUri, {
+        folder: 'doggosheaven/staff',
+        transformation: [{ width: 400, height: 400, crop: 'fill' }],
+      });
+
+      const user = await User.findOneAndUpdate(
+        { email: decoded.userEmail || decoded.email },
+        { profilePhoto: result.secure_url },
+        { new: true }
+      ).select('-password');
+
+      return res.json({ success: true, profilePhoto: result.secure_url, user });
+    });
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
 router.get("/getallstaff", async (req, res) => {
   try {
     const User = require('../models/user');
