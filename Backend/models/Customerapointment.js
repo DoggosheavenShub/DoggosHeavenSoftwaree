@@ -122,6 +122,11 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  acceptedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
 }, {
   timestamps: true
 });

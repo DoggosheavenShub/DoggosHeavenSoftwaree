@@ -260,6 +260,7 @@ const updateAppointmentStatus = async (req, res) => {
     if (paymentMode) updateData.paymentMode = paymentMode;
     if (paymentStatus) updateData.paymentStatus = paymentStatus;
     if (totalAmount !== undefined && Number(totalAmount) > 0) updateData.totalAmount = Number(totalAmount);
+    if (req.userId && (status === 'confirmed' || status === 'completed')) updateData.acceptedBy = req.userId;
 
     // If completing with manual payment, ensure paid
     if (status === 'completed' && paymentMode && paymentMode !== 'online') {
@@ -521,6 +522,7 @@ const confirmAppointment = async (req, res) => {
     if (totalAmount && Number(totalAmount) > 0) {
       appointment.totalAmount = Number(totalAmount);
     }
+    if (req.userId) appointment.acceptedBy = req.userId;
     await appointment.save();
 
     // Customer ko notification bhejo

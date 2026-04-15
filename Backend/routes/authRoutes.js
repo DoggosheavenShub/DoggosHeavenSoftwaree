@@ -305,8 +305,8 @@ router.get("/staffdetails/:id", async (req, res) => {
     const providedTypeIds = await Visit.find({ createdBy: staff._id }).distinct('visitType');
     const allServices = await VisitType.find({});
 
-    // Appointments (all — no staff link in model)
-    const appointments = await Appointment.find({})
+    // Appointments accepted/confirmed by this staff
+    const appointments = await Appointment.find({ acceptedBy: staff._id })
       .populate('customerId', 'name fullName email phone')
       .sort({ createdAt: -1 }).limit(50);
 
@@ -329,7 +329,7 @@ router.get("/staffdetails/:id", async (req, res) => {
     res.status(200).json({
       success: true,
       staff,
-      stats: { totalVisits, totalBoardings, totalRevenue, totalPets: recentPets.length, totalInventory: inventoryItems.length, totalPrescriptions: prescriptions.length },
+      stats: { totalVisits, totalBoardings, totalRevenue, totalPets: recentPets.length, totalInventory: inventoryItems.length, totalPrescriptions: prescriptions.length, totalAppointments: appointments.length },
       recentVisits: staffVisits,
       allServices,
       providedServiceIds: providedTypeIds.map(id => id.toString()),
