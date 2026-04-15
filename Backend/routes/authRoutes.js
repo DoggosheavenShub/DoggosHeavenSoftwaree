@@ -273,51 +273,71 @@ router.get("/staffdetails/:id", async (req, res) => {
     const Appointment = require('../models/Customerapointment');
     const Inventory = require('../models/inventory');
     const Pet = require('../models/pet');
+    const Prescription = require('../models/Prescription');
 
     const staff = await User.findById(req.params.id).select('-password');
     if (!staff) return res.status(404).json({ success: false, message: "Staff not found" });
 
+    // Visits by this staff
     const staffVisits = await Visit.find({ createdBy: staff._id })
-      .sort({ createdAt: -1 })
-      .limit(50)
+      .sort({ createdAt: -1 }).limit(50)
       .populate({ path: 'pet', select: 'name', populate: { path: 'owner', select: 'name' } })
       .populate({ path: 'visitType', select: 'purpose emoji' });
 
     const totalVisits = await Visit.countDocuments({ createdBy: staff._id });
+
+    // Revenue from visits by this staff
+    const revenueAgg = await Visit.aggregate([
+      { $match: { createdBy: staff._id } },
+      { $group: { _id: null, total: { $sum: '$details.finalPrice' } } }
+    ]);
+    const totalRevenue = revenueAgg[0]?.total || 0;
+
+    // Boardings by this staff (via visitId)
     const visitIds = await Visit.find({ createdBy: staff._id }).distinct('_id');
-    const totalBoardings = await Boarding.countDocuments({ visitId: { $in: visitIds } });
+    const boardings = await Boarding.find({ visitId: { $in: visitIds } })
+      .sort({ createdAt: -1 }).limit(30)
+      .populate({ path: 'petId', select: 'name breed', populate: { path: 'owner', select: 'name phone' } })
+      .populate('boardingType', 'purpose');
+    const totalBoardings = boardings.length;
+
+    // Services provided
     const providedTypeIds = await Visit.find({ createdBy: staff._id }).distinct('visitType');
     const allServices = await VisitType.find({});
 
-    // All appointments
+    // Appointments (all — no staff link in model)
     const appointments = await Appointment.find({})
       .populate('customerId', 'name fullName email phone')
-      .sort({ createdAt: -1 })
-      .limit(50);
+      .sort({ createdAt: -1 }).limit(50);
 
-    // Inventory items (all — no createdBy field)
-    const inventoryItems = await Inventory.find({})
+    // Inventory added/updated by this staff
+    const inventoryItems = await Inventory.find({ createdBy: staff._id })
       .select('itemName itemType stock createdAt updatedAt')
-      .sort({ updatedAt: -1 })
-      .limit(30);
+      .sort({ updatedAt: -1 }).limit(50);
 
-    // Recent pet registrations (all — no createdBy field)
-    const recentPets = await Pet.find({})
+    // Pets registered by this staff
+    const recentPets = await Pet.find({ createdBy: staff._id })
       .select('name species breed createdAt')
-      .populate('owner', 'name')
-      .sort({ createdAt: -1 })
-      .limit(20);
+      .populate('owner', 'name phone')
+      .sort({ createdAt: -1 }).limit(50);
+
+    // Prescriptions by this staff
+    const prescriptions = await Prescription.find({ createdBy: staff._id })
+      .sort({ createdAt: -1 }).limit(30)
+      .populate('petId', 'name');
 
     res.status(200).json({
       success: true,
       staff,
-      stats: { totalVisits, totalBoardings },
+      stats: { totalVisits, totalBoardings, totalRevenue, totalPets: recentPets.length, totalInventory: inventoryItems.length, totalPrescriptions: prescriptions.length },
       recentVisits: staffVisits,
       allServices,
       providedServiceIds: providedTypeIds.map(id => id.toString()),
       appointments,
       inventoryItems,
       recentPets,
+      boardings,
+      prescriptions,
     });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });

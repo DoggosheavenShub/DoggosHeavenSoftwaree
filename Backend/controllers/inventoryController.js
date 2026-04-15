@@ -100,6 +100,7 @@ exports.addinventory = async (req, res) => {
       medicineName: medicineName || "",
       brandName: brandName || "",
       saltName: saltName || "",
+      createdBy: req.userId || null,
     });
 
     const savedItem = await newItem.save();

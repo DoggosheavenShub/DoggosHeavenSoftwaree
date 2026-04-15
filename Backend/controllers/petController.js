@@ -64,6 +64,7 @@ exports.addPet = async (req, res) => {
       neutered: pet.neutered,
       registrationDate: pet.registrationDate,
       image: photoUrls[idx] || null,
+      createdBy: req.userId || null,
     }));
 
     console.log(petDocuments);

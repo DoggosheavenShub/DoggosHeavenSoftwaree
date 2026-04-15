@@ -56,6 +56,11 @@ const inventorySchema = new mongoose.Schema({
     contact: { type: String, default: "" },
     email:   { type: String, default: "" },
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
 }, {
   timestamps: true 
 });
