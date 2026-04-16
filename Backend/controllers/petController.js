@@ -35,13 +35,12 @@ exports.addPet = async (req, res) => {
 
     // Upload pet photos to Cloudinary if provided
     const photoUrls = {};
-    if (req.files) {
+    if (req.files && req.files.length > 0) {
       await Promise.all(
-        Object.entries(req.files).map(async ([key, fileArr]) => {
-          const match = key.match(/^photo_(\d+)$/);
+        req.files.map(async (file) => {
+          const match = file.fieldname.match(/^photo_(\d+)$/);
           if (!match) return;
           const idx = parseInt(match[1]);
-          const file = Array.isArray(fileArr) ? fileArr[0] : fileArr;
           const dataUri = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
           const result = await cloudinary.uploader.upload(dataUri, {
             folder: "doggosheaven/pets",
