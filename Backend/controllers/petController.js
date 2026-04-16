@@ -245,6 +245,7 @@ exports.getFilteredPetsByNameAndPhone = async (req, res) => {
           name: 1,
           species: 1,
           breed: 1,
+          image: 1,
           isBlacklisted: 1,
           blacklistReason: 1,
           owner: { _id: 1, name: 1, phone: 1, email: 1 },
