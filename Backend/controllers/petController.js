@@ -232,7 +232,7 @@ exports.getFilteredPetsByNameAndPhone = async (req, res) => {
         ? [
             {
               $match: {
-                "owner.phone": phone,
+                "owner.phone": { $regex: phone, $options: "i" },
               },
             },
           ]
