@@ -341,18 +341,30 @@ exports.addPrescription = async (req, res) => {
     
     await session.commitTransaction();
 
-    // Owner ko push notification bhejo
+    // Owner ko push notification aur in-app notification bhejo
     try {
       const petWithOwner = await Pet.findById(petId).populate("owner").lean();
       if (petWithOwner?.owner?.email) {
         const ownerUser = await User.findOne({ email: petWithOwner.owner.email, role: "customer" }).lean();
-        if (ownerUser?.expoPushToken) {
-          await sendPushNotification(
-            ownerUser.expoPushToken,
-            "💊 Prescription Ready",
-            `A new prescription has been added for ${petWithOwner.name}. Check your prescriptions for details.`,
-            { type: "prescription", petId: String(petId) }
-          );
+        if (ownerUser) {
+          const VisitNotification = require("../models/VisitNotification");
+          // In-app notification
+          await VisitNotification.create({
+            userId: ownerUser._id,
+            title: `💊 New Prescription for ${petWithOwner.name}`,
+            body: `A new prescription has been added for ${petWithOwner.name}. Open My Prescriptions to view details.`,
+            petName: petWithOwner.name,
+            purpose: "prescription",
+          });
+          // Push notification
+          if (ownerUser.expoPushToken) {
+            await sendPushNotification(
+              ownerUser.expoPushToken,
+              `💊 New Prescription for ${petWithOwner.name}`,
+              `A new prescription has been added for ${petWithOwner.name}. Open My Prescriptions to view details.`,
+              { type: "prescription", petId: String(petId) }
+            );
+          }
         }
       }
     } catch (notifErr) {
