@@ -128,6 +128,37 @@ exports.updatePet = async (req, res) => {
   }
 };
 
+exports.deletePet = async (req, res) => {
+  try {
+    const { petId } = req.params;
+    const token = req?.headers["authorization"]?.trim();
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    const jwt = require("jsonwebtoken");
+    let decoded;
+    try { decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); }
+    catch { return res.status(401).json({ success: false, message: "Invalid or expired token" }); }
+
+    const userEmail = decoded.userEmail || decoded.email;
+    const owner = await Owner.findOne({ email: userEmail });
+    if (!owner) return res.status(404).json({ success: false, message: "Owner not found" });
+
+    const pet = await Pet.findById(petId);
+    if (!pet) return res.status(404).json({ success: false, message: "Pet not found" });
+    if (pet.owner.toString() !== owner._id.toString())
+      return res.status(403).json({ success: false, message: "Not authorized to delete this pet" });
+
+    await Pet.findByIdAndDelete(petId);
+    owner.pets = owner.pets.filter(p => p.toString() !== petId);
+    await owner.save();
+
+    return res.status(200).json({ success: true, message: "Pet deleted successfully" });
+  } catch (error) {
+    console.log("Error in deletePet:", error.message);
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
+  }
+};
+
 exports.getAllVisitByPetId=async(req,res)=>{
      try {
         const visits = await Visit.find({ pet: req.params.petId })
