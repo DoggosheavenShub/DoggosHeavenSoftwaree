@@ -131,15 +131,9 @@ exports.updatePet = async (req, res) => {
 exports.deletePet = async (req, res) => {
   try {
     const { petId } = req.params;
-    const token = req?.headers["authorization"]?.trim();
-    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+    const userEmail = req.user?.email;
+    if (!userEmail) return res.status(401).json({ success: false, message: "Unauthorized" });
 
-    const jwt = require("jsonwebtoken");
-    let decoded;
-    try { decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); }
-    catch { return res.status(401).json({ success: false, message: "Invalid or expired token" }); }
-
-    const userEmail = decoded.userEmail || decoded.email;
     const owner = await Owner.findOne({ email: userEmail });
     if (!owner) return res.status(404).json({ success: false, message: "Owner not found" });
 
